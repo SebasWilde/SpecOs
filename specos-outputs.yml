@@ -1,0 +1,42 @@
+# specos-outputs.yml
+# Team output configuration.
+# Each team modifies this file for their tools.
+# trigger: manual = the lead runs it when they want
+# trigger: auto   = (v2.0) runs on push to the repo
+
+version: "1.0"
+mode: manual  # manual (v1.0) | agentic (v2.0)
+
+outputs:
+  - name: confluence-doc
+    description: Main feature page in Confluence
+    prompt: prompts/outputs/output-confluence.md
+    input: spec.md
+    trigger: manual
+    destination: Confluence > [your space name]
+
+  - name: confluence-flows
+    description: Mermaid diagrams of user journeys
+    prompt: prompts/outputs/output-flows.md
+    input: spec.md
+    trigger: manual
+    destination: Confluence > [your space name] > flows subpage
+
+  - name: jira-tasks
+    description: User Story subtasks in Jira
+    prompt: prompts/outputs/output-jira.md
+    input: spec.md + tasks.md
+    trigger: manual
+    destination: Jira > [project name] > corresponding Epic
+
+  - name: notion-test-cases
+    description: QA test cases
+    prompt: prompts/outputs/output-test.md
+    input: spec.md + tasks.md
+    trigger: manual
+    destination: Notion > [QA database name]
+
+# To add a new output:
+# 1. Use prompts/meta/how-to-create-output-prompt.md to generate the prompt
+# 2. Save the prompt in prompts/outputs/
+# 3. Add the entry here with the same format
