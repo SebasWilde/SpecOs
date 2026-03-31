@@ -3,6 +3,9 @@
 > The operating system for your team with AI agents.
 > Phase 1: Manual flow with prompts.
 
+**Created by [Sebastian Wilde Alarcón Arenas](https://github.com/[tu-usuario])**
+Licensed under [MIT](./LICENSE) · Free to use with attribution · [Credits](./CREDITS.md)
+
 ---
 
 ## What changed in v2.0
