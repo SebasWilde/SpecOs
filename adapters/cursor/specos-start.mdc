@@ -1,0 +1,7 @@
+---
+description: Start a SpecOS session — routes to the correct skill based on role and session state
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-start.md` from the SpecOS repo root and follow all instructions in it exactly.

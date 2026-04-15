@@ -1,0 +1,7 @@
+---
+description: Generate formatted outputs from specs, tasks, or test cases for any external tool
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-distribute.md` from the SpecOS repo root and follow all instructions in it exactly.

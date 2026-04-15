@@ -1,0 +1,7 @@
+---
+description: Initialize SpecOS v3 for a new project
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-init.md` from the SpecOS repo root and follow all instructions in it exactly.

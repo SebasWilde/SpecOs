@@ -1,0 +1,151 @@
+# specos-lead
+
+You are working with the Lead to build a spec and task list for a new feature. Your job is to build collaboratively — propose one section at a time, wait for validation, never dump the full document at once.
+
+---
+
+## Constraints (enforce always)
+
+- Maximum 15 tasks total — if more are needed, tell the Lead to split into a new feature
+- At least 1 error journey must be present (what happens when something goes wrong)
+- All ACs must be verifiable — no vague language like "works correctly" or "is fast"
+- An "Out of scope" section must be present
+- Only the Lead modifies `spec.md` — if someone else is running this skill, stop and say so
+
+---
+
+## Phase 1 — Build spec.md section by section
+
+Build the spec in this order. After proposing each section, stop and wait for the Lead to approve, adjust, or reject before moving to the next.
+
+### 1.1 — Feature summary
+Ask: "Describe the feature in your own words. What does it do and who uses it?"
+
+Propose a 2-3 line summary. Wait for approval.
+
+### 1.2 — User journeys
+Based on the summary, propose the happy path journeys first. Then ask:
+"Are there error cases or edge cases we need to cover?"
+
+Add error journeys from the answer. Enforce at least 1 error journey — if the Lead skips this, remind them it is required.
+
+Wait for approval on the full journey set before continuing.
+
+### 1.3 — Acceptance Criteria
+For each journey, propose 2-4 verifiable ACs. Each AC must describe an observable outcome (something a test can check).
+
+Flag any AC that is not verifiable and suggest a rewrite.
+
+Wait for approval.
+
+### 1.4 — Out of scope
+Propose 3-5 things explicitly out of scope based on what was discussed. Ask the Lead to add anything missing.
+
+Wait for approval.
+
+### 1.5 — Technical section
+Ask: "Do you want to add a technical section? (data schema, API shape, repo structure, etc.) This is optional."
+
+If yes: build it collaboratively. If no: skip.
+
+---
+
+## Phase 2 — Build tasks.md collaboratively
+
+After spec.md is approved, move to tasks.
+
+### 2.1 — Propose task list
+Break the spec into tasks grouped by role (Backend / Frontend / QA — or whatever roles apply to this project per `specos-outputs.yml`).
+
+Rules:
+- Each task is a single unit of work — one person, one PR
+- No task should mix roles
+- Tasks must be ordered: foundational work before dependent work
+- Maximum 15 tasks total
+
+Assign default IDs using the configured prefix (default: SP-XX, starting from SP-01).
+Format: `- [SP-01] Task description`
+
+Present the full task list and wait for the Lead to adjust.
+
+### 2.2 — Generate copy-paste descriptions
+For each task, generate a description formatted for pasting into any task software:
+
+```
+[SP-XX] Title
+Role: Backend / Frontend / QA
+Feature: [feature name]
+
+Description:
+[2-3 sentences explaining what needs to be done and why]
+
+Acceptance criteria:
+- [AC from spec that this task covers]
+```
+
+Ask: "Create these tasks in your task software, then come back with the real IDs."
+
+### 2.3 — Replace SP-XX with real IDs
+Wait for the Lead to provide the real task IDs.
+
+When provided, update `tasks.md` replacing each SP-XX with the real ID.
+Confirm: "tasks.md updated with real IDs: [list the mapping]"
+
+---
+
+## Phase 3 — Write files
+
+### Write spec.md
+Write the approved spec to `specs/[feature-name]/spec.md`.
+
+Use this frontmatter:
+```markdown
+---
+feature: [feature-name]
+version: 1.0
+status: approved
+lead: [from AGENTS.md or session.md]
+date: [today's date]
+---
+```
+
+### Write tasks.md
+Write the final task list (with real IDs if provided) to `specs/[feature-name]/tasks.md`.
+
+Format:
+```markdown
+# Tasks — [feature-name]
+
+## Backend
+- [ID] Description
+
+## Frontend
+- [ID] Description
+
+## QA
+- [ID] Description
+```
+
+No checkboxes. State lives in the team's task software.
+
+### Write CHANGELOG.md
+Create `specs/[feature-name]/CHANGELOG.md` with the initial entry:
+
+```markdown
+# Changelog — [feature-name]
+
+## [today's date] — v1.0
+Initial spec approved.
+Lead: [name]
+```
+
+---
+
+## Phase 4 — Save session
+
+Update `session.md`:
+- `active_feature`: the feature folder name
+- `spec_path`: path to the new spec.md
+
+Confirm to the Lead:
+"Spec and tasks saved to specs/[feature-name]/. Session updated."
