@@ -1,119 +1,165 @@
-# SpecOS — Cheat Sheet
+# SpecOS v3 — Cheat Sheet
 
 > One page. Everything you need for daily work.
 
 ---
 
-## The flow in 3 moments
+## The 2 perspectives
 
 ```
-1. CREATE        Lead + AI → spec.md + tasks.md (collaborative session)
-2. IMPLEMENT     Dev reads spec.md + their task → codes → marks [x] → PR
-3. DISTRIBUTE    Lead uses outputs/ prompts → copies to Confluence/Jira/Notion
+CONSTRUCTION   Lead defines spec → Dev implements
+BREAKING       QA (human or agent) challenges, tests, flags gaps
 ```
+
+Both always required. Never the same logic.
 
 ---
 
-## Session startup commands
+## Session startup
+
+```
+/specos-start
+```
+
+Agent reads `session.md`. If it exists: resumes. If not: asks based on your role.
+
+---
+
+## Skill reference
+
+| Skill | Who | What |
+|---|---|---|
+| `/specos-init` | Lead | First-time setup — 6 questions, generates AGENTS.md + constitution.md + specos-outputs.yml |
+| `/specos-start` | Everyone | Begins any session, routes by role and session state |
+| `/specos-lead` | Lead | Builds spec + tasks collaboratively, assigns SP-XX IDs, collects real IDs |
+| `/specos-dev` | Dev | Loads only the relevant spec, writes to implementation repo |
+| `/specos-qa` | QA | Generates testcases.md collaboratively, assigns TC-XX IDs |
+| `/specos-distribute` | Lead / QA | Generates outputs per specos-outputs.yml |
+
+---
+
+## Perspective flows
 
 **Lead — new feature:**
 ```
-Paste: prompts/01-collaborative-session.md
-Then: describe the feature in natural language
+/specos-start → construction perspective
+→ spec.md section by section → Lead validates each
+→ tasks.md collaboratively → Lead adjusts
+→ SP-XX IDs assigned → real IDs collected → tasks.md updated
 ```
 
-**Backend / Frontend / QA — implement:**
+**Dev — implement task:**
 ```
-Paste: spec.md of the feature
-Paste: your specific task from tasks.md
-Work in that context
+/specos-start → provide task ID or description
+→ agent loads spec.md → implement in context
 ```
 
-**Lead — generate outputs:**
+**QA — generate test cases:**
 ```
-/document-module → output-confluence.md + spec.md
-/flow            → output-flows.md + spec.md
-/task            → output-jira.md + spec.md + tasks.md
-/steps-to-test   → output-test.md + spec.md + tasks.md
+/specos-start → provide feature or task ID
+→ agent loads spec.md → testcases.md collaboratively
+→ QA edits freely → /specos-distribute
+```
+
+**Solo builder (agent takes breaking perspective):**
+```
+/specos-start → construction → finish feature
+→ agent proposes: "Want me to take the breaking perspective?"
+→ agent generates testcases.md, flags edge cases
+```
+
+**Person with multiple roles:**
+```
+/specos-start → roles: [lead, backend]
+→ "Which perspective today? Construction / Breaking / Both"
+→ same session, both perspectives, no restart
 ```
 
 ---
 
 ## Files per feature
 
-| File | Who writes it | What it contains |
+| File | Who writes | What |
 |---|---|---|
-| `spec.md` | Lead + AI (collaborative) | Journeys, ACs, technical — everything |
-| `tasks.md` | Lead + AI (collaborative) | Tasks by role, max 15 |
+| `spec.md` | Lead + agent (collaborative) | Journeys, ACs, technical — everything |
+| `tasks.md` | Lead + agent (collaborative) | Tasks by role, no checkboxes, max 15 |
+| `testcases.md` | QA + agent (collaborative) | Test cases with TC-XX IDs, free-form fields |
 | `CHANGELOG.md` | Lead | Spec changes with date and reason |
 
 ---
 
-## spec.md header
+## tasks.md format
 
 ```markdown
----
-feature: feature-name-in-kebab-case
-version: 1.0
-status: draft
-lead: name
-date: YYYY-MM-DD
----
+## Backend
+- [SP-01] Description
+
+## Frontend
+- [SP-02] Description
+
+## QA
+- [SP-03] Description
 ```
 
-Statuses: `draft` → `approved` → `in-development` → `complete`
+No checkboxes. State lives in the team's task software.
 
 ---
 
-## Approval checklist
+## testcases.md format
 
-- [ ] Has at least 1 error journey
-- [ ] All ACs are verifiable (not descriptive)
-- [ ] Has out of scope with at least 1 item
-- [ ] API contracts defined if there are new endpoints
-- [ ] Under 150 lines — if over, split the feature
-
----
-
-## PR format
-
-```
-feat: task description
-
-PROJ-XX #done
-Spec: specs/[feature]/spec.md (task [role] #N)
+```markdown
+## TC-01 — Title
+task: SP-03
+steps:
+  1. Step one
+  2. Step two
+expected: Expected result
 ```
 
----
-
-## Golden rule
-
-**Verifiable AC:** "Token expires in exactly 24h" ✓
-**Descriptive AC:** "Should look good" ✗
-
-**Feature too large:** over 150 lines or over 15 tasks → split feature
-
-**Agent without context:** always paste spec.md before asking for code
+Additional fields are optional and free-form — agent never rejects them.
 
 ---
 
-## Available prompts
+## session.md schema
 
-```
-prompts/
-├── 00-repo-setup.md              ← first time, creates the full repo
-├── 01-collaborative-session.md   ← new feature, lead's main prompt
-├── 02-generate-spec.md           ← simple feature, quick generation
-├── 03-generate-tasks.md          ← tasks from already approved spec
-├── outputs/
-│   ├── output-confluence.md      ← /document-module
-│   ├── output-flows.md           ← /flow
-│   ├── output-jira.md            ← /task
-│   └── output-test.md            ← /steps-to-test
-└── meta/
-    └── how-to-create-output-prompt.md  ← create prompt for new tool
+```markdown
+# SpecOS session
+updated: YYYY-MM-DD
+
+roles: [lead, backend]
+active_feature: feature-folder-name
+task_id: SP-01
+task_description: Short description
+spec_path: specs/feature-name/spec.md
+implementation_repos:
+  backend: ../repo_back
+  frontend: null
+  e2e: null
 ```
 
+Always in `.gitignore`. Never committed.
+
 ---
 
-*SpecOS v2.0*
+## Golden rules
+
+- **No code without a spec** — repo presence = approved
+- **No status fields** — task software is the source of truth
+- **Max 15 tasks** — if more, split the feature
+- **Spec change >50% of content** — create a new feature
+- **Every spec change** — add CHANGELOG.md entry
+
+---
+
+## Verifiable AC checklist
+
+```
+✓  "Token expires in exactly 24h"
+✗  "Should look good"
+✓  "Maximum 5 tags — 6th attempt is rejected with error message"
+✗  "Tags work correctly"
+```
+
+---
+
+*SpecOS v3*
