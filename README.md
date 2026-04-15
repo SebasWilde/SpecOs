@@ -222,6 +222,15 @@ implementation_repos:
 
 ---
 
+## Full guides
+
+- [Claude Code — setup and usage guide](docs/guides/claude-code.md)
+- [OpenCode — setup and usage guide](docs/guides/opencode.md)
+
+Complete conversational flow transcripts (init → lead → dev → qa → distribute) in [`docs/flows/`](docs/flows/).
+
+---
+
 ## Out of scope for v3
 
 - CLI binary — bash script only

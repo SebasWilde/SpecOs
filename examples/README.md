@@ -28,3 +28,7 @@ feature-tags/
 - How to define out of scope clearly
 - How to include the technical section without over-documenting
 - What the output of each prompt looks like when applied to a real spec
+
+**Want to see how this was built?**
+The full conversational transcripts — from `/specos-init` through `/specos-distribute` — are in [`docs/flows/`](../docs/flows/).
+Each flow uses this `feature-tags` project as the example.
