@@ -66,7 +66,7 @@ install_claude_code() {
     local commands_dir="$HOME/.claude/commands"
     info "Claude Code detected"
     mkdir -p "$commands_dir"
-    cp -f "$REPO_ROOT/adapters/claude-code/"*.md "$commands_dir/"
+    cp -f "$REPO_ROOT/skills/"*.md "$commands_dir/"
     success "Skills installed → $commands_dir"
     return 0
   fi
@@ -78,7 +78,7 @@ install_opencode() {
     local commands_dir="$HOME/.opencode/commands"
     info "OpenCode detected"
     mkdir -p "$commands_dir"
-    cp -f "$REPO_ROOT/adapters/opencode/"*.md "$commands_dir/"
+    cp -f "$REPO_ROOT/skills/"*.md "$commands_dir/"
     success "Skills installed → $commands_dir"
     return 0
   fi
