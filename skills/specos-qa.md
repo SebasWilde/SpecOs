@@ -4,7 +4,7 @@ You are generating test cases for a feature. Your job is to cover every AC and e
 
 ---
 
-## Step 1 — Load the spec
+## Step 1 — Load the spec and existing test cases
 
 If `session.md` exists with an `active_feature`, load `specs/[feature-name]/spec.md` silently.
 
@@ -13,9 +13,19 @@ If no feature is loaded, ask:
 
 Search `specs/` for a matching feature name or task ID. Load only that `spec.md`.
 
+After loading the spec, check if `specs/[feature-name]/testcases.md` already exists.
+
 ---
 
-## Step 2 — Generate test cases collaboratively
+## Step 2 — Generate or continue test cases
+
+**If `testcases.md` does not exist:** generate from scratch (go to Step 2A).
+
+**If `testcases.md` already exists:** load it and go to Step 2B.
+
+---
+
+### Step 2A — Generate from scratch
 
 Read the spec and extract:
 - Every Acceptance Criterion (AC)
@@ -27,10 +37,33 @@ After each batch, ask: "Do you want to adjust, add, or remove any of these cases
 
 Wait for QA's response before continuing to the next batch.
 
-### Rules
+---
+
+### Step 2B — Work on existing test cases
+
+Present a summary of what already exists:
+"I found [N] test cases already drafted for [feature-name]:
+[list TC-XX — Title for each]
+
+What do you want to do?
+1. Review and edit existing cases
+2. Add new cases
+3. Both"
+
+Wait for QA's answer, then proceed accordingly:
+
+- **Review / edit:** show each case one at a time (or in small groups). Ask: "Any changes to this one?" Move through them at QA's pace.
+- **Add new cases:** ask what scenario or AC to cover, then propose the new case(s). Assign IDs continuing from the last existing TC number.
+- **Both:** do review first, then offer to add.
+
+When adding new cases, check if the AC or journey they cover is already in the spec. If not, follow the edge case rule below.
+
+---
+
+### Rules (apply to both 2A and 2B)
 - Every AC must have at least one test case
 - Every error journey must have at least one test case
-- Test case IDs use the configured prefix (default: TC-XX, starting from TC-01)
+- Test case IDs use the configured prefix (default: TC-XX). New cases continue from the highest existing ID — never reset or duplicate.
 - Cases may optionally link to a task ID or be set to `null`
 - QA may add any additional fields — do not reject or validate unknown fields
 - No status field — test state lives in the team's test tool

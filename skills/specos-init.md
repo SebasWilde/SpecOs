@@ -132,6 +132,100 @@ session.md
 
 Create the `specs/` directory if it does not exist. Do not create any files inside it.
 
+### 6. README.md
+
+Generate `README.md` at the repo root using the answers collected in questions 1–6. Write in English. The README must cover:
+
+**Structure:**
+
+```markdown
+# [Project Name] — Specs
+
+One-line description of what the product does and who it's for.
+
+---
+
+## What's in this repo
+
+This repository contains the product specs, task breakdowns, and QA test cases for [Project Name].
+It uses **SpecOS v3** — a structured workflow for AI-assisted software development.
+
+| Folder / File | Purpose |
+|---|---|
+| `specs/` | One folder per feature. Each contains spec.md, tasks.md, testcases.md, CHANGELOG.md |
+| `AGENTS.md` | Project context — read automatically by AI agents |
+| `constitution.md` | The 8 rules every agent and team member follows |
+| `specos-outputs.yml` | Team configuration and integration settings |
+| `session.md` | Local session state — gitignored, never committed |
+
+---
+
+## How to work on this project
+
+### 1. Start every session
+
+Run `/specos-start` in your AI agent. It reads your session state and routes you to the right skill automatically.
+
+### 2. Define or update a spec (Lead role)
+
+Run `/specos-lead`. The agent will guide you through writing or refining a `spec.md` for a feature.
+
+### 3. Implement a task (Dev role)
+
+Run `/specos-dev`. Provide your task ID (e.g. `SP-04`). The agent reads the spec, loads your implementation repo, and helps you build.
+
+### 4. Write or run test cases (QA role)
+
+Run `/specos-qa`. The agent generates test cases from the spec or helps you execute them.
+
+### 5. Distribute outputs
+
+Run `/specos-distribute` to push specs, tasks, or test cases to your configured tools (Jira, Confluence, Notion, etc.).
+
+---
+
+## Tech stack
+
+[Summarize the stack from question 2: languages, frameworks, databases, infra.]
+
+---
+
+## Team
+
+| Role | Responsibility |
+|---|---|
+| Lead | Writes and approves specs |
+| Backend | Implements API and business logic |
+| Frontend | Implements UI and validations |
+| QA | Designs and executes test cases |
+
+[Fill in names from the answers to questions 3–4.]
+
+---
+
+## Rules
+
+All contributors (human and AI) follow the rules in `constitution.md`. The key ones:
+
+- No code is written without a `spec.md` committed to this repo.
+- Only the Lead role modifies `spec.md`.
+- Every spec change requires a `CHANGELOG.md` entry.
+
+---
+
+## Getting started
+
+```bash
+# First time setup (already done if you're reading this)
+bash install.sh
+
+# Begin any session
+/specos-start
+```
+```
+
+Fill in all `[placeholders]` using the answers collected during init. Do not leave any placeholder unfilled.
+
 ---
 
 ## Confirmation message
@@ -145,6 +239,7 @@ Files created:
   AGENTS.md
   constitution.md
   specos-outputs.yml
+  README.md
   .gitignore (updated)
   specs/
 

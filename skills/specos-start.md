@@ -100,7 +100,13 @@ Then load and follow the instructions of the target skill.
 
 ## Step 6 — Save session.md
 
-At the end of every session, write or update `session.md` with the current state:
+Locate the **specs repo root**: the directory that contains both `specs/` and `specos-outputs.yml`. This is where `session.md` must always be saved, regardless of which directory the agent is currently running from.
+
+- If you found `session.md` in Step 1, save back to that same location.
+- If this is a first session, search upward from the current directory for a folder containing `specs/` and `specos-outputs.yml`. Use that as the root.
+- Never save `session.md` inside an implementation repo (backend, frontend, e2e).
+
+Write or update `session.md` at that root with the current state:
 
 ```markdown
 # SpecOS session
