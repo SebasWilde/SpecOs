@@ -40,3 +40,8 @@
 
 ## Examples
 - [SP-25] Update `examples/` with a complete v3 end-to-end example — new skill format, testcases.md, tasks.md without checkboxes
+
+## Help and status skills
+- [SP-26] Write `skills/specos-help.md` — lists all commands and key project files, no session required
+- [SP-27] Write `skills/specos-status.md` — reads session.md and displays current state, read-only
+- [SP-28] Add adapters for `specos-help` and `specos-status` to claude-code, opencode, cursor, and generic

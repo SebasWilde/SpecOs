@@ -1,5 +1,12 @@
 # Changelog — specos-v3
 
+## 2026-04-21 v2.1
+- Journey 11 added: `/specos-help` — lists all skills and key project files, no session required
+- Journey 12 added: `/specos-status` — reads session.md and displays current state, read-only
+- ACs added for `specos-help` and `specos-status` skills
+- Tasks SP-26, SP-27, SP-28 added for implementation and adapters of both skills
+- Spec structure updated to include `specos-help.md` and `specos-status.md` in `skills/`
+
 ## 2026-04-15 v2.0
 - Roles changed from fixed identities to configurable perspectives
 - Two mandatory perspectives defined: construction (Lead) and breaking (QA)

@@ -1,0 +1,7 @@
+---
+description: Show current SpecOS session state from session.md
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-status.md` from the SpecOS repo root and follow all instructions in it exactly.
