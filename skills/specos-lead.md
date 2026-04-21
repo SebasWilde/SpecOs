@@ -68,29 +68,6 @@ Format: `- [SP-01] Task description`
 
 Present the full task list and wait for the Lead to adjust.
 
-### 2.2 — Generate copy-paste descriptions
-For each task, generate a description formatted for pasting into any task software:
-
-```
-[SP-XX] Title
-Role: Backend / Frontend / QA
-Feature: [feature name]
-
-Description:
-[2-3 sentences explaining what needs to be done and why]
-
-Acceptance criteria:
-- [AC from spec that this task covers]
-```
-
-Ask: "Create these tasks in your task software, then come back with the real IDs."
-
-### 2.3 — Replace SP-XX with real IDs
-Wait for the Lead to provide the real task IDs.
-
-When provided, update `tasks.md` replacing each SP-XX with the real ID.
-Confirm: "tasks.md updated with real IDs: [list the mapping]"
-
 ---
 
 ## Phase 3 — Write files

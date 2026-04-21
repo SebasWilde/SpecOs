@@ -261,40 +261,46 @@ This transcript shows the Lead generating Jira tasks, a Confluence doc, and QA s
 
 > **Agent**
 >
+> What is the Jira link for this feature? (or say TBD)
+
+---
+
+> **User**
+>
+> https://jira.company.com/browse/TAGS
+
+---
+
+> **Agent**
+>
 > ---
 > **CONFLUENCE PAGE — Post Tags**
 > Paste this into a new Confluence page under your project's Feature Specs space.
 > ---
 >
-> # 📌 Post Tags
->
-> **Feature:** feature-tags | **Version:** 1.1 | **Lead:** Ana Garcia | **Date:** 2026-03-15
+> # 🏷️ Post Tags
 >
 > ---
 >
-> ## 📦 What it does
+> 📌 Summary
+> Users can label their posts with up to 5 tags to make content easier to organize and find.
+> Tags are saved in lowercase, duplicates are ignored, and each tag is limited to 30 characters.
+> This is the foundation for post filtering in a future feature.
 >
-> Users need to organize and filter their posts by category. Tags allow labeling each post with keywords to make it easier to search and navigate related content.
+> 📦 Scope
 >
-> ---
->
-> ## 🗺 Scope
->
-> **In scope:**
+> **In Scope**
 > - Add tags to posts (up to 5 per post)
 > - Display tags on post view
 > - Edit tags on existing posts
 >
-> **Out of scope:**
+> **Out of Scope**
 > - Filtering posts by tag (next feature)
 > - Global or system-suggested tags
 > - Tags with custom colors
 > - Tag limit at the account level
 >
-> ---
->
-> ## ✅ Acceptance Criteria
->
+> ✅ Acceptance Criteria
 > - [ ] Tags field accepts Enter and comma as separators
 > - [ ] Each tag displays as a chip with X to remove
 > - [ ] Maximum 5 tags per post — 6th attempt not added
@@ -304,21 +310,18 @@ This transcript shows the Lead generating Jira tasks, a Confluence doc, and QA s
 > - [ ] Tags silently truncated to 30 characters
 > - [ ] Tags saved in lowercase regardless of input
 >
+> 🔗 References
+> - Jira: https://jira.company.com/browse/TAGS
+> - Spec: [add link manually]
+>
+> 📜 Change History
+> | Date | Change | Requested by |
+> |---|---|---|
+> | 2026-03-10 | Initial version | Client |
+>
 > ---
 >
-> ## 🔗 References
->
-> - Tasks: TAGS-01 to TAGS-15 (Jira)
-> - Test cases: TC-01 to TC-08
->
-> ---
->
-> ## 📜 Change History
->
-> | Version | Date       | Change                            | Reason                    |
-> |---------|------------|-----------------------------------|---------------------------|
-> | 1.1     | 2026-03-15 | Changed truncation from error to silent | QA feedback in review     |
-> | 1.0     | 2026-03-10 | Initial spec approved             | —                         |
+> Copy this into Confluence manually and replace the Spec link in References.
 
 ---
 
@@ -430,6 +433,24 @@ This transcript shows the Lead generating Jira tasks, a Confluence doc, and QA s
 > ✓ `outputs/steps-to-test.md`
 >
 > Copy each output into your tool manually. In v4, MCP integration will push these automatically.
+>
+> ---
+>
+> Create these tasks in your task software, then come back with the real IDs so I can update `tasks.md`.
+
+---
+
+> **User**
+>
+> Done. IDs are: SP-01 → TAGS-01, SP-02 → TAGS-02, SP-03 → TAGS-03, SP-04 → TAGS-04, SP-05 → TAGS-05, SP-06 → TAGS-06, SP-07 → TAGS-07, SP-08 → TAGS-08, SP-09 → TAGS-09, SP-10 → TAGS-10, SP-11 → TAGS-11, SP-12 → TAGS-12, SP-13 → TAGS-13, SP-14 → TAGS-14, SP-15 → TAGS-15
+
+---
+
+> **Agent**
+>
+> `tasks.md` updated with real IDs:
+>
+> SP-01 → TAGS-01, SP-02 → TAGS-02, SP-03 → TAGS-03, SP-04 → TAGS-04, SP-05 → TAGS-05, SP-06 → TAGS-06, SP-07 → TAGS-07, SP-08 → TAGS-08, SP-09 → TAGS-09, SP-10 → TAGS-10, SP-11 → TAGS-11, SP-12 → TAGS-12, SP-13 → TAGS-13, SP-14 → TAGS-14, SP-15 → TAGS-15
 
 ---
 
@@ -437,4 +458,4 @@ This transcript shows the Lead generating Jira tasks, a Confluence doc, and QA s
 
 - Outputs are saved to `specs/[feature]/outputs/` and also printed in-session for immediate copy-paste.
 - You can request individual outputs instead of all three — just answer `1`, `2`, or `3` when prompted.
-- If real task IDs were assigned after init (e.g., `JIRA-1042`), update `tasks.md` before running distribute so the output uses the correct IDs.
+- Real task IDs are assigned during distribute — `tasks.md` always starts with SP-XX placeholders from the lead session and gets updated here.
