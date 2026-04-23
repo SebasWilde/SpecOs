@@ -38,6 +38,35 @@ echo ""
 
 # --- Agent updaters ---
 
+_write_gemini_toml() {
+  local skill_file="$1"
+  local output_file="$2"
+  local description
+  description=$(sed -n '3p' "$skill_file")
+  printf 'description = "%s"\nprompt = '"'"''"'"''"'"'\n' "$description" > "$output_file"
+  cat "$skill_file" >> "$output_file"
+  printf "\n'''\n" >> "$output_file"
+}
+
+update_gemini() {
+  local is_installed=false
+  command -v gemini &>/dev/null && is_installed=true
+  [[ -d "$HOME/.gemini" ]] && is_installed=true
+
+  if [[ "$is_installed" == "true" ]]; then
+    local commands_dir="$HOME/.gemini/commands"
+    mkdir -p "$commands_dir"
+    for skill_file in "$REPO_ROOT/skills/"*.md; do
+      local name
+      name=$(basename "$skill_file" .md)
+      _write_gemini_toml "$skill_file" "$commands_dir/${name}.toml"
+    done
+    success "Gemini CLI → $commands_dir"
+    return 0
+  fi
+  return 1
+}
+
 update_claude_code() {
   local commands_dir="$HOME/.claude/commands"
   if [[ -d "$HOME/.claude" ]]; then
@@ -50,8 +79,13 @@ update_claude_code() {
 }
 
 update_opencode() {
-  local commands_dir="$HOME/.opencode/commands"
-  if [[ -d "$HOME/.opencode" ]]; then
+  local is_installed=false
+  [[ -d "$HOME/.opencode" ]] && is_installed=true
+  [[ -d "$HOME/.config/opencode" ]] && is_installed=true
+  command -v opencode &>/dev/null && is_installed=true
+
+  if [[ "$is_installed" == "true" ]]; then
+    local commands_dir="$HOME/.config/opencode/commands"
     mkdir -p "$commands_dir"
     cp -f "$REPO_ROOT/skills/"*.md "$commands_dir/"
     success "OpenCode → $commands_dir"
@@ -111,6 +145,7 @@ UPDATED=0
 
 update_claude_code && UPDATED=$((UPDATED + 1)) || true
 update_opencode    && UPDATED=$((UPDATED + 1)) || true
+update_gemini      && UPDATED=$((UPDATED + 1)) || true
 update_cursor      && UPDATED=$((UPDATED + 1)) || true
 update_windsurf    && UPDATED=$((UPDATED + 1)) || true
 update_codex       && UPDATED=$((UPDATED + 1)) || true

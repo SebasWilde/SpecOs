@@ -57,9 +57,49 @@ create_symlinks() {
     ln -s "AGENTS.md" "$REPO_ROOT/.cursorrules"
     success "Created symlink: .cursorrules → AGENTS.md"
   fi
+
+  # GEMINI.md → AGENTS.md
+  if [[ -L "$REPO_ROOT/GEMINI.md" ]]; then
+    info "GEMINI.md symlink already exists — skipped"
+  elif [[ -e "$REPO_ROOT/GEMINI.md" ]]; then
+    warn "GEMINI.md exists as a real file — skipped (manual review needed)"
+  else
+    ln -s "AGENTS.md" "$REPO_ROOT/GEMINI.md"
+    success "Created symlink: GEMINI.md → AGENTS.md"
+  fi
 }
 
 # --- Agent installers ---
+
+_write_gemini_toml() {
+  local skill_file="$1"
+  local output_file="$2"
+  local description
+  description=$(sed -n '3p' "$skill_file")
+  printf 'description = "%s"\nprompt = '"'"''"'"''"'"'\n' "$description" > "$output_file"
+  cat "$skill_file" >> "$output_file"
+  printf "\n'''\n" >> "$output_file"
+}
+
+install_gemini() {
+  local is_installed=false
+  command -v gemini &>/dev/null && is_installed=true
+  [[ -d "$HOME/.gemini" ]] && is_installed=true
+
+  if [[ "$is_installed" == "true" ]]; then
+    local commands_dir="$HOME/.gemini/commands"
+    info "Gemini CLI detected"
+    mkdir -p "$commands_dir"
+    for skill_file in "$REPO_ROOT/skills/"*.md; do
+      local name
+      name=$(basename "$skill_file" .md)
+      _write_gemini_toml "$skill_file" "$commands_dir/${name}.toml"
+    done
+    success "Skills installed → $commands_dir"
+    return 0
+  fi
+  return 1
+}
 
 install_claude_code() {
   if [[ -d "$HOME/.claude" ]]; then
@@ -74,8 +114,13 @@ install_claude_code() {
 }
 
 install_opencode() {
-  if [[ -d "$HOME/.opencode" ]]; then
-    local commands_dir="$HOME/.opencode/commands"
+  local is_installed=false
+  [[ -d "$HOME/.opencode" ]] && is_installed=true
+  [[ -d "$HOME/.config/opencode" ]] && is_installed=true
+  command -v opencode &>/dev/null && is_installed=true
+
+  if [[ "$is_installed" == "true" ]]; then
+    local commands_dir="$HOME/.config/opencode/commands"
     info "OpenCode detected"
     mkdir -p "$commands_dir"
     cp -f "$REPO_ROOT/skills/"*.md "$commands_dir/"
@@ -150,6 +195,7 @@ INSTALLED=0
 
 install_claude_code && INSTALLED=$((INSTALLED + 1)) || true
 install_opencode    && INSTALLED=$((INSTALLED + 1)) || true
+install_gemini      && INSTALLED=$((INSTALLED + 1)) || true
 install_cursor      && INSTALLED=$((INSTALLED + 1)) || true
 install_windsurf    && INSTALLED=$((INSTALLED + 1)) || true
 install_codex       && INSTALLED=$((INSTALLED + 1)) || true

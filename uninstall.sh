@@ -67,9 +67,34 @@ remove_symlinks() {
   elif [[ -e "$REPO_ROOT/.cursorrules" ]]; then
     warn ".cursorrules is a real file, not a SpecOS symlink — skipped"
   fi
+
+  # GEMINI.md
+  if [[ -L "$REPO_ROOT/GEMINI.md" ]]; then
+    local target
+    target=$(readlink "$REPO_ROOT/GEMINI.md")
+    if [[ "$target" == "AGENTS.md" ]]; then
+      rm "$REPO_ROOT/GEMINI.md"
+      removed "GEMINI.md symlink"
+    else
+      warn "GEMINI.md is a symlink but does not point to AGENTS.md — skipped"
+    fi
+  elif [[ -e "$REPO_ROOT/GEMINI.md" ]]; then
+    warn "GEMINI.md is a real file, not a SpecOS symlink — skipped"
+  fi
 }
 
 # --- Agent uninstallers ---
+
+uninstall_gemini() {
+  local commands_dir="$HOME/.gemini/commands"
+  if ls "$commands_dir"/specos-*.toml &>/dev/null 2>&1; then
+    info "Gemini CLI skills found"
+    rm -f "$commands_dir"/specos-*.toml
+    success "Skills removed from $commands_dir"
+    return 0
+  fi
+  return 1
+}
 
 uninstall_claude_code() {
   local commands_dir="$HOME/.claude/commands"
@@ -83,14 +108,25 @@ uninstall_claude_code() {
 }
 
 uninstall_opencode() {
-  local commands_dir="$HOME/.opencode/commands"
-  if ls "$commands_dir"/specos-*.md &>/dev/null 2>&1; then
-    info "OpenCode skills found"
-    rm -f "$commands_dir"/specos-*.md
-    success "Skills removed from $commands_dir"
-    return 0
+  local removed=false
+  local old_dir="$HOME/.opencode/commands"
+  local new_dir="$HOME/.config/opencode/commands"
+
+  if ls "$new_dir"/specos-*.md &>/dev/null 2>&1; then
+    info "OpenCode skills found (new path)"
+    rm -f "$new_dir"/specos-*.md
+    success "Skills removed from $new_dir"
+    removed=true
   fi
-  return 1
+
+  if ls "$old_dir"/specos-*.md &>/dev/null 2>&1; then
+    info "OpenCode skills found (legacy path)"
+    rm -f "$old_dir"/specos-*.md
+    success "Skills removed from $old_dir"
+    removed=true
+  fi
+
+  [[ "$removed" == "true" ]] && return 0 || return 1
 }
 
 uninstall_cursor() {
@@ -147,6 +183,7 @@ REMOVED=0
 
 uninstall_claude_code && REMOVED=$((REMOVED + 1)) || true
 uninstall_opencode    && REMOVED=$((REMOVED + 1)) || true
+uninstall_gemini      && REMOVED=$((REMOVED + 1)) || true
 uninstall_cursor      && REMOVED=$((REMOVED + 1)) || true
 uninstall_windsurf    && REMOVED=$((REMOVED + 1)) || true
 uninstall_copilot     && REMOVED=$((REMOVED + 1)) || true

@@ -88,7 +88,8 @@ SpecOs/
 │   └── specos-distribute.md
 ├── adapters/
 │   ├── claude-code/          ← .claude/commands/ format
-│   ├── opencode/             ← .opencode/commands/ format
+│   ├── opencode/             ← .config/opencode/commands/ format
+│   ├── gemini/               ← .gemini/commands/ format (.toml, generated)
 │   ├── cursor/               ← .cursor/rules/ format (.mdc)
 │   └── generic/              ← AGENTS.md fallback for all other agents
 ├── specs/

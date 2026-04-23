@@ -20,10 +20,10 @@ Run the installer from the SpecOS repo root:
 curl -fsSL https://raw.githubusercontent.com/SebasWilde/SpecOs/main/install.sh | bash
 ```
 
-The installer detects OpenCode automatically and copies the 6 skill files to `~/.opencode/commands/`:
+The installer detects OpenCode automatically and copies the 6 skill files to `~/.config/opencode/commands/`:
 
 ```
-~/.opencode/commands/
+~/.config/opencode/commands/
 ├── specos-init.md
 ├── specos-start.md
 ├── specos-lead.md
@@ -41,7 +41,7 @@ These symlinks ensure that whatever agent reads the repo, it sees the same proje
 **Verify the install:**
 
 ```bash
-ls ~/.opencode/commands/specos-*.md
+ls ~/.config/opencode/commands/specos-*.md
 ```
 
 You should see all 6 files. If you see them, skills are ready to use from any OpenCode session.
@@ -210,7 +210,7 @@ To remove SpecOS skills from OpenCode (and all other detected agents):
 bash uninstall.sh
 ```
 
-This removes `~/.opencode/commands/specos-*.md` and the repo symlinks. Project files (`AGENTS.md`, `specs/`, etc.) are not touched.
+This removes `~/.config/opencode/commands/specos-*.md` and the repo symlinks. Project files (`AGENTS.md`, `specs/`, etc.) are not touched.
 
 ---
 
