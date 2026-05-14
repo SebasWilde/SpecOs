@@ -1,5 +1,9 @@
 # Changelog — specos-v3
 
+## 2026-05-14 v2.2
+- `keywords` added to spec.md frontmatter — free-form tags for agent search across the specs repo
+- `linked` added to spec.md frontmatter — explicit references to related specs for navigation and context loading
+
 ## 2026-04-21 v2.1
 - Journey 11 added: `/specos-help` — lists all skills and key project files, no session required
 - Journey 12 added: `/specos-status` — reads session.md and displays current state, read-only

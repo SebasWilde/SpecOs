@@ -83,6 +83,9 @@ version: 1.0
 status: approved
 lead: [from AGENTS.md or session.md]
 date: [today's date]
+keywords: [relevant terms for agent search]
+linked:
+  - specs/[related-feature]/spec.md
 ---
 ```
 

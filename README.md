@@ -114,6 +114,9 @@ feature: feature-name-in-kebab-case
 version: 1.0
 lead: name
 date: YYYY-MM-DD
+keywords: [relevant terms for agent search]
+linked:
+  - specs/[related-feature]/spec.md
 ---
 
 # Feature Title
