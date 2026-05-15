@@ -62,6 +62,7 @@ Rules:
 - No task should mix roles
 - Tasks must be ordered: foundational work before dependent work
 - Maximum 15 tasks total
+- Task description: maximum 8 words, imperative verb first (e.g. "Add tag validation to post model")
 
 Assign default IDs using the configured prefix (default: SP-XX, starting from SP-01).
 Format: `- [SP-01] Task description`

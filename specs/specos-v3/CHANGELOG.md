@@ -1,5 +1,9 @@
 # Changelog — specos-v3
 
+## 2026-05-14 v2.3
+- Task descriptions capped at 8 words, imperative verb first — enforced in specos-lead and specos-distribute
+- Formatting rules added to specos-distribute: no trailing spaces, single blank line between sections, consistent table alignment
+
 ## 2026-05-14 v2.2
 - `keywords` added to spec.md frontmatter — free-form tags for agent search across the specs repo
 - `linked` added to spec.md frontmatter — explicit references to related specs for navigation and context loading

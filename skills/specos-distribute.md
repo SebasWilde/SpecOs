@@ -63,12 +63,13 @@ Then, for each task in `tasks.md`, generate using this exact format (always in E
 ```
 
 Rules:
-- Title must be concise and technical
+- Title must be concise and technical — maximum 8 words, imperative verb first (e.g. "Add JWT validation to /auth endpoint")
 - Context only appears when strictly necessary — inject relevant technical details from spec.md (API shape, schema, decisions) into the tasks that need them
 - Dev Notes only appears when branch or command info was provided
 - ACs must be simple bullets — no nested lists, no vague language
 - Never invent features or technical details not in the spec
 - Infer obvious technical details when clearly implied by the spec
+- Formatting rules (strict): no trailing spaces on any line, exactly one blank line between sections, no double blank lines anywhere
 
 Print tasks sequentially, grouped by role. Pause between role groups and ask: "Ready for the next group?"
 
@@ -141,6 +142,7 @@ Rules:
 - Out of scope must have at least one item
 - Use plain English, avoid technical jargon unless necessary
 - Do not include User Journeys or Technical Notes sections
+- Formatting rules (strict): no trailing spaces on any line, exactly one blank line between sections, table columns aligned with consistent spacing, no empty rows in tables
 
 Print the document. Tell the Lead: "Copy this into Confluence manually and replace the Spec link in References."
 
