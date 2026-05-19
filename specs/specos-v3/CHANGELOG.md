@@ -1,5 +1,10 @@
 # Changelog — specos-v3
 
+## 2026-05-14 v2.4
+- specos-lead-parallel.md introduced — parallel variant of specos-lead that spawns two subagents simultaneously for tasks.md and testcases.md generation
+- Claude Code and OpenCode adapters now reference specos-lead-parallel.md instead of specos-lead.md
+- Generic skill (specos-lead.md) remains sequential for agents without subagent support
+
 ## 2026-05-14 v2.3
 - Task descriptions capped at 8 words, imperative verb first — enforced in specos-lead and specos-distribute
 - Formatting rules added to specos-distribute: no trailing spaces, single blank line between sections, consistent table alignment
