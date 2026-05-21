@@ -41,35 +41,41 @@ Ask only: "Do you have branch or PR info for these tasks?
 
 Wait for the answer. If option 1, ask for the branch/PR info now. If option 2, ask per task before generating it.
 
-Then, for each task in `tasks.md`, generate using this exact format (always in English):
+Then, for each task in `tasks.md`, output the following structure as raw markdown — never wrap it in a code block:
 
-```
 # [TITLE]
 
 ## Context
-[Only include if background is needed to understand the task — e.g. relevant technical decisions, data model, or API contract from the spec's technical section. Skip entirely if scope is self-explanatory.]
+[Only include this section when the task requires background to be understood — e.g. a relevant API contract, data model decision, or architectural constraint from spec.md. If the scope is self-explanatory, omit this section entirely and go straight to Scope.]
 
 ## Scope
-[What needs to be implemented. Pull from tasks.md description and relevant ACs from spec.md. Use bullets only if steps are clear and well-defined, otherwise prose.]
+[Full description of what must be implemented. Copy every relevant detail from tasks.md and cross-reference the matching ACs and technical notes from spec.md. Do not summarize — include specifics: endpoint names, field names, validation rules, business logic, edge cases. Use prose; switch to bullets only when listing parallel steps or items with no logical sequence.]
 
 ## Acceptance Criteria
-- [criterion — specific and testable, pulled from the ACs in spec.md that this task covers]
+- [criterion — specific and testable, pulled verbatim or closely from the ACs in spec.md that this task covers]
 
 ## Dev Notes
-[Only include if branch/PR/command info was provided. Skip entirely if none.]
+[Only include this section when branch/PR/command info was provided. If none was given, omit entirely.]
 ⚠️ Branch from: `[branch]`
 ⚠️ PR to: `[branch]`
 ℹ️ Run: `[command if any]`
-```
 
-Rules:
-- Title must be concise and technical — maximum 8 words, imperative verb first (e.g. "Add JWT validation to /auth endpoint")
-- Context only appears when strictly necessary — inject relevant technical details from spec.md (API shape, schema, decisions) into the tasks that need them
-- Dev Notes only appears when branch or command info was provided
-- ACs must be simple bullets — no nested lists, no vague language
+---
+
+Formatting rules (strict — apply before printing):
+- No blank line between `# TITLE` and the first `## Section`
+- Exactly one blank line between sections (after the section content, before the next `##`)
+- No blank lines inside a section's content
+- No trailing spaces on any line
+- No double blank lines anywhere in the output
+- If a section is omitted (Context or Dev Notes), do not leave a blank line in its place
+
+Content rules:
+- Title: maximum 8 words, imperative verb first (e.g. "Add JWT validation to /auth endpoint")
+- Scope: never summarize — reproduce all relevant details from tasks.md and spec.md for that task
+- ACs: simple bullets, no nested lists, no vague language ("should work", "handle correctly")
 - Never invent features or technical details not in the spec
-- Infer obvious technical details when clearly implied by the spec
-- Formatting rules (strict): no trailing spaces on any line, exactly one blank line between sections, no double blank lines anywhere
+- Infer obvious technical details only when clearly implied by the spec
 
 Print tasks sequentially, grouped by role. Pause between role groups and ask: "Ready for the next group?"
 
