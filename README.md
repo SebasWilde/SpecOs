@@ -20,7 +20,7 @@ Then in your AI agent:
 /specos-init
 ```
 
-That's it. The agent asks 6 questions and generates your project config.
+That's it. The agent asks 7 questions and generates your project config.
 
 ---
 
@@ -39,7 +39,7 @@ The core insight: AI agents will write whatever you ask them to. SpecOS makes su
 
 Both perspectives are required. They cannot be the same logic.
 
-### The 6 skills
+### The 8 skills
 
 | Skill | Who uses it |
 |---|---|
@@ -48,7 +48,9 @@ Both perspectives are required. They cannot be the same logic.
 | `/specos-lead` | Lead — builds spec + tasks collaboratively |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — generates testcases.md from spec |
-| `/specos-distribute` | Lead — generates outputs per specos-outputs.yml |
+| `/specos-distribute` | Lead — generates outputs per specos-outputs.yml and standards |
+| `/specos-split` | Lead — splits a large spec into sub-specs under a group folder |
+| `/specos-group` | Lead — groups related existing specs under a shared parent folder |
 
 ---
 
@@ -77,7 +79,8 @@ SpecOs/
 ├── README.md
 ├── AGENTS.md                 ← global agent context (template)
 ├── constitution.md           ← rules template
-├── specos-outputs.yml        ← config template
+├── specos-outputs.yml        ← output destinations and integrations
+├── specos-standards.yml      ← language, default ACs, code standards per role
 ├── CHEATSHEET.md
 ├── skills/
 │   ├── specos-init.md
@@ -85,7 +88,9 @@ SpecOs/
 │   ├── specos-lead.md
 │   ├── specos-dev.md
 │   ├── specos-qa.md
-│   └── specos-distribute.md
+│   ├── specos-distribute.md
+│   ├── specos-split.md
+│   └── specos-group.md
 ├── adapters/
 │   ├── claude-code/          ← .claude/commands/ format
 │   ├── opencode/             ← .config/opencode/commands/ format
@@ -184,6 +189,33 @@ expected: Expected result
 > ID prefix configurable in specos-outputs.yml. Default: TC.
 > Additional fields are optional and free-form — never rejected.
 
+### specos-standards.yml — project standards, committed
+
+```yaml
+# Only `language` is a reserved key. Everything else is free-form.
+language:
+  specs: en       # ISO 639-1
+  outputs: en
+
+# Add any section your project needs. Organize by role within each section.
+# Skills read ALL entries for the relevant role and apply them automatically.
+acceptance_criteria:
+  backend:
+    - "All error responses must include an error code and a human-readable message"
+  frontend:
+    - "All user-facing strings must be translatable"
+
+code_style:
+  shared:
+    - "No hardcoded environment-specific values — use environment variables"
+  backend:
+    - "All database queries must go through the repository layer"
+
+# Other examples: api_conventions, accessibility, security, naming_conventions, performance
+```
+
+Committed to the repo. Edit as the project evolves. Skills read the whole file — no fixed schema beyond `language`. `specos-distribute` injects the relevant entries into every task output. `specos-dev` enforces them during implementation.
+
 ### session.md — local only, never committed
 
 ```markdown
@@ -191,7 +223,7 @@ expected: Expected result
 updated: YYYY-MM-DD
 
 roles: [lead, backend]
-active_feature: feature-folder-name
+active_feature: feature-folder-name   # or group/sub-feature for nested specs
 task_id: SP-01
 task_description: Short task description
 spec_path: specs/feature-name/spec.md
@@ -207,7 +239,7 @@ implementation_repos:
 
 ### Lead
 1. Run `curl install.sh | bash` once
-2. Run `/specos-init` — answers 6 questions, generates project config
+2. Run `/specos-init` — answers 7 questions, generates project config
 3. Run `/specos-start` (or `/specos-lead` directly) for each new feature
 4. Build `spec.md` + `tasks.md` collaboratively, section by section
 5. Assign real task IDs from your task software when ready
@@ -242,7 +274,7 @@ Complete conversational flow transcripts (init → lead → dev → qa → distr
 - GitHub Actions or CI/CD pipelines
 - Web dashboard or UI
 - Windows support
-- Multi-language output — English only
+- Automatic translation — language is configured in specos-standards.yml but content is written by the agent in the configured language, not translated
 - Status fields anywhere
 
 ---

@@ -19,12 +19,13 @@ Wait for the answer.
 ## Step 2 — Load the relevant files
 
 Read `specos-outputs.yml` to get the configured destinations and ID prefixes.
+Read `specos-standards.yml` if it exists. Collect all entries for the task's role and `shared` across every section (except `language`). Apply them when generating task output — see below.
 
-Based on the selection:
-- Tasks → read `specs/[feature-name]/tasks.md`
-- Test cases → read `specs/[feature-name]/testcases.md`
-- Confluence doc → read `specs/[feature-name]/spec.md`
-- Flow diagrams → read `specs/[feature-name]/spec.md`
+Based on the selection and the `active_feature` in session.md (which may be `group/sub-feature`):
+- Tasks → read `specs/[active_feature]/tasks.md`
+- Test cases → read `specs/[active_feature]/testcases.md`
+- Confluence doc → read `specs/[active_feature]/spec.md`
+- Flow diagrams → read `specs/[active_feature]/spec.md`
 
 If the file does not exist: "No [file] found for this feature. Run /specos-lead or /specos-qa first."
 
@@ -52,7 +53,11 @@ Then, for each task in `tasks.md`, output the following structure as raw markdow
 [Full description of what must be implemented. Copy every relevant detail from tasks.md and cross-reference the matching ACs and technical notes from spec.md. Do not summarize — include specifics: endpoint names, field names, validation rules, business logic, edge cases. Use prose; switch to bullets only when listing parallel steps or items with no logical sequence.]
 
 ## Acceptance Criteria
-- [criterion — specific and testable, pulled verbatim or closely from the ACs in spec.md that this task covers]
+- [criterion — one sentence that states the condition and the observable outcome. Include enough context to be self-contained: what triggers it, what the result must be. Example: "When a user submits the form with an empty email field, the API returns 422 with an `email` error key." Do not copy vague phrases from the spec — rewrite them to be concrete and verifiable. Maximum 2 lines per criterion.]
+- [Append any entries from specos-standards.yml whose section name suggests a quality gate or acceptance condition (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). One bullet per entry. If nothing applies, omit.]
+
+## Standards
+[Only include this section when specos-standards.yml has entries for this task's role or `shared` in any non-AC section (e.g. `code_style`, `api_conventions`, `accessibility`, `security`, `naming`). List each entry as a bullet grouped by section name. If nothing applies, omit this section entirely.]
 
 ## Dev Notes
 [Only include this section when branch/PR/command info was provided. If none was given, omit entirely.]
@@ -73,7 +78,8 @@ Formatting rules (strict — apply before printing):
 Content rules:
 - Title: maximum 8 words, imperative verb first (e.g. "Add JWT validation to /auth endpoint")
 - Scope: never summarize — reproduce all relevant details from tasks.md and spec.md for that task
-- ACs: simple bullets, no nested lists, no vague language ("should work", "handle correctly")
+- ACs: simple bullets, no nested lists. Each AC must state the condition + the expected outcome in one self-contained sentence. No vague language ("should work", "handle correctly") — rewrite to be concrete even if the spec is vague. Always append role defaults from specos-standards.yml.
+- Standards: show when specos-standards.yml has any non-AC entries for that role or shared. Group by section name. Simple bullets.
 - Never invent features or technical details not in the spec
 - Infer obvious technical details only when clearly implied by the spec
 

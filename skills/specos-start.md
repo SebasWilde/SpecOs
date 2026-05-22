@@ -65,7 +65,7 @@ If no implementation repos are configured (monorepo), skip this step.
 
 ## Step 4 — Check for specs
 
-Look for any `spec.md` files inside `specs/`.
+Look for any `spec.md` files inside `specs/` — search both `specs/*/spec.md` and `specs/*/*/spec.md` (one or two levels deep). Skip any `spec.md` that has `type: group` in its frontmatter — those are group summaries, not implementable specs.
 
 **If no specs exist and the role is dev or qa:**
 "No specs available right now. Check with your Lead."
@@ -113,10 +113,10 @@ Write or update `session.md` at that root with the current state:
 updated: YYYY-MM-DD
 
 roles: [role1, role2]
-active_feature: feature-folder-name
+active_feature: feature-folder-name        # can be group/sub-feature for nested specs
 task_id: TASK-XX
 task_description: Short description of the current task
-spec_path: specs/feature-name/spec.md
+spec_path: specs/feature-name/spec.md     # e.g. specs/payments/checkout/spec.md
 implementation_repos:
   backend: ../repo-back
   frontend: ../repo-front

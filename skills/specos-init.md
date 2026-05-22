@@ -34,7 +34,12 @@ Ask the questions one at a time. Wait for the user's answer before asking the ne
 1. Monorepo — specs and code live in the same repo
 2. Separate repos — this is the specs repo, code lives elsewhere"
 
-**Question 6 — Implementation repo paths** *(ask only if answer to Q5 was "separate repos")*
+**Question 6 — Language**
+"What language should specs and outputs be written in? (e.g. English, Spanish, Portuguese — or type the ISO code: en, es, pt)"
+
+*(Store for specos-standards.yml. Default: en if not answered.)*
+
+**Question 7 — Implementation repo paths** *(ask only if answer to Q5 was "separate repos")*
 "What are the paths to your implementation repos relative to this folder?
 Provide one per role that applies. Example:
 - backend: ../repo-backend
@@ -42,7 +47,7 @@ Provide one per role that applies. Example:
 - e2e: ../repo-e2e
 Leave a role as `null` if it does not apply."
 
-*(If answer to Q5 was "monorepo", skip Q6 and use `null` for all implementation repo paths.)*
+*(If answer to Q5 was "monorepo", skip Q7 and use `null` for all implementation repo paths.)*
 
 ---
 
@@ -118,7 +123,29 @@ outputs:
 
 Set `team.qa: agent` if the user selected solo builder or indicated QA is handled by the agent. Otherwise `human`.
 
-### 4. .gitignore entry
+### 4. specos-standards.yml
+
+Generate `specos-standards.yml` using the language answer from Question 6:
+
+```yaml
+# specos-standards.yml
+# Project-level standards for SpecOS v3.
+# Committed to the repo. Edit as your project evolves.
+#
+# `language` is the only reserved key. Everything else is free-form.
+# Define any section your project needs. Organize by role within each section.
+# Skills read the entire file and apply all entries for the relevant role.
+
+language:
+  specs: [language code from Q6]   # ISO 639-1 — for spec.md, tasks.md, testcases.md
+  outputs: [language code from Q6] # for Jira/Confluence/etc. generated outputs
+
+# --- Add your project standards below ---
+# Each section can have: frontend, backend, qa, shared
+# Examples: acceptance_criteria, code_style, api_conventions, accessibility, security
+```
+
+### 5. .gitignore entry
 
 If a `.gitignore` already exists, append to it. If not, create it. Add:
 
@@ -128,11 +155,11 @@ If a `.gitignore` already exists, append to it. If not, create it. Add:
 session.md
 ```
 
-### 5. specs/ directory
+### 6. specs/ directory
 
 Create the `specs/` directory if it does not exist. Do not create any files inside it.
 
-### 6. README.md
+### 7. README.md
 
 Generate `README.md` at the repo root using the answers collected in questions 1–6. Write in English. The README must cover:
 
@@ -239,6 +266,7 @@ Files created:
   AGENTS.md
   constitution.md
   specos-outputs.yml
+  specos-standards.yml
   README.md
   .gitignore (updated)
   specs/

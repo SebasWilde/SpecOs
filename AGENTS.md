@@ -16,14 +16,23 @@
 
 ```
 specs/
-└── [feature-name]/
+└── [feature-name]/              ← single feature
     ├── spec.md          ← journeys, ACs, technical — everything
     ├── tasks.md         ← subtasks by role, no checkboxes, no status fields
     ├── testcases.md     ← QA test cases with TC-XX IDs
     └── CHANGELOG.md     ← spec change history
+
+└── [group-name]/                ← group of related features
+    ├── spec.md          ← domain summary + list of sub-specs only (type: group)
+    └── [sub-feature]/
+        ├── spec.md
+        ├── tasks.md
+        ├── testcases.md
+        └── CHANGELOG.md
 ```
 
-- All specs live in `specs/`. Each feature has its own folder.
+- All specs live in `specs/`. Features can be flat or nested under a group.
+- Group `spec.md` files have `type: group` in frontmatter — agents skip them for implementation.
 - No agent writes code without a `spec.md` present in this repo.
 - Only the Lead role modifies `spec.md`.
 - Repo presence = approved. No status field in the spec.
@@ -99,4 +108,6 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 | `/specos-lead` | Create or update a spec collaboratively |
 | `/specos-dev` | Implement a task with full spec context |
 | `/specos-qa` | Generate test cases from a spec |
-| `/specos-distribute` | Generate outputs per specos-outputs.yml |
+| `/specos-distribute` | Generate outputs per specos-outputs.yml and standards |
+| `/specos-split` | Split a large spec into sub-specs under a group folder |
+| `/specos-group` | Group related existing specs under a shared parent folder |

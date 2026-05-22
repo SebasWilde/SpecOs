@@ -11,7 +11,7 @@ If `session.md` exists and has a `task_id`, load it silently. Skip to Step 2.
 If no task is loaded, ask:
 "What is your task ID or description? (e.g. SP-42 or 'implement login endpoint')"
 
-Search all `tasks.md` files in `specs/` for the task ID or a description match.
+Search all `tasks.md` files in `specs/` for the task ID or a description match — look in both `specs/*/tasks.md` and `specs/*/*/tasks.md`. Skip group-level folders (they have no tasks.md).
 
 If found: confirm — "Found task [ID] in feature [feature-name]: [task description]. Is this correct?"
 If not found: "I couldn't find that task in any spec. Check the task ID or ask your Lead."
@@ -25,6 +25,8 @@ Read `specs/[feature-name]/spec.md` for the matched feature.
 Do not read any other spec. Do not load unrelated context.
 
 Read `AGENTS.md` to understand the project structure (stack, conventions, repo layout).
+
+Read `specos-standards.yml` if it exists. Collect ALL entries for the task's role and `shared` across every section (except `language`). Apply them as hard constraints throughout implementation — they override any convention not explicitly stated in the spec.
 
 ---
 

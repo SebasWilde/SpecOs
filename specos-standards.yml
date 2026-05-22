@@ -1,0 +1,23 @@
+# specos-standards.yml
+# Project-level standards for SpecOS v3.
+# Committed to the repo. Edit as your project evolves.
+#
+# How this file works:
+#   - `language` is the only reserved key — it controls what language skills write in.
+#   - Everything else is free-form. Define any section your project needs.
+#   - Within each section, organize by role: frontend, backend, qa, shared.
+#     `shared` applies to all roles.
+#   - Skills read the entire file and apply all entries for the relevant role:
+#       - Sections that look like quality gates → appended to Acceptance Criteria in task output
+#       - Everything else → injected as a Standards section in task output and enforced by specos-dev
+#
+# Common section names teams use: acceptance_criteria, code_style, api_conventions,
+# accessibility, security, naming_conventions, testing_requirements, performance_budgets.
+# Add whatever makes sense for your project. There is no fixed schema beyond `language`.
+
+language:
+  specs: en       # ISO 639-1 code — language for spec.md, tasks.md, testcases.md content
+  outputs: en     # language for generated outputs (Jira tasks, Confluence docs, etc.)
+
+# --- Add your project standards below ---
+# Each section can have any combination of: frontend, backend, qa, shared

@@ -29,12 +29,14 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 
 | Skill | Who | What |
 |---|---|---|
-| `/specos-init` | Lead | First-time setup — 6 questions, generates AGENTS.md + constitution.md + specos-outputs.yml |
+| `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-outputs.yml + specos-standards.yml |
 | `/specos-start` | Everyone | Begins any session, routes by role and session state |
 | `/specos-lead` | Lead | Builds spec + tasks collaboratively, assigns SP-XX IDs, collects real IDs |
 | `/specos-dev` | Dev | Loads only the relevant spec, writes to implementation repo |
 | `/specos-qa` | QA | Generates testcases.md collaboratively, assigns TC-XX IDs |
-| `/specos-distribute` | Lead / QA | Generates outputs per specos-outputs.yml |
+| `/specos-distribute` | Lead / QA | Generates outputs per specos-outputs.yml + standards |
+| `/specos-split` | Lead | Splits a large spec into sub-specs under a group folder |
+| `/specos-group` | Lead | Groups related existing specs under a shared parent folder |
 
 ---
 
@@ -138,6 +140,60 @@ implementation_repos:
 ```
 
 Always in `.gitignore`. Never committed.
+
+---
+
+## Grouped specs
+
+Use when a feature is too large or when specs share a domain.
+
+```
+specs/
+└── payments/              ← group folder
+    ├── spec.md            ← summary + list of sub-specs only (type: group)
+    ├── checkout/
+    │   ├── spec.md
+    │   └── tasks.md
+    └── refunds/
+        ├── spec.md
+        └── tasks.md
+```
+
+| When | Skill |
+|---|---|
+| Spec is too large, split into parts | `/specos-split` |
+| Multiple specs share a domain | `/specos-group` |
+
+`active_feature` in session.md: `payments/checkout`
+
+---
+
+## specos-standards.yml
+
+Committed config. Edit as the project evolves.
+
+```yaml
+# Only `language` is reserved. Add any section your project needs.
+language:
+  specs: en
+  outputs: en
+
+acceptance_criteria:   # → injected into task ACs in /specos-distribute
+  backend:
+    - "All error responses must include an error code and a message"
+  shared:
+    - "..."
+
+code_style:            # → injected as ## Standards in task output, enforced by /specos-dev
+  backend:
+    - "..."
+  shared:
+    - "No hardcoded environment-specific values — use environment variables"
+
+# Other sections teams add: api_conventions, accessibility, security, naming_conventions
+```
+
+Skills read the entire file. No fixed schema beyond `language`. Each section's entries are applied to the matching role and `shared`.
 
 ---
 

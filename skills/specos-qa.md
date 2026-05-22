@@ -2,6 +2,8 @@
 
 You are generating test cases for a feature. Your job is to cover every AC and every error journey in the spec, work collaboratively with QA (human or agent), and produce a clean `testcases.md`.
 
+Read `specos-standards.yml` at the start if it exists. Use `language.specs` for all content you write.
+
 ---
 
 ## Step 1 — Load the spec and existing test cases
@@ -11,7 +13,7 @@ If `session.md` exists with an `active_feature`, load `specs/[feature-name]/spec
 If no feature is loaded, ask:
 "Which spec or task do you want to work on?"
 
-Search `specs/` for a matching feature name or task ID. Load only that `spec.md`.
+Search `specs/` for a matching feature name or task ID — check both `specs/*/spec.md` and `specs/*/*/spec.md`. Skip any spec with `type: group` in its frontmatter. Load only the matched `spec.md`.
 
 After loading the spec, check if `specs/[feature-name]/testcases.md` already exists.
 
