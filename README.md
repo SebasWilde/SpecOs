@@ -44,7 +44,7 @@ Both perspectives are required. They cannot be the same logic.
 | Skill | Who uses it |
 |---|---|
 | `/specos-init` | Lead — first-time project setup |
-| `/specos-start` | Everyone — begins any session, reads session.md and routes |
+| `/specos-start` | Everyone — begins any session, runs local onboarding if needed, routes by role |
 | `/specos-lead` | Lead — builds spec + tasks collaboratively |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — generates testcases.md from spec |
@@ -65,9 +65,13 @@ SpecOS works with Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity, Winds
 - **Monorepo:** set all `implementation_repos` paths to `.`
 - **Separate repos:** specs repo is the entry point, implementation repos are destinations. Agent validates paths before any session.
 
-### Session state
+### Local state — two files, never committed
 
-`session.md` stores the current state locally — roles, active feature, task ID, implementation repo paths. It is always in `.gitignore`. Never committed.
+**`local-workspace.yml`** — created once per machine on the first `/specos-start`. Stores who you are on this project: your name, roles, and implementation repo paths. Stable across sessions.
+
+**`session.md`** — updated every session. Stores the active feature, task ID, and spec path. Ephemeral — changes every time you switch tasks.
+
+Both are always in `.gitignore`. Never committed.
 
 ---
 
@@ -216,21 +220,29 @@ code_style:
 
 Committed to the repo. Edit as the project evolves. Skills read the whole file — no fixed schema beyond `language`. `specos-distribute` injects the relevant entries into every task output. `specos-dev` enforces them during implementation.
 
-### session.md — local only, never committed
+### local-workspace.yml — local identity, never committed
+
+Created on the first `/specos-start` in a cloned repo. One-time setup per machine.
+
+```yaml
+user: Your Name
+roles: [lead, backend]
+implementation_repos:
+  backend: ../repo-backend
+  frontend: ../repo-frontend
+  e2e: null
+```
+
+### session.md — active session state, never committed
 
 ```markdown
 # SpecOS session
 updated: YYYY-MM-DD
 
-roles: [lead, backend]
 active_feature: feature-folder-name   # or group/sub-feature for nested specs
 task_id: SP-01
 task_description: Short task description
 spec_path: specs/feature-name/spec.md
-implementation_repos:
-  backend: ../repo_back
-  frontend: ../repo_front
-  e2e: null
 ```
 
 ---
@@ -240,18 +252,19 @@ implementation_repos:
 ### Lead
 1. Run `curl install.sh | bash` once
 2. Run `/specos-init` — answers 7 questions, generates project config
-3. Run `/specos-start` (or `/specos-lead` directly) for each new feature
-4. Build `spec.md` + `tasks.md` collaboratively, section by section
-5. Assign real task IDs from your task software when ready
-6. Run `/specos-distribute` to generate outputs
+3. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
+4. Run `/specos-start` (or `/specos-lead` directly) for each new feature
+5. Build `spec.md` + `tasks.md` collaboratively, section by section
+6. Assign real task IDs from your task software when ready
+7. Run `/specos-distribute` to generate outputs
 
 ### Dev
-1. Run `/specos-start` — provide task ID or description
-2. Agent loads only the relevant `spec.md`
-3. Implement in that context
+1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
+2. Provide task ID or description
+3. Agent loads only the relevant `spec.md` and implements in that context
 
 ### QA
-1. Run `/specos-start` — provide feature name or task ID
+1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
 2. Agent loads `spec.md` collaboratively builds `testcases.md`
 3. Review, adjust, add custom fields freely
 4. Run `/specos-distribute` to push output
