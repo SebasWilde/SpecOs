@@ -4,11 +4,11 @@ Display the current session state. Read-only — no files created or modified.
 
 ---
 
-## Step 1 — Find session.md
+## Step 1 — Find session files
 
-Look for `session.md` or `.specos/session.md` in the current directory and parent directories.
+Look for `local-workspace.yml` and `session.md` in the current directory and parent directories.
 
-**If session.md does not exist:**
+**If neither file exists:**
 Print:
 ```
 No active session.
@@ -20,20 +20,21 @@ Stop here.
 
 ## Step 2 — Read and display session state
 
-Read `session.md` silently and print a clean summary in this format:
+Read both files silently (use whichever exist) and print a clean summary in this format:
 
 ```
 SpecOS session — <active_feature or "no feature set">
-updated: <updated value>
+updated: <updated value or "—">
 
-Roles:          <roles value>
+User:           <user from local-workspace.yml or "—">
+Roles:          <roles from local-workspace.yml or "—">
 Feature:        <active_feature or "—">
 Task:           <task_id — task_description, or "—" if both are null>
 Spec:           <spec_path or "—">
 Implementation repos:
-  backend:      <path or "not configured">
-  frontend:     <path or "not configured">
-  e2e:          <path or "not configured">
+  backend:      <path from local-workspace.yml or "not configured">
+  frontend:     <path from local-workspace.yml or "not configured">
+  e2e:          <path from local-workspace.yml or "not configured">
 ```
 
 Rules:

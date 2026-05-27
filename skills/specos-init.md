@@ -61,11 +61,11 @@ Generate a project-specific `AGENTS.md` using the answers. Include:
 - Project name and one-line description (inferred from stack if not provided)
 - Tech stack summary
 - Team roles and who holds them
-- SpecOS structure: `specs/`, `skills/`, `session.md` (gitignored)
+- SpecOS structure: `specs/`, `local-workspace.yml` (gitignored), `session.md` (gitignored)
 - Implementation repo paths if separate repos
 - Rule: no agent writes code without a spec in the repo
 - Rule: only Lead modifies `spec.md`
-- Rule: `session.md` is never committed
+- Rule: `local-workspace.yml` and `session.md` are never committed
 
 ### 2. constitution.md
 
@@ -150,7 +150,8 @@ language:
 If a `.gitignore` already exists, append to it. If not, create it. Add:
 
 ```
-# SpecOS session state — local only, never committed
+# SpecOS local files — never committed
+local-workspace.yml
 .specos/session.md
 session.md
 ```
@@ -183,7 +184,8 @@ It uses **SpecOS v3** — a structured workflow for AI-assisted software develop
 | `AGENTS.md` | Project context — read automatically by AI agents |
 | `constitution.md` | The 8 rules every agent and team member follows |
 | `specos-outputs.yml` | Team configuration and integration settings |
-| `session.md` | Local session state — gitignored, never committed |
+| `local-workspace.yml` | Local identity: your name, roles, repo paths — gitignored |
+| `session.md` | Active session state — gitignored, never committed |
 
 ---
 
@@ -246,7 +248,7 @@ All contributors (human and AI) follow the rules in `constitution.md`. The key o
 # First time setup (already done if you're reading this)
 bash install.sh
 
-# Begin any session
+# First session on this machine — will ask your name, role, and repo paths
 /specos-start
 ```
 ```

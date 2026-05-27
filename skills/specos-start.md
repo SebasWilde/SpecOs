@@ -4,26 +4,74 @@ You are the entry point for every SpecOS session. Your job is to read context, a
 
 ---
 
+## Step 0 — Read local-workspace.yml
+
+Look for `local-workspace.yml` in the specs repo root (the directory containing `specs/` and `specos-outputs.yml`).
+
+**If local-workspace.yml exists:** read it silently. Extract `user`, `roles`, and `implementation_repos`. Go to Step 1.
+
+**If local-workspace.yml does not exist:** run the local onboarding flow below.
+
+### Local onboarding
+
+One-time setup for this machine. Saves who you are locally — never committed.
+
+Check that `specos-outputs.yml` exists. If not:
+"SpecOS is not initialized in this repo. Run /specos-init first."
+Stop here.
+
+Ask these questions one at a time:
+
+**Q1 — Name**
+"What's your name? (used as the lead field in spec frontmatter)"
+
+**Q2 — Role(s)**
+"What role(s) do you hold on this project?
+- lead — writes and approves specs
+- backend — implements API and business logic
+- frontend — implements UI
+- qa — designs and runs tests
+- builder — designs + builds + tests (solo)
+You can select multiple."
+
+**Q3 — Implementation repos** *(ask only if the project uses separate repos — check `specos-outputs.yml` or `AGENTS.md` for `implementation_repos` section)*
+"What are the paths to your implementation repos from this folder?
+Example:
+- backend: ../repo-backend
+- frontend: ../repo-frontend
+- e2e: null
+Leave as null any that don't apply."
+
+*(If monorepo, skip Q3 and set all paths to null.)*
+
+After collecting answers, write `local-workspace.yml` at the specs repo root:
+
+```yaml
+user: [name from Q1]
+roles: [roles from Q2]
+implementation_repos:
+  backend: [path or null]
+  frontend: [path or null]
+  e2e: [path or null]
+```
+
+Confirm: "local-workspace.yml saved. Welcome, [name]."
+
+---
+
 ## Step 1 — Read session.md
 
-Look for `session.md` or `.specos/session.md` in the current directory.
+Look for `session.md` in the specs repo root.
 
-**If session.md exists:** read it silently. Do not ask any questions. Go to Step 3.
+**If session.md exists:** read it silently. Go to Step 3.
 
 **If session.md does not exist:** go to Step 2.
 
 ---
 
-## Step 2 — First-time flow
+## Step 2 — Route by role
 
-Read `specos-outputs.yml` to learn the team configuration and the roles of the current person.
-Read `AGENTS.md` to understand the project structure.
-
-If neither file exists, respond:
-"SpecOS is not initialized in this repo. Run /specos-init first."
-Stop here.
-
-Based on the roles declared in `specos-outputs.yml` or `AGENTS.md`, ask one question:
+Using the `roles` from `local-workspace.yml`, ask one question:
 
 **If role is lead only:**
 "What feature do you want to specify?"
@@ -52,11 +100,11 @@ Wait for the answer before continuing.
 
 ## Step 3 — Validate implementation repo paths
 
-If the session requires writing code (dev or qa roles), check the implementation repo paths from `session.md` or `AGENTS.md`.
+If the session requires writing code (dev or qa roles), check `implementation_repos` from `local-workspace.yml`.
 
 For each path that is not `null`:
 - Check if the path is accessible from the current directory
-- If not accessible: "I can't reach `[path]`. Please check the path in your session.md or AGENTS.md."
+- If not accessible: "I can't reach `[path]`. Please update the path in local-workspace.yml."
 - Do not proceed until all required paths are valid.
 
 If no implementation repos are configured (monorepo), skip this step.
@@ -112,15 +160,10 @@ Write or update `session.md` at that root with the current state:
 # SpecOS session
 updated: YYYY-MM-DD
 
-roles: [role1, role2]
 active_feature: feature-folder-name        # can be group/sub-feature for nested specs
 task_id: TASK-XX
 task_description: Short description of the current task
 spec_path: specs/feature-name/spec.md     # e.g. specs/payments/checkout/spec.md
-implementation_repos:
-  backend: ../repo-back
-  frontend: ../repo-front
-  e2e: null
 ```
 
 Use `null` for any field that does not apply. Do not commit this file — it is in `.gitignore`.

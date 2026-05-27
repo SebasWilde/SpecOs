@@ -67,7 +67,7 @@ feature: [sub-feature-name]
 group: [original-feature-name]
 version: 1.0
 status: approved
-lead: [from session.md or AGENTS.md]
+lead: [from local-workspace.yml or AGENTS.md]
 date: [today]
 keywords: [relevant terms]
 linked:

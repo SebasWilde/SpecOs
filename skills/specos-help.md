@@ -29,7 +29,8 @@ KEY FILES
   constitution.md        Non-negotiable rules for this project
   specos-outputs.yml     Team config, ID prefixes, integrations
   specos-standards.yml   Language, default ACs, and code standards per role
-  session.md             Local session state — never committed (in .gitignore)
+  local-workspace.yml    Local identity: user, roles, repo paths — never committed
+  session.md             Active session state — never committed (in .gitignore)
   specs/<feature>/
     spec.md              Journeys, ACs, technical definition
     tasks.md             Subtasks by role, no checkboxes

@@ -32,11 +32,11 @@ Read `specos-standards.yml` if it exists. Collect ALL entries for the task's rol
 
 ## Step 3 — Confirm the implementation repo
 
-Check `session.md` for `implementation_repos`.
+Check `local-workspace.yml` for `implementation_repos`.
 
 If the task role requires a specific repo (e.g. backend task → `implementation_repos.backend`):
 - Check that the path exists and is accessible
-- If not accessible: "I can't reach `[path]`. Please update the path in session.md."
+- If not accessible: "I can't reach `[path]`. Please update the path in local-workspace.yml."
 - Do not proceed until the path is valid
 
 If the project is a monorepo, work in the current directory.

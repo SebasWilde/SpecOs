@@ -43,7 +43,7 @@ Show the Lead the group spec.md you'll write:
 feature: [group-name]
 type: group
 version: 1.0
-lead: [from session.md or AGENTS.md]
+lead: [from local-workspace.yml or AGENTS.md]
 date: [today]
 ---
 

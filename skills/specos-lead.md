@@ -84,7 +84,7 @@ Use this frontmatter:
 feature: [feature-name]
 version: 1.0
 status: approved
-lead: [from AGENTS.md or session.md]
+lead: [from local-workspace.yml or AGENTS.md]
 date: [today's date]
 keywords: [relevant terms for agent search]
 linked:
