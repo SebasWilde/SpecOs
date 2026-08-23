@@ -2,14 +2,28 @@
 
 You are working with the Lead to build a spec and task list for a new feature. Your job is to build collaboratively — propose one section at a time, wait for validation, never dump the full document at once.
 
-Read `specos-standards.yml` at the start if it exists. Use `language.specs` for all spec content you write.
+Read `specos-project.yml` at the start if it exists. Use `language.specs` for all spec content you write.
+
+## Config you own
+
+**Settings** — read these from `settings.lead` and obey them. Absent means the default; do not warn about an absent file or block.
+
+| Setting | Accepted values | Default | Effect |
+|---|---|---|---|
+| `max_tasks` | integer >= 1 | `15` | Maximum tasks in one spec before you tell the Lead to split |
+| `max_journeys` | integer >= 1, or `none` | `none` | Journey count that triggers a `/specos-split` suggestion. `none` = never suggest |
+| `require_error_journey` | `true` \| `false` | `true` | Whether at least one error journey is mandatory |
+
+An unknown key under `settings.lead`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then fall back to that setting's default and continue. Collect every such problem into a single message; never abort over config.
+
+**Rules** — apply every entry under `rules` for the relevant role and for `shared`. Any `writing_style` rules govern how you word journeys, ACs, and task descriptions. Rules are sentences: follow them, never validate them. A rule's own language never changes the language of what you write — that is `language.specs` alone.
 
 ---
 
 ## Constraints (enforce always)
 
-- Maximum 15 tasks total — if more are needed, tell the Lead to split into a new feature
-- At least 1 error journey must be present (what happens when something goes wrong)
+- At most `max_tasks` tasks total (default 15) — if more are needed, tell the Lead to split into a new feature
+- At least 1 error journey must be present when `require_error_journey` is true, the default (what happens when something goes wrong)
 - All ACs must be verifiable — no vague language like "works correctly" or "is fast"
 - An "Out of scope" section must be present
 - Only the Lead modifies `spec.md` — if someone else is running this skill, stop and say so
@@ -29,7 +43,9 @@ Propose a 2-3 line summary. Wait for approval.
 Based on the summary, propose the happy path journeys first. Then ask:
 "Are there error cases or edge cases we need to cover?"
 
-Add error journeys from the answer. Enforce at least 1 error journey — if the Lead skips this, remind them it is required.
+Add error journeys from the answer. When `require_error_journey` is true (the default), enforce at least 1 — if the Lead skips this, remind them it is required. When it is false, still offer one, but accept a spec without it.
+
+When `max_journeys` is set and the journey count reaches it, say so once and suggest `/specos-split`: "This spec has [N] journeys, which is the limit this project set. /specos-split can break it into sub-specs." Suggest, never block.
 
 Wait for approval on the full journey set before continuing.
 
@@ -57,13 +73,13 @@ If yes: build it collaboratively. If no: skip.
 After spec.md is approved, move to tasks.
 
 ### 2.1 — Propose task list
-Break the spec into tasks grouped by role (Backend / Frontend / QA — or whatever roles apply to this project per `specos-outputs.yml`).
+Break the spec into tasks grouped by role (Backend / Frontend / QA — or whatever roles apply to this project per `specos-project.yml`).
 
 Rules:
 - Each task is a single unit of work — one person, one PR
 - No task should mix roles
 - Tasks must be ordered: foundational work before dependent work
-- Maximum 15 tasks total
+- At most `max_tasks` tasks total (default 15)
 - Task description: maximum 8 words, imperative verb first (e.g. "Add tag validation to post model")
 
 Assign default IDs using the configured prefix (default: SP-XX, starting from SP-01).

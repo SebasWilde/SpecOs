@@ -18,8 +18,19 @@ Wait for the answer.
 
 ## Step 2 — Load the relevant files
 
-Read `specos-outputs.yml` to get the configured destinations and ID prefixes.
-Read `specos-standards.yml` if it exists. Collect all entries for the task's role and `shared` across every section (except `language`). Apply them when generating task output — see below.
+Read `specos-project.yml` — it holds destinations, ID prefixes, settings, and rules.
+
+**Settings** — read these from `settings.distribute` and obey them. Absent means the default; do not warn about an absent file or block.
+
+| Setting | Accepted values | Default | Effect |
+|---|---|---|---|
+| `diagrams` | `none` \| `combined` \| `per_journey` \| `ask` | `ask` | How many flow diagrams to generate. Only `ask` asks. |
+| `branch_info` | `ask` \| `none` | `ask` | Whether to ask for branch/PR info before generating tasks |
+| `task_title_max_words` | integer ≥ 1 | `8` | Maximum words in a task title |
+
+An unknown key under `settings.distribute`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then fall back to that setting's default and continue. Collect every such problem into a single message; never abort over config.
+
+**Rules** — collect all entries under `rules` for the task's role and for `shared`, across every section. Apply them when generating output, as described below. Any `writing_style` rules govern how you word what you produce. Rules are sentences: follow them, never validate them. A rule's own language never changes the output language — that is `language.outputs` alone.
 
 Based on the selection and the `active_feature` in session.md (which may be `group/sub-feature`):
 - Tasks → read `specs/[active_feature]/tasks.md`
@@ -35,7 +46,9 @@ If the file does not exist: "No [file] found for this feature. Run /specos-lead 
 
 ### Tasks output
 
-Ask only: "Do you have branch or PR info for these tasks?
+When `branch_info` is `none`, skip this question entirely and omit the Dev Notes section from every task.
+
+When `branch_info` is `ask`, ask only: "Do you have branch or PR info for these tasks?
 1. Same for all tasks — tell me once
 2. Per task — I'll ask as I go
 3. None"
@@ -54,10 +67,10 @@ Then, for each task in `tasks.md`, output the following structure as raw markdow
 
 ## Acceptance Criteria
 - [criterion — one sentence that states the condition and the observable outcome. Include enough context to be self-contained: what triggers it, what the result must be. Example: "When a user submits the form with an empty email field, the API returns 422 with an `email` error key." Do not copy vague phrases from the spec — rewrite them to be concrete and verifiable. Maximum 2 lines per criterion.]
-- [Append any entries from specos-standards.yml whose section name suggests a quality gate or acceptance condition (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). One bullet per entry. If nothing applies, omit.]
+- [Append any entries from `rules` whose section name suggests a quality gate or acceptance condition (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). One bullet per entry. If nothing applies, omit.]
 
 ## Standards
-[Only include this section when specos-standards.yml has entries for this task's role or `shared` in any non-AC section (e.g. `code_style`, `api_conventions`, `accessibility`, `security`, `naming`). List each entry as a bullet grouped by section name. If nothing applies, omit this section entirely.]
+[Only include this section when `rules` has entries for this task's role or `shared` in any non-AC section (e.g. `code_style`, `api_conventions`, `accessibility`, `security`, `naming`). List each entry as a bullet grouped by section name. If nothing applies, omit this section entirely.]
 
 ## Dev Notes
 [Only include this section when branch/PR/command info was provided. If none was given, omit entirely.]
@@ -76,10 +89,10 @@ Formatting rules (strict — apply before printing):
 - If a section is omitted (Context or Dev Notes), do not leave a blank line in its place
 
 Content rules:
-- Title: maximum 8 words, imperative verb first (e.g. "Add JWT validation to /auth endpoint")
+- Title: at most `task_title_max_words` words (default 8), imperative verb first (e.g. "Add JWT validation to /auth endpoint")
 - Scope: never summarize — reproduce all relevant details from tasks.md and spec.md for that task
-- ACs: simple bullets, no nested lists. Each AC must state the condition + the expected outcome in one self-contained sentence. No vague language ("should work", "handle correctly") — rewrite to be concrete even if the spec is vague. Always append role defaults from specos-standards.yml.
-- Standards: show when specos-standards.yml has any non-AC entries for that role or shared. Group by section name. Simple bullets.
+- ACs: simple bullets, no nested lists. Each AC must state the condition + the expected outcome in one self-contained sentence. No vague language ("should work", "handle correctly") — rewrite to be concrete even if the spec is vague. Always append role defaults from `rules`.
+- Standards: show when `rules` has any non-AC entries for that role or shared. Group by section name. Simple bullets.
 - Never invent features or technical details not in the spec
 - Infer obvious technical details only when clearly implied by the spec
 
@@ -160,7 +173,16 @@ Print the document. Tell the Lead: "Copy this into Confluence manually and repla
 
 ### Flow diagrams output
 
-Ask only: "How many diagrams do you need?
+`diagrams` decides this, and only `ask` asks:
+
+| Value | Behaviour |
+|---|---|
+| `none` | Generate nothing. Say so in one line and stop. |
+| `combined` | One combined diagram for all journeys. |
+| `per_journey` | One diagram per journey. |
+| `ask` | Ask the question below. |
+
+When `diagrams` is `ask`, ask only: "How many diagrams do you need?
 1. One combined diagram for all journeys
 2. One diagram per journey
 3. Let you decide based on the spec"

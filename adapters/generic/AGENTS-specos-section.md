@@ -21,7 +21,7 @@ When the user types one of the commands below, read the corresponding skill file
 | `/specos-distribute` | `skills/specos-distribute.md` | Generate formatted outputs |
 | `/specos-split` | `skills/specos-split.md` | Split a large spec into sub-specs |
 | `/specos-group` | `skills/specos-group.md` | Group related specs under a parent folder |
-| `/specos-config` | `skills/specos-config.md` | Configure specos-standards.yml |
+| `/specos-config` | `skills/specos-config.md` | Configure specos-project.yml |
 | `/specos-status` | `skills/specos-status.md` | Show current session state |
 | `/specos-help` | `skills/specos-help.md` | List commands and key files |
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SpecOS v3 — uninstaller
 # Removes all skills installed by install.sh from detected agent directories.
-# Does NOT remove project files: AGENTS.md, constitution.md, specos-outputs.yml, specs/
+# Does NOT remove project files: AGENTS.md, constitution.md, specos-project.yml, specs/
 # Works on macOS and Linux. Idempotent — safe to run multiple times.
 set -euo pipefail
 
@@ -198,7 +198,7 @@ fi
 
 echo ""
 echo "  Project files were NOT removed:"
-echo "  AGENTS.md, constitution.md, specos-outputs.yml, specs/"
+echo "  AGENTS.md, constitution.md, specos-project.yml, specs/"
 echo ""
 echo "  To fully remove SpecOS from a project, delete those files manually."
 echo ""

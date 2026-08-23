@@ -1,5 +1,5 @@
 ---
-description: Configure specos-standards.yml interactively
+description: Configure specos-project.yml interactively
 globs:
 alwaysApply: false
 ---

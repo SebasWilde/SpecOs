@@ -185,6 +185,89 @@ for f in local-workspace.yml session.md .specos/memory.md; do
   fi
 done
 
+# --- 7. Config file contract ------------------------------------------------
+#
+# specos-project.yml replaced specos-outputs.yml and specos-standards.yml.
+# Three ways this ships broken and nobody notices until a user hits it:
+# a template that no longer exists, a skill still reading a deleted file, and
+# a setting documented in the spec that no skill actually reads.
+
+head_ "Config"
+
+PROJECT_YML="$REPO_ROOT/specos-project.yml"
+
+if [[ -f "$PROJECT_YML" ]]; then
+  ok "specos-project.yml template exists"
+else
+  bad "specos-project.yml template is missing"
+fi
+
+for old in specos-outputs.yml specos-standards.yml; do
+  if [[ -f "$REPO_ROOT/$old" ]]; then
+    bad "$old still exists — it was merged into specos-project.yml"
+  else
+    ok "$old is gone"
+  fi
+done
+
+# A skill may name an old file only when it is talking about the migration:
+# specos-start performs it, specos-config redirects to it, specos-status
+# reports that it has not happened yet. Any other skill naming one is reading
+# a file that no longer exists.
+STALE=0
+for f in "$REPO_ROOT"/skills/*.md; do
+  name=$(basename "$f" .md)
+  case "$name" in specos-start|specos-config|specos-status) continue;; esac
+  if grep -q "specos-outputs\.yml\|specos-standards\.yml" "$f"; then
+    bad "$name still references a merged config file"
+    STALE=$((STALE+1))
+  fi
+done
+[[ $STALE -eq 0 ]] && ok "no skill reads a merged config file"
+
+# specos-start must actually carry the migration, not just mention the files.
+if grep -q "specos-project.yml" "$REPO_ROOT/skills/specos-start.md" \
+   && grep -q "specos-outputs.yml" "$REPO_ROOT/skills/specos-start.md"; then
+  ok "specos-start carries the migration"
+else
+  bad "specos-start does not carry the migration"
+fi
+
+# Every setting in the catalog must be read by the skill that owns it.
+# A setting documented in the spec but absent from its skill is dead config:
+# the user sets it, nothing happens, and nothing reports the problem.
+SETTINGS_MISSING=0
+check_setting() {
+  local skill="$1" key="$2"
+  local f="$REPO_ROOT/skills/specos-$skill.md"
+  if [[ ! -f "$f" ]]; then
+    bad "skills/specos-$skill.md missing (owns $key)"
+    SETTINGS_MISSING=$((SETTINGS_MISSING+1)); return
+  fi
+  grep -q "$key" "$f" || { bad "$skill does not read $key"; SETTINGS_MISSING=$((SETTINGS_MISSING+1)); }
+}
+
+check_setting lead max_tasks
+check_setting lead max_journeys
+check_setting lead require_error_journey
+check_setting qa cases_per_ac
+check_setting qa include_negative_cases
+check_setting qa batch_by
+check_setting distribute diagrams
+check_setting distribute branch_info
+check_setting distribute task_title_max_words
+check_setting dev require_tests
+
+[[ $SETTINGS_MISSING -eq 0 ]] && ok "all 10 settings are read by their owning skill"
+
+# The template ships defaults commented out. An active settings: or rules: key
+# would silently pin every new project instead of running on defaults.
+if grep -qE '^settings:|^rules:' "$PROJECT_YML" 2>/dev/null; then
+  bad "template has an active settings:/rules: key — defaults must stay commented"
+else
+  ok "template ships settings and rules commented out"
+fi
+
 # --- Summary ----------------------------------------------------------------
 
 echo ""

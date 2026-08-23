@@ -49,7 +49,7 @@ specs/
 | QA | [name/s] | Writes and executes test cases |
 
 > Roles are configurable. One person can hold multiple roles.
-> `qa: agent` in specos-outputs.yml means the AI takes the breaking perspective automatically.
+> `qa: agent` in specos-project.yml means the AI takes the breaking perspective automatically.
 
 ---
 
@@ -129,9 +129,9 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 | `/specos-lead-parallel` | Draft several related specs in one pass |
 | `/specos-dev` | Implement a task with full spec context |
 | `/specos-qa` | Generate test cases from a spec |
-| `/specos-distribute` | Generate outputs per specos-outputs.yml and standards |
+| `/specos-distribute` | Generate outputs per specos-project.yml settings and rules |
 | `/specos-split` | Split a large spec into sub-specs under a group folder |
 | `/specos-group` | Group related existing specs under a shared parent folder |
-| `/specos-config` | Configure specos-standards.yml interactively |
+| `/specos-config` | Configure specos-project.yml interactively |
 | `/specos-status` | Show current session state (read-only) |
 | `/specos-help` | List all commands and key files |

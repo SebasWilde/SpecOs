@@ -4,9 +4,45 @@ You are the entry point for every SpecOS session. Your job is to read context, a
 
 ---
 
-## Step 0 — Read local-workspace.yml
+## Step 0 — Migrate the old config files
 
-Look for `local-workspace.yml` in the specs repo root (the directory containing `specs/` and `specos-outputs.yml`).
+Runs before anything else, and only in projects that predate the config merge.
+
+Look in the specs repo root for `specos-project.yml`:
+
+| Found | Action |
+|---|---|
+| `specos-project.yml` exists | nothing — go to Step 0.1. Never ask. |
+| it is absent, and `specos-outputs.yml` or `specos-standards.yml` exists | offer the merge below |
+| nothing exists | nothing — `/specos-init` will create the new file |
+
+### The offer
+
+Say: "These two config files are now one. I can merge them into specos-project.yml."
+
+Build the merged result and **print it in full before writing anything**:
+
+- `specos-outputs.yml` contributes `version` (set it to `"2"`), `team`, `ids`, `integrations`, `outputs`
+- `specos-standards.yml` contributes `language` and every free-form section, which move under `rules:`
+- `settings:` is **not** invented. It is omitted entirely — it gets written the first time the Lead sets something in `/specos-config`
+
+**The `language` conflict.** Both old files declare `language`. Use the `specos-standards.yml` value, because that is the one skills read for content today. Say so out loud: "Both files set language — I'm using the one from specos-standards.yml ([code])." Never resolve this silently, even when the two agree.
+
+**Translate the rules.** `specos-project.yml` is written in English, and nothing required that before. Translate any non-English rule to English as part of the merged result, and list which ones you translated so the Lead approves the translation together with the merge. Keep literal strings a rule requires in the output verbatim — translate the instruction, never the payload.
+
+### On approval
+
+Write `specos-project.yml`, then delete `specos-outputs.yml` and `specos-standards.yml` in the same step. No project may hold three config files. Confirm in one line and continue the session.
+
+### On refusal
+
+Continue this session reading the old files. Do not ask again in this session — the offer returns next session. Never make the offer twice in one run.
+
+---
+
+## Step 0.1 — Read local-workspace.yml
+
+Look for `local-workspace.yml` in the specs repo root (the directory containing `specs/` and `specos-project.yml`).
 
 **If local-workspace.yml exists:** read it silently. Extract `user`, `roles`, `implementation_repos`, and `memory_links`. Go to Step 0.5.
 
@@ -16,7 +52,7 @@ Look for `local-workspace.yml` in the specs repo root (the directory containing 
 
 One-time setup for this machine. Saves who you are locally — never committed.
 
-Check that `specos-outputs.yml` exists. If not:
+Check that `specos-project.yml` exists. If not:
 "SpecOS is not initialized in this repo. Run /specos-init first."
 Stop here.
 
@@ -34,7 +70,7 @@ Ask these questions one at a time:
 - builder — designs + builds + tests (solo)
 You can select multiple."
 
-**Q3 — Implementation repos** *(ask only if the project uses separate repos — check `specos-outputs.yml` or `AGENTS.md` for `implementation_repos` section)*
+**Q3 — Implementation repos** *(ask only if the project uses separate repos — check `specos-project.yml` or `AGENTS.md` for `implementation_repos` section)*
 "What are the paths to your implementation repos from this folder?
 Example:
 - backend: ../repo-backend
@@ -238,10 +274,10 @@ Then load and follow the instructions of the target skill.
 
 ## Step 6 — Save session.md
 
-Locate the **specs repo root**: the directory that contains both `specs/` and `specos-outputs.yml`. This is where `session.md` must always be saved, regardless of which directory the agent is currently running from.
+Locate the **specs repo root**: the directory that contains both `specs/` and `specos-project.yml`. This is where `session.md` must always be saved, regardless of which directory the agent is currently running from.
 
 - If you found `session.md` in Step 1, save back to that same location.
-- If this is a first session, search upward from the current directory for a folder containing `specs/` and `specos-outputs.yml`. Use that as the root.
+- If this is a first session, search upward from the current directory for a folder containing `specs/` and `specos-project.yml`. Use that as the root.
 - Never save `session.md` inside an implementation repo (backend, frontend, e2e).
 
 Write or update `session.md` at that root with the current state:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SpecOS v3 — updater
 # Copies the latest skills to all detected agent directories.
-# Does NOT touch project files: AGENTS.md, constitution.md, specos-outputs.yml, specs/
+# Does NOT touch project files: AGENTS.md, constitution.md, specos-project.yml, specs/
 # Works on macOS and Linux. Idempotent — safe to run multiple times.
 set -euo pipefail
 

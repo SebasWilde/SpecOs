@@ -1,7 +1,7 @@
 # Flow: /specos-init
 
 > **When to run:** Once per project, by the Lead.
-> **What it does:** Asks 6 questions and generates AGENTS.md, constitution.md, specos-outputs.yml, .gitignore entry, and specs/.
+> **What it does:** Asks 6 questions and generates AGENTS.md, constitution.md, specos-project.yml, .gitignore entry, and specs/.
 
 ---
 
@@ -112,7 +112,7 @@ The following shows the complete back-and-forth between the user (Lead) and the 
 >
 > ✓ **AGENTS.md** — project context for all agents
 > ✓ **constitution.md** — the 8 non-negotiable rules for this project
-> ✓ **specos-outputs.yml** — team configuration and integration settings
+> ✓ **specos-project.yml** — everything configurable: language, team, IDs, integrations, destinations, settings, rules
 > ✓ **.gitignore** — updated with `session.md` entry
 > ✓ **specs/** — directory created, ready for your first feature
 >
@@ -149,9 +149,9 @@ TaskManager Pro is a task management application...
 | QA       | agent  | Test cases (breaking perspective) |
 ```
 
-### specos-outputs.yml (excerpt)
+### specos-project.yml (excerpt)
 ```yaml
-version: "1.0"
+version: "2"
 language: en
 
 team:
@@ -180,5 +180,5 @@ outputs:
 ## Notes
 
 - Question 6 (implementation repo paths) is only asked when you choose **separate repos** in question 5.
-- The `qa: agent` setting in `specos-outputs.yml` means the agent automatically takes the breaking perspective when running `/specos-qa`. A human QA can still override this.
+- The `qa: agent` setting in `specos-project.yml` means the agent automatically takes the breaking perspective when running `/specos-qa`. A human QA can still override this.
 - You can edit any generated file after init. Run `/specos-init` again only to fully reset (it will overwrite existing files).

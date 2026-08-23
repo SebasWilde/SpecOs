@@ -37,7 +37,7 @@ Ask the questions one at a time. Wait for the user's answer before asking the ne
 **Question 6 — Language**
 "What language should specs and outputs be written in? (e.g. English, Spanish, Portuguese — or type the ISO code: en, es, pt)"
 
-*(Store for specos-standards.yml. Default: en if not answered.)*
+*(Store for specos-project.yml. Default: en if not answered.)*
 
 **Question 7 — Implementation repo paths** *(ask only if answer to Q5 was "separate repos")*
 "What are the paths to your implementation repos relative to this folder?
@@ -75,18 +75,37 @@ Generate `constitution.md` with exactly these 8 rules:
 2. Breaking perspective always exists — it cannot be the same logic that built the feature.
 3. No agent writes code without a spec committed to the repo.
 4. Only the Lead role modifies `spec.md`.
-5. Maximum 15 tasks per feature — split into a new feature if more are needed.
+5. A capped number of tasks per feature — the cap is `settings.lead.max_tasks` in `specos-project.yml`, 15 by default. Split into a new feature if more are needed.
 6. All outputs are written in English by default.
 7. A spec change affecting more than 50% of the content is a new feature, not an update.
 8. Every spec change requires a `CHANGELOG.md` entry: date, what changed, and why.
 
-### 3. specos-outputs.yml
+### 3. specos-project.yml
 
-Generate `specos-outputs.yml` using the team composition answers:
+Generate `specos-project.yml` — the single committed config file. Use the team composition answers and the language answer from Question 6.
+
+The file is written in English: keys, comments, and any rules alike. That is independent of `language.specs`, which only sets the language of generated content.
 
 ```yaml
-version: "1.0"
-language: en
+# specos-project.yml
+# Everything configurable about this project. Committed to the repo.
+# Machine-specific paths and identity live in local-workspace.yml, never here.
+#
+# Written in English — keys, comments, and rules alike — whatever language.specs
+# says. The config language and the content language are independent.
+#
+# Three blocks, distinguished by who consumes them:
+#   team / ids / integrations / outputs  -> who does what, and where output goes
+#   settings                             -> closed schema. Skills read and obey.
+#   rules                                -> free-form. Skills read and interpret.
+
+version: "2"
+
+language:
+  specs: [language code from Q6]   # ISO 639-1 — for spec.md, tasks.md, testcases.md
+  outputs: [language code from Q6] # for Jira/Confluence/etc. generated outputs
+
+# --- Team and destinations -------------------------------------------------
 
 team:
   lead: human         # human | agent
@@ -119,33 +138,52 @@ outputs:
     destination: manual
   confluence_doc:
     destination: manual
+
+# --- Settings --------------------------------------------------------------
+# Closed schema: only these keys are valid, only these values are accepted.
+# Every key optional — an absent key uses the default shown.
+# Uncomment and change only what you want to pin. Run /specos-config to edit.
+#
+#   lead:
+#     max_tasks: 15                 # integer >= 1
+#     max_journeys: none            # integer >= 1 | none
+#     require_error_journey: true   # true | false
+#   qa:
+#     cases_per_ac: standard        # minimal | standard | exhaustive | integer
+#     include_negative_cases: true  # true | false
+#     batch_by: journey             # journey | ac | all
+#   distribute:
+#     diagrams: ask                 # none | combined | per_journey | ask
+#     branch_info: ask              # ask | none
+#     task_title_max_words: 8       # integer >= 1
+#   dev:
+#     require_tests: false          # true | false
+#
+# `ask` is a real choice, not a fallback: it keeps a question being asked
+# every run, which is what you want when the answer genuinely varies.
+
+# --- Rules -----------------------------------------------------------------
+# Free-form. Any section name, organized by role: frontend, backend, qa, shared.
+# `shared` applies to every role. Skills interpret these as written.
+#
+# Use rules for anything a value cannot express — tone, naming conventions,
+# review expectations. Use settings for anything that is a number, a boolean,
+# or one option from a short list.
+#
+#   rules:
+#     writing_style:
+#       shared:
+#         - "Direct tone, no filler. Never 'should work correctly'"
+#     code_style:
+#       backend:
+#         - "Validate every request body with Zod"
 ```
 
 Set `team.qa: agent` if the user selected solo builder or indicated QA is handled by the agent. Otherwise `human`.
 
-### 4. specos-standards.yml
+Write `settings:` and `rules:` as commented examples only — never as active keys. A fresh project runs entirely on documented defaults, and `/specos-config` writes the first real entry when the Lead sets one.
 
-Generate `specos-standards.yml` using the language answer from Question 6:
-
-```yaml
-# specos-standards.yml
-# Project-level standards for SpecOS v3.
-# Committed to the repo. Edit as your project evolves.
-#
-# `language` is the only reserved key. Everything else is free-form.
-# Define any section your project needs. Organize by role within each section.
-# Skills read the entire file and apply all entries for the relevant role.
-
-language:
-  specs: [language code from Q6]   # ISO 639-1 — for spec.md, tasks.md, testcases.md
-  outputs: [language code from Q6] # for Jira/Confluence/etc. generated outputs
-
-# --- Add your project standards below ---
-# Each section can have: frontend, backend, qa, shared
-# Examples: acceptance_criteria, code_style, api_conventions, accessibility, security
-```
-
-### 5. .gitignore entry
+### 4. .gitignore entry
 
 If a `.gitignore` already exists, append to it. If not, create it. Add:
 
@@ -158,11 +196,11 @@ session.md
 
 `.specos/` covers both `session.md` and the `memory.md` fallback used by agents that have no memory system of their own. Add the same entry to each implementation repo's `.gitignore` when the project uses separate repos.
 
-### 6. specs/ directory
+### 5. specs/ directory
 
 Create the `specs/` directory if it does not exist. Do not create any files inside it.
 
-### 7. README.md
+### 6. README.md
 
 Generate `README.md` at the repo root using the answers collected in questions 1–6. Write in English. The README must cover:
 
@@ -185,7 +223,7 @@ It uses **SpecOS v3** — a structured workflow for AI-assisted software develop
 | `specs/` | One folder per feature. Each contains spec.md, tasks.md, testcases.md, CHANGELOG.md |
 | `AGENTS.md` | Project context — read automatically by AI agents |
 | `constitution.md` | The 8 rules every agent and team member follows |
-| `specos-outputs.yml` | Team configuration and integration settings |
+| `specos-project.yml` | Everything configurable: language, team, IDs, integrations, destinations, settings, rules |
 | `local-workspace.yml` | Local identity: your name, roles, repo paths, memory links — gitignored |
 | `session.md` | Active session state — gitignored, never committed |
 
@@ -269,8 +307,7 @@ SpecOS v3 initialized.
 Files created:
   AGENTS.md
   constitution.md
-  specos-outputs.yml
-  specos-standards.yml
+  specos-project.yml
   README.md
   .gitignore (updated)
   specs/

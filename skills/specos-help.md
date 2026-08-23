@@ -17,18 +17,18 @@ SKILLS
   /specos-lead        Create or update a spec collaboratively (Lead role)
   /specos-dev         Implement a task with full spec context (Dev role)
   /specos-qa          Generate test cases from a spec (QA role)
-  /specos-distribute  Generate outputs per specos-outputs.yml
+  /specos-distribute  Generate outputs per specos-project.yml
   /specos-split       Split a large spec into sub-specs under a group folder
   /specos-group       Group related specs under a shared parent folder
-  /specos-config      Configure specos-standards.yml interactively
+  /specos-config      Configure specos-project.yml interactively
   /specos-status      Show current session state
   /specos-help        Show this help
 
 KEY FILES
   AGENTS.md              Global project context — read by all agents
   constitution.md        Non-negotiable rules for this project
-  specos-outputs.yml     Team config, ID prefixes, integrations
-  specos-standards.yml   Language, default ACs, and code standards per role
+  specos-project.yml     Everything configurable: language, team, IDs,
+                         integrations, destinations, settings, rules
   local-workspace.yml    Local identity: user, roles, repo paths, memory links — never committed
   session.md             Active session state — never committed (in .gitignore)
   specs/<feature>/

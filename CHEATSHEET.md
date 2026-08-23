@@ -29,16 +29,16 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 
 | Skill | Who | What |
 |---|---|---|
-| `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-outputs.yml + specos-standards.yml |
+| `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-project.yml |
 | `/specos-start` | Everyone | Begins any session, routes by role and session state |
 | `/specos-lead` | Lead | Builds spec + tasks collaboratively, assigns SP-XX IDs, collects real IDs |
 | `/specos-lead-parallel` | Lead | Drafts several related specs in one pass |
 | `/specos-dev` | Dev | Loads only the relevant spec, writes to implementation repo |
 | `/specos-qa` | QA | Generates testcases.md collaboratively, assigns TC-XX IDs |
-| `/specos-distribute` | Lead / QA | Generates outputs per specos-outputs.yml + standards |
+| `/specos-distribute` | Lead / QA | Generates outputs per specos-project.yml settings + rules |
 | `/specos-split` | Lead | Splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead | Groups related existing specs under a shared parent folder |
-| `/specos-config` | Lead | Configures specos-standards.yml interactively |
+| `/specos-config` | Lead | Configures specos-project.yml interactively |
 | `/specos-status` | Everyone | Shows current session state (read-only) |
 | `/specos-help` | Everyone | Lists all commands and key files (no session needed) |
 
@@ -234,32 +234,78 @@ specs/
 
 ---
 
-## specos-standards.yml
+## specos-project.yml
 
-Committed config. Edit as the project evolves.
+The one committed config file. `local-workspace.yml` holds machine-specific paths and is never committed.
+
+Written in English — keys, comments, and rules alike — regardless of `language.specs`. Config language and content language are independent.
 
 ```yaml
-# Only `language` is reserved. Add any section your project needs.
+version: "2"
+
 language:
-  specs: en
-  outputs: en
+  specs: en           # language of spec.md, tasks.md, testcases.md
+  outputs: en         # language of generated outputs
 
-acceptance_criteria:   # → injected into task ACs in /specos-distribute
-  backend:
-    - "All error responses must include an error code and a message"
-  shared:
-    - "..."
+# --- Team and destinations ---
+team:      { lead: human, qa: human }      # human | agent | both
+ids:       { task_prefix: SP, testcase_prefix: TC }
+integrations: { jira: { enabled: false, mcp: null }, ... }
+outputs:   { tasks: { destination: manual }, ... }
 
-code_style:            # → injected as ## Standards in task output, enforced by /specos-dev
-  backend:
-    - "..."
-  shared:
-    - "No hardcoded environment-specific values — use environment variables"
+# --- Settings: closed schema. Skills obey. Every key optional. ---
+settings:
+  lead:       { max_tasks: 15, max_journeys: none, require_error_journey: true }
+  qa:         { cases_per_ac: standard, include_negative_cases: true, batch_by: journey }
+  distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8 }
+  dev:        { require_tests: false }
 
-# Other sections teams add: api_conventions, accessibility, security, naming_conventions
+# --- Rules: free-form. Skills interpret. Any section, by role. ---
+rules:
+  acceptance_criteria:   # → injected into task ACs in /specos-distribute
+    backend:
+      - "All error responses must include an error code and a message"
+  code_style:            # → injected as ## Standards, enforced by /specos-dev
+    shared:
+      - "No hardcoded environment-specific values — use environment variables"
+  writing_style:         # → governs how every skill words its output
+    shared:
+      - "Direct tone, no filler. Never 'should work correctly'"
 ```
 
-Skills read the entire file. No fixed schema beyond `language`. Each section's entries are applied to the matching role and `shared`.
+### Settings vs rules
+
+| | `settings` | `rules` |
+|---|---|---|
+| Shape | number, boolean, one of a listed set | a sentence |
+| The skill | **obeys** it | **interprets** it |
+| Schema | closed — invalid values fall back to the default | open — any section, never rejected |
+| Use for | how many, how long, whether to ask | how it should read |
+
+Anything that can only be said in a sentence — tone, naming style, review expectations — is a rule. Settings are for what a value can express.
+
+### Settings catalog
+
+| Skill | Setting | Values | Default |
+|---|---|---|---|
+| `lead` | `max_tasks` | integer ≥ 1 | 15 |
+| `lead` | `max_journeys` | integer ≥ 1 \| none | none |
+| `lead` | `require_error_journey` | true \| false | true |
+| `qa` | `cases_per_ac` | minimal \| standard \| exhaustive \| integer | standard |
+| `qa` | `include_negative_cases` | true \| false | true |
+| `qa` | `batch_by` | journey \| ac \| all | journey |
+| `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
+| `distribute` | `branch_info` | ask \| none | ask |
+| `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
+| `dev` | `require_tests` | true \| false | false |
+
+An absent key uses its default silently. An invalid value is reported once, then falls back to the default — a bad config never blocks a session. `ask` is a real choice: it keeps a question being asked every run.
+
+Run `/specos-config` to edit any of this interactively.
+
+### Migrating from the old files
+
+Projects with `specos-outputs.yml` and `specos-standards.yml` are offered a merge on the next `/specos-start`. It prints the result before writing, and deletes both old files on approval.
 
 ---
 

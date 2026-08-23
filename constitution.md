@@ -23,8 +23,8 @@
    Devs and QA read specs. They do not change them.
    If an edge case is found during dev or testing, escalate to the Lead — do not edit the spec directly.
 
-5. **Maximum 15 tasks per feature.**
-   If a feature needs more than 15 tasks, it is too large — split it into sub-features with their own specs.
+5. **A capped number of tasks per feature.**
+   The cap is `settings.lead.max_tasks` in `specos-project.yml`, 15 by default. A feature that needs more is too large — split it into sub-features with their own specs. The number lives in the config, not here, so there is only one place to change it.
 
 6. **All outputs are written in English.**
    Specs, tasks, test cases, changelogs — always in English.

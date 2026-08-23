@@ -26,7 +26,19 @@ Do not read any other spec. Do not load unrelated context.
 
 Read `AGENTS.md` to understand the project structure (stack, conventions, repo layout).
 
-Read `specos-standards.yml` if it exists. Collect ALL entries for the task's role and `shared` across every section (except `language`). Apply them as hard constraints throughout implementation — they override any convention not explicitly stated in the spec.
+Read `specos-project.yml` if it exists.
+
+**Settings** — read `settings.dev` and obey it. Absent means the default; do not warn about an absent file or block.
+
+| Setting | Accepted values | Default | Effect |
+|---|---|---|---|
+| `require_tests` | `true` \| `false` | `false` | Whether the task is incomplete until it ships tests |
+
+When `require_tests` is true, write tests for what you implement and do not report the task as done without them. If the repo has no test setup at all, say so and ask how to proceed rather than skipping silently.
+
+An unknown key under `settings.dev`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then fall back to the default and continue. Never abort over config.
+
+**Rules** — collect ALL entries under `rules` for the task's role and `shared`, across every section. Apply them as hard constraints throughout implementation — they override any convention not explicitly stated in the spec. Rules are sentences: follow them, never validate them.
 
 ---
 
@@ -99,13 +111,13 @@ If you learned something about the **implementation repo** that will still be tr
 
 Worth recording:
 - Where a kind of code lives, and why it lives there
-- A convention this repo follows that is not written in `AGENTS.md` or `specos-standards.yml`
+- A convention this repo follows that is not written in `AGENTS.md` or `specos-project.yml`
 - A gotcha that cost you time and will cost the next session the same
 - Which files a feature actually touched, when that mapping is not obvious from the spec
 
 Not worth recording:
 - The narrative of this session
-- Anything already in the spec, `AGENTS.md`, `specos-standards.yml`, or the commit history
+- Anything already in the spec, `AGENTS.md`, `specos-project.yml`, or the commit history
 - Anything you did not verify
 
 If the agent has no memory system, append to `.specos/memory.md` in that repo and make sure `.specos/` is gitignored there.

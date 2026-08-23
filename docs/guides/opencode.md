@@ -82,7 +82,7 @@ After all answers, it generates:
 your-project/
 ├── AGENTS.md           ← commit this
 ├── constitution.md     ← commit this
-├── specos-outputs.yml  ← commit this
+├── specos-project.yml  ← commit this
 ├── specs/              ← commit this (empty)
 └── .gitignore          ← updated with session.md
 ```
@@ -90,7 +90,7 @@ your-project/
 Commit the generated files:
 
 ```bash
-git add AGENTS.md constitution.md specos-outputs.yml specs/ .gitignore
+git add AGENTS.md constitution.md specos-project.yml specs/ .gitignore
 git commit -m "chore: initialize SpecOS v3"
 ```
 
@@ -178,7 +178,7 @@ Select role `QA`, provide the feature name. The agent:
 
 **Tips for OpenCode:**
 - You can add custom fields to test cases (e.g., `priority`, `environment`, `automation`) — the agent accepts any free-form fields.
-- If `qa: agent` is set in `specos-outputs.yml`, OpenCode takes the breaking perspective automatically.
+- If `qa: agent` is set in `specos-project.yml`, OpenCode takes the breaking perspective automatically.
 
 ---
 

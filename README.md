@@ -49,10 +49,10 @@ Both perspectives are required. They cannot be the same logic.
 | `/specos-lead-parallel` | Lead — drafts several specs in one pass |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — generates testcases.md from spec |
-| `/specos-distribute` | Lead — generates outputs per specos-outputs.yml and standards |
+| `/specos-distribute` | Lead — generates outputs per specos-project.yml settings and rules |
 | `/specos-split` | Lead — splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead — groups related existing specs under a shared parent folder |
-| `/specos-config` | Lead — configures specos-standards.yml interactively |
+| `/specos-config` | Lead — configures specos-project.yml interactively |
 | `/specos-status` | Everyone — shows current session state, read-only |
 | `/specos-help` | Everyone — lists commands and key files, no session needed |
 
@@ -147,8 +147,7 @@ SpecOs/
 ├── README.md
 ├── AGENTS.md                 ← global agent context (template)
 ├── constitution.md           ← rules template
-├── specos-outputs.yml        ← output destinations and integrations
-├── specos-standards.yml      ← language, default ACs, code standards per role
+├── specos-project.yml        ← the one committed config: destinations, settings, rules
 ├── CHEATSHEET.md
 ├── skills/
 │   ├── specos-init.md
@@ -254,35 +253,79 @@ steps:
 expected: Expected result
 ```
 
-> ID prefix configurable in specos-outputs.yml. Default: TC.
+> ID prefix configurable in specos-project.yml. Default: TC.
 > Additional fields are optional and free-form — never rejected.
 
-### specos-standards.yml — project standards, committed
+### specos-project.yml — everything configurable, committed
+
+One file, three blocks. `local-workspace.yml` holds machine-specific paths and is never committed — that is the only other config file.
 
 ```yaml
-# Only `language` is a reserved key. Everything else is free-form.
+version: "2"
+
 language:
-  specs: en       # ISO 639-1
-  outputs: en
+  specs: en       # ISO 639-1 — language of spec.md, tasks.md, testcases.md
+  outputs: en     # language of generated outputs
 
-# Add any section your project needs. Organize by role within each section.
-# Skills read ALL entries for the relevant role and apply them automatically.
-acceptance_criteria:
-  backend:
-    - "All error responses must include an error code and a human-readable message"
-  frontend:
-    - "All user-facing strings must be translatable"
+# --- Team and destinations ---
+team: { lead: human, qa: human }
+ids:  { task_prefix: SP, testcase_prefix: TC }
+integrations:
+  jira: { enabled: false, mcp: null }
+outputs:
+  tasks: { destination: manual }
 
-code_style:
-  shared:
-    - "No hardcoded environment-specific values — use environment variables"
-  backend:
-    - "All database queries must go through the repository layer"
+# --- Settings: closed schema. Skills read these and obey. ---
+settings:
+  qa:
+    cases_per_ac: 2             # minimal | standard | exhaustive | integer
+    include_negative_cases: true
+  distribute:
+    diagrams: per_journey       # none | combined | per_journey | ask
+  lead:
+    max_tasks: 15
 
-# Other examples: api_conventions, accessibility, security, naming_conventions, performance
+# --- Rules: free-form. Skills read these and interpret. ---
+rules:
+  writing_style:
+    shared:
+      - "Direct tone, no filler. Never 'should work correctly'"
+  acceptance_criteria:
+    backend:
+      - "All error responses must include an error code and a human-readable message"
+  code_style:
+    shared:
+      - "No hardcoded environment-specific values — use environment variables"
 ```
 
-Committed to the repo. Edit as the project evolves. Skills read the whole file — no fixed schema beyond `language`. `specos-distribute` injects the relevant entries into every task output. `specos-dev` enforces them during implementation.
+**Settings vs rules** is the only distinction you need. A **setting** is a number, a boolean, or one option from a short list — the skill reads it and obeys, with no interpretation. A **rule** is a sentence — the skill reads it and interprets it. `cases_per_ac: 2` gives two cases every time; `"Direct tone, no filler"` cannot be reduced to a value.
+
+Anything that can only be said in a sentence is a rule. Tone belongs there, not in settings: `neutral | conversational` would be two labels over a continuous space that each skill reads differently, which is exactly the inconsistency settings exist to remove.
+
+Every setting is optional and has one documented default, so an absent `settings` block behaves like a fresh install. An invalid value is reported once and falls back to its default — a bad config never blocks a session. `ask` is a real choice, not a fallback: it keeps a question being asked every run.
+
+Rules keep the behaviour they always had: sections that read as quality gates are appended to task Acceptance Criteria, everything else is injected as a Standards section, and `specos-dev` enforces them during implementation.
+
+Run `/specos-config` to edit any of it interactively.
+
+**Settings catalog**
+
+| Skill | Setting | Values | Default |
+|---|---|---|---|
+| `lead` | `max_tasks` | integer ≥ 1 | 15 |
+| `lead` | `max_journeys` | integer ≥ 1 \| none | none |
+| `lead` | `require_error_journey` | true \| false | true |
+| `qa` | `cases_per_ac` | minimal \| standard \| exhaustive \| integer | standard |
+| `qa` | `include_negative_cases` | true \| false | true |
+| `qa` | `batch_by` | journey \| ac \| all | journey |
+| `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
+| `distribute` | `branch_info` | ask \| none | ask |
+| `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
+| `dev` | `require_tests` | true \| false | false |
+
+**The file is written in English** — keys, comments, and rules alike — regardless of `language.specs`. The two are independent: an English config file produces Spanish specs when `language.specs: es`. Rules are instructions the agent follows, and instructions are followed most reliably in English. `/specos-config` accepts a rule in any language, translates it, and shows you the English text before writing — nothing is reworded silently, and a literal string a rule requires in the output is never translated.
+
+**Coming from the two old files?** Projects with `specos-outputs.yml` and `specos-standards.yml` are offered a merge on the next `/specos-start`. It prints the merged result before writing anything, and deletes both old files on approval.
 
 ### local-workspace.yml — local identity, never committed
 
@@ -356,11 +399,12 @@ Complete conversational flow transcripts (init → lead → dev → qa → distr
 ## Out of scope for v3
 
 - CLI binary — bash script only
-- Automatic MCP integration — outputs are manual, MCP declared in specos-outputs.yml for v4
+- Automatic MCP integration — outputs are manual, MCP declared in specos-project.yml for v4
 - GitHub Actions or CI/CD pipelines
 - Web dashboard or UI
 - Windows support
-- Automatic translation — language is configured in specos-standards.yml but content is written by the agent in the configured language, not translated
+- Automatic translation — language is configured in specos-project.yml but content is written by the agent in the configured language, not translated
+- Per-feature or per-role setting overrides — `settings` is project-wide
 - Status fields anywhere
 
 ---

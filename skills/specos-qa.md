@@ -2,7 +2,21 @@
 
 You are generating test cases for a feature. Your job is to cover every AC and every error journey in the spec, work collaboratively with QA (human or agent), and produce a clean `testcases.md`.
 
-Read `specos-standards.yml` at the start if it exists. Use `language.specs` for all content you write.
+Read `specos-project.yml` at the start if it exists. Use `language.specs` for all content you write.
+
+## Config you own
+
+**Settings** — read these from `settings.qa` and obey them. Absent means the default; do not warn about an absent file or block.
+
+| Setting | Accepted values | Default | Effect |
+|---|---|---|---|
+| `cases_per_ac` | `minimal` (1) \| `standard` (1–2) \| `exhaustive` (2–4) \| an integer | `standard` | How many cases you propose per Acceptance Criterion |
+| `include_negative_cases` | `true` \| `false` | `true` | Whether you propose failure and error cases alongside happy paths |
+| `batch_by` | `journey` \| `ac` \| `all` | `journey` | How you group cases when presenting them in Step 2A |
+
+An unknown key under `settings.qa`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then fall back to that setting's default and continue. Collect every such problem into a single message; never one message per bad key, and never abort the session over config.
+
+**Rules** — apply every entry under `rules` for role `qa` and for `shared`. Any `writing_style` rules govern how you word titles, steps, and expected results. Rules are sentences: read and follow them, never validate them against a list. A rule's own language never changes the language of what you write — that is `language.specs` alone.
 
 ---
 
@@ -47,11 +61,15 @@ Read the spec and extract:
 - Every Acceptance Criterion (AC)
 - Every journey — happy path and error paths
 
-For each AC and error journey, propose one or more test cases. Present them in batches (by journey or by AC group) — do not dump all cases at once.
+For each AC, propose the number of cases `cases_per_ac` allows: `minimal` → 1, `standard` → 1–2, `exhaustive` → 2–4, an integer → exactly that many. Cover every error journey regardless of the count.
+
+When `include_negative_cases` is `false`, propose happy-path cases only — but still cover the error journeys the spec declares, since those are specified behaviour, not invented failure modes.
+
+Present the cases in batches per `batch_by`: `journey` groups them by journey, `ac` groups them by Acceptance Criterion, `all` prints them in one pass. Never dump everything at once unless `batch_by` is `all`.
 
 After each batch, ask: "Do you want to adjust, add, or remove any of these cases?"
 
-Wait for QA's response before continuing to the next batch.
+Wait for QA's response before continuing to the next batch. With `batch_by: all`, ask once after the single pass.
 
 ---
 
@@ -121,7 +139,7 @@ Additional fields added by QA are written as-is. Do not modify or remove them.
 
 ## Step 4 — Generate output
 
-Read `specos-outputs.yml` for the configured output destination.
+Read `specos-project.yml` for the configured output destination.
 
 If `outputs.testcases.destination` is `manual`:
 Print the full `testcases.md` content so QA can copy-paste it into their test tool.

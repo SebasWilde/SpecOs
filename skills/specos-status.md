@@ -6,7 +6,7 @@ Display the current session state. Read-only — no files created or modified.
 
 ## Step 1 — Find session files
 
-Look for `local-workspace.yml` and `session.md` in the current directory and parent directories.
+Look for `local-workspace.yml`, `session.md`, and `specos-project.yml` in the current directory and parent directories.
 
 **If neither file exists:**
 Print:
@@ -40,6 +40,9 @@ Memory links:
   backend:      <state>
   frontend:     <state>
   e2e:          <state>
+Settings:
+  <skill>.<key>: <value>
+  <all others at default>
 ```
 
 Rules:
@@ -57,6 +60,10 @@ Rules:
 
 - Only check that locations exist — never read their contents in this skill
 - Omit the whole `Memory links` block when no `implementation_repos` are configured (monorepo)
+- Settings: list only the keys actually present under `settings` in `specos-project.yml`, one per line as `<skill>.<key>: <value>`. Then one final line naming how many of the 10 are running on their default: `<N> others at default`. Never print all 10 with their defaults — `/specos-config` does that.
+- If `settings` is absent or empty, the whole block is one line: `all at default`
+- If `specos-project.yml` is missing but `specos-outputs.yml` or `specos-standards.yml` exists, replace the Settings block with: `config not migrated — run /specos-start`
+- Omit the whole `Settings` block when no config file of any kind exists
 - If any key is `unmapped` or `broken`, print one line after the summary: `Run /specos-start to map: [keys]`. Nothing else — no commentary.
 - If `task_id` is null but `task_description` is set, show only the description
 - If both are set, show: `TASK-XX — description`

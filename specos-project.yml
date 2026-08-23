@@ -1,0 +1,100 @@
+# specos-project.yml
+# Everything configurable about this project. Committed to the repo.
+# Machine-specific paths and identity live in local-workspace.yml, never here.
+#
+# Written in English — keys, comments, and rules alike — whatever language.specs
+# says. The config language and the content language are independent: this can be
+# an English file for a project that writes its specs in Spanish.
+#
+# Three blocks, distinguished by who consumes them:
+#   team / ids / integrations / outputs  → who does what, and where output goes
+#   settings                             → closed schema. Skills read and obey.
+#   rules                                → free-form. Skills read and interpret.
+
+version: "2"
+
+language:
+  specs: en       # ISO 639-1 — language for spec.md, tasks.md, testcases.md
+  outputs: en     # language for generated outputs (Jira tasks, Confluence docs…)
+
+# --- Team and destinations -------------------------------------------------
+
+team:
+  lead: human
+  qa: human           # human | agent | both
+
+ids:
+  task_prefix: SP     # default task ID prefix (e.g. SP-01). Replace with yours.
+  testcase_prefix: TC # default test case ID prefix (e.g. TC-01)
+
+integrations:
+  jira:
+    enabled: false
+    mcp: null         # MCP server name when enabled (v4)
+  confluence:
+    enabled: false
+    mcp: null
+  notion:
+    enabled: false
+  linear:
+    enabled: false
+  github_issues:
+    enabled: false
+  slack:
+    enabled: false
+
+outputs:
+  tasks:
+    destination: manual   # manual = copy-paste from agent output
+  testcases:
+    destination: manual
+  confluence_doc:
+    destination: manual
+
+# --- Settings --------------------------------------------------------------
+# Closed schema: only the keys below are valid, only the values listed are
+# accepted. Every key is optional — an absent key uses the default shown.
+# Uncomment and change only what you want to pin.
+#
+#   lead:
+#     max_tasks: 15                 # integer >= 1
+#     max_journeys: none            # integer >= 1 | none
+#     require_error_journey: true   # true | false
+#   qa:
+#     cases_per_ac: standard        # minimal | standard | exhaustive | integer
+#     include_negative_cases: true  # true | false
+#     batch_by: journey             # journey | ac | all
+#   distribute:
+#     diagrams: ask                 # none | combined | per_journey | ask
+#     branch_info: ask              # ask | none
+#     task_title_max_words: 8       # integer >= 1
+#   dev:
+#     require_tests: false          # true | false
+#
+# `ask` is a real choice, not a fallback: it keeps a question being asked
+# every run, which is what you want when the answer genuinely varies.
+
+# settings:
+
+# --- Rules -----------------------------------------------------------------
+# Free-form. Any section name, organized by role: frontend, backend, qa, shared.
+# `shared` applies to every role. Skills interpret these as written.
+#
+# Sections that read as quality gates (acceptance_criteria, qa_gates,
+# definition_of_done) are appended to Acceptance Criteria in task output.
+# Every other section is injected as a Standards section.
+#
+# Use rules for anything a value cannot express — tone, naming conventions,
+# review expectations. Use settings for anything that is a number, a boolean,
+# or one option from a short list.
+#
+#   rules:
+#     writing_style:
+#       shared:
+#         - "Direct tone, no filler. Never 'should work correctly'"
+#         - "Second person in test case steps"
+#     code_style:
+#       backend:
+#         - "Validate every request body with Zod"
+
+# rules:
