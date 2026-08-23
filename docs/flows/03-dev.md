@@ -170,3 +170,21 @@ This transcript shows a backend developer picking up task `TAGS-01` (add `tags` 
 - Scope boundaries are explicit — the agent calls out what is NOT part of the current task and references the task IDs where that work belongs.
 - If the spec is ambiguous or missing a detail the dev needs, the agent stops and asks the Lead to update the spec rather than inventing requirements.
 - Session is saved at the end so the next `/specos-start` picks up from `TAGS-01` / `feature-tags` automatically.
+
+---
+
+## Separate repos — memory links
+
+The transcript above shows a monorepo. When the implementation repo is separate, one extra thing happens before the agent reads any source file: it resolves that repo's **agent memory** and reads its index.
+
+This matters because agents scope memory per project directory. Without the link, a session started in the specs repo cannot see what the agent already learned in the backend repo last week, and re-explores it from zero.
+
+- The map lives in `local-workspace.yml` under `memory_links` — each repo key holds `auto`, a path, or `off`
+- `/specos-start` maintains it by difference: it asks only about repos that have no value yet, and never re-asks
+- `/specos-dev` only *resolves* — it never stops mid-task to ask. A missing key falls back to automatic derivation and is mentioned once at the end of the session
+- Anything memory names is verified to still exist before the agent acts on it, and corrected when stale
+- Learnings are written back to the memory of the repo they describe, not the repo the session started in
+
+Memory answers *where* and *how*. The spec still answers *what* and *why* — nothing in memory authorizes work without a `spec.md`.
+
+Run `/specos-status` to see the state of each link.

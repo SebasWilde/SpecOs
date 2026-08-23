@@ -39,18 +39,22 @@ The core insight: AI agents will write whatever you ask them to. SpecOS makes su
 
 Both perspectives are required. They cannot be the same logic.
 
-### The 8 skills
+### The 12 skills
 
 | Skill | Who uses it |
 |---|---|
 | `/specos-init` | Lead — first-time project setup |
 | `/specos-start` | Everyone — begins any session, runs local onboarding if needed, routes by role |
 | `/specos-lead` | Lead — builds spec + tasks collaboratively |
+| `/specos-lead-parallel` | Lead — drafts several specs in one pass |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — generates testcases.md from spec |
 | `/specos-distribute` | Lead — generates outputs per specos-outputs.yml and standards |
 | `/specos-split` | Lead — splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead — groups related existing specs under a shared parent folder |
+| `/specos-config` | Lead — configures specos-standards.yml interactively |
+| `/specos-status` | Everyone — shows current session state, read-only |
+| `/specos-help` | Everyone — lists commands and key files, no session needed |
 
 ---
 
@@ -67,11 +71,71 @@ SpecOS works with Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity, Winds
 
 ### Local state — two files, never committed
 
-**`local-workspace.yml`** — created once per machine on the first `/specos-start`. Stores who you are on this project: your name, roles, and implementation repo paths. Stable across sessions.
+**`local-workspace.yml`** — created once per machine on the first `/specos-start`. Stores who you are on this project: your name, roles, implementation repo paths, and memory links. Stable across sessions.
 
 **`session.md`** — updated every session. Stores the active feature, task ID, and spec path. Ephemeral — changes every time you switch tasks.
 
 Both are always in `.gitignore`. Never committed.
+
+### Memory links — separate repos, connected memory
+
+Agents scope memory per project directory. In a separate-repo setup that means the specs repo and each implementation repo get their own memory namespace, and none of them can see the others. A session started in the specs repo re-explores the backend repo from scratch, even though the agent already learned it last week.
+
+Memory links fix that. SpecOS does not store memory — every agent already has its own. SpecOS stores **the map of where each repo's memory lives**, and the skills resolve that map before exploring anything.
+
+```yaml
+# in local-workspace.yml — local only, never committed
+memory_links:
+  self: auto                            # derive each session
+  backend: auto
+  frontend: ~/some/non-standard/memory  # or a path, used verbatim
+  e2e: off                              # or off — never look, never ask
+```
+
+**How the map gets built.** Not by a one-time question. `/specos-start` compares `implementation_repos` against `memory_links` on every session and asks only about the difference — the keys that have a repo path but no value yet. A key that already has a value is never overwritten and never re-asked.
+
+That single rule covers every entry point without special cases:
+
+| Situation | What happens |
+|---|---|
+| New project | first `/specos-start` finds no keys, asks once, writes them |
+| Project already running before this feature | `memory_links` is absent, so all keys are missing — asked once on the next start |
+| A repo added months later | only the new key is missing — asked about that key alone |
+| Monorepo | no repo paths, so the whole step is skipped — never asked |
+
+At most one question per session, and `off` is permanent: it is the answer that makes the question stop.
+
+**How a link resolves**, for any key that is not `off`:
+
+1. **A path** — used verbatim. For non-standard setups or linking across agents.
+2. **`auto`** — derived from the running agent's own convention. Claude Code maps `/Users/me/proj/api` to `~/.claude/projects/-Users-me-proj-api/memory`. Agents that scope memory per project directory apply their own rule. Agents with no memory system fall back to `.specos/memory.md` inside the repo.
+3. **Nothing there** — no memory for that repo yet. The session continues exactly as before.
+
+`auto` is the recommended value: it survives a repo being moved or renamed, and needs no knowledge of any agent's internals.
+
+`/specos-status` shows the state of every link — `linked`, `auto`, `off`, `unmapped`, or `broken`.
+
+Three rules keep it honest:
+
+- **Index first.** Skills read the memory index and open a single entry only when its description matches the task. Reading everything would cost more than exploring.
+- **Verify before trusting.** Memory is a point-in-time observation. Any path or symbol it names is confirmed to still exist before the agent acts on it — and corrected on the spot when it is stale.
+- **Memory never replaces a spec.** It answers *where* and *how*. The spec answers *what* and *why*. Nothing in memory authorizes writing code without a `spec.md`.
+
+Learnings are written back to the repo they are about, not to the repo the session started in — so the knowledge lands where the next session will look for it.
+
+### session.md is not memory
+
+They coexist because they answer different questions.
+
+| | `session.md` | Agent memory |
+|---|---|---|
+| Answers | what I am working on | what I know about this repo |
+| Scope | the project | one repo, one agent |
+| Lifetime | rewritten every session | accumulates across sessions |
+| Portable | yes — same content for anyone on the team | no — local and agent-specific |
+| Authoritative | yes, for the active task | no — always verified before use |
+
+`session.md` is read first. It names the repo that matters, which is what makes the memory map worth resolving at all.
 
 ---
 
@@ -231,6 +295,15 @@ implementation_repos:
   backend: ../repo-backend
   frontend: ../repo-frontend
   e2e: null
+
+# Where each repo's agent memory lives on this machine.
+# auto = derive each session | a path = use verbatim | off = never
+# Added and maintained by /specos-start. Absent = not yet mapped.
+memory_links:
+  self: auto
+  backend: auto
+  frontend: ~/some/non-standard/memory
+  e2e: off
 ```
 
 ### session.md — active session state, never committed

@@ -1,0 +1,7 @@
+---
+description: Split a large spec into sub-specs under a group folder
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-split.md` from the SpecOS repo root and follow all instructions in it exactly.

@@ -1,6 +1,6 @@
 # specos-init
 
-You are setting up SpecOS v3 for a new project. Your job is to ask exactly 6 questions, then generate the required files. Do not generate any file before all 6 answers are collected.
+You are setting up SpecOS v3 for a new project. Your job is to ask up to 7 questions, then generate the required files. Do not generate any file before all answers are collected.
 
 ---
 
@@ -152,9 +152,11 @@ If a `.gitignore` already exists, append to it. If not, create it. Add:
 ```
 # SpecOS local files — never committed
 local-workspace.yml
-.specos/session.md
+.specos/
 session.md
 ```
+
+`.specos/` covers both `session.md` and the `memory.md` fallback used by agents that have no memory system of their own. Add the same entry to each implementation repo's `.gitignore` when the project uses separate repos.
 
 ### 6. specs/ directory
 
@@ -184,7 +186,7 @@ It uses **SpecOS v3** — a structured workflow for AI-assisted software develop
 | `AGENTS.md` | Project context — read automatically by AI agents |
 | `constitution.md` | The 8 rules every agent and team member follows |
 | `specos-outputs.yml` | Team configuration and integration settings |
-| `local-workspace.yml` | Local identity: your name, roles, repo paths — gitignored |
+| `local-workspace.yml` | Local identity: your name, roles, repo paths, memory links — gitignored |
 | `session.md` | Active session state — gitignored, never committed |
 
 ---

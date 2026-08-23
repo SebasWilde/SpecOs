@@ -63,7 +63,15 @@ implementation_repos:
 ```
 
 > For monorepos: set all paths to `.` (current directory).
-> Paths are stored locally in `session.md` — never committed.
+> Paths are stored locally in `local-workspace.yml` — never committed.
+
+### Memory links
+
+Each repo has its own agent memory namespace. `local-workspace.yml` maps them under `memory_links` — each key holds `auto`, a path, or `off` — so a session started here can reuse what was already learned in an implementation repo instead of exploring it again.
+
+`/specos-start` maintains the map by difference: it compares `implementation_repos` against `memory_links` every session and asks only about keys that have no value yet. Keys with a value are never re-asked. Monorepos skip the step entirely.
+
+Rules: read the memory index first and open only the entries that match the task; verify anything memory names still exists before acting on it; memory answers *where* and *how*, never *what* — it never authorizes code without a `spec.md`. Learnings are written back to the repo they describe, not to the repo the session started in.
 
 ---
 
@@ -97,6 +105,18 @@ implementation_repos:
 
 ---
 
+## Working on SpecOS itself
+
+This repo is the framework, not a project built with it. `specs/specos-v3/` holds only `spec.md` and `CHANGELOG.md` — no `tasks.md`, no `testcases.md`. That is a decision, not an omission: SpecOS targets product projects, and a deliverable made of Markdown prompts has no runtime to execute a test case against. Do not generate those files here.
+
+The breaking perspective is carried by `verify.sh` instead — run it before every release:
+
+```bash
+./verify.sh
+```
+
+---
+
 ## SpecOS v3 skills
 
 Run `/specos-start` to begin any session. The agent reads `session.md` and routes automatically.
@@ -106,8 +126,12 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 | `/specos-start` | Begin any session — lead, dev, QA, or resume |
 | `/specos-init` | First-time project setup (run once per project) |
 | `/specos-lead` | Create or update a spec collaboratively |
+| `/specos-lead-parallel` | Draft several related specs in one pass |
 | `/specos-dev` | Implement a task with full spec context |
 | `/specos-qa` | Generate test cases from a spec |
 | `/specos-distribute` | Generate outputs per specos-outputs.yml and standards |
 | `/specos-split` | Split a large spec into sub-specs under a group folder |
 | `/specos-group` | Group related existing specs under a shared parent folder |
+| `/specos-config` | Configure specos-standards.yml interactively |
+| `/specos-status` | Show current session state (read-only) |
+| `/specos-help` | List all commands and key files |

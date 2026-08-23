@@ -17,6 +17,20 @@ Search `specs/` for a matching feature name or task ID — check both `specs/*/s
 
 After loading the spec, check if `specs/[feature-name]/testcases.md` already exists.
 
+### Recover what is already known about the repos under test
+
+Before exploring any implementation repo, resolve its memory location from `memory_links` in `local-workspace.yml`:
+
+- **`off`** — skip memory for this repo.
+- **A path** — use it verbatim.
+- **`auto`, or the key is missing** — derive it from the running agent's own convention. Claude Code: `~/.claude/projects/<absolute repo path with every `/` replaced by `-`>/memory`. Agents with no memory system: `.specos/memory.md` inside the repo.
+
+If the resolved location does not exist, there is no memory yet — continue without it.
+
+Read the **index only**, and open a memory file only when its description relates to this feature. Verify anything it names still exists before relying on it.
+
+Memory helps you find where behavior lives and what has broken before. It is never a source of test cases on its own — every case still traces to an AC or a journey in the spec.
+
 ---
 
 ## Step 2 — Generate or continue test cases
@@ -122,3 +136,11 @@ If `outputs.testcases.destination` is a named integration (e.g. `jira`, `notion`
 Update `session.md`:
 - `active_feature`: the feature folder name
 - `spec_path`: path to the spec
+
+---
+
+## Step 6 — Record what stays true
+
+If you learned something durable about a repo under test — a fragile area, a fixture or seed that is required, a behavior that repeatedly breaks — write it to **that repo's** memory location, the one resolved in Step 1. Not the narrative of this session, and nothing you did not verify.
+
+Memory is local and per-machine. Never commit it.

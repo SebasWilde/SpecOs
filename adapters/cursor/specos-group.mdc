@@ -1,0 +1,7 @@
+---
+description: Group related existing specs under a shared parent folder
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-group.md` from the SpecOS repo root and follow all instructions in it exactly.

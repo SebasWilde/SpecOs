@@ -32,11 +32,15 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 | `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-outputs.yml + specos-standards.yml |
 | `/specos-start` | Everyone | Begins any session, routes by role and session state |
 | `/specos-lead` | Lead | Builds spec + tasks collaboratively, assigns SP-XX IDs, collects real IDs |
+| `/specos-lead-parallel` | Lead | Drafts several related specs in one pass |
 | `/specos-dev` | Dev | Loads only the relevant spec, writes to implementation repo |
 | `/specos-qa` | QA | Generates testcases.md collaboratively, assigns TC-XX IDs |
 | `/specos-distribute` | Lead / QA | Generates outputs per specos-outputs.yml + standards |
 | `/specos-split` | Lead | Splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead | Groups related existing specs under a shared parent folder |
+| `/specos-config` | Lead | Configures specos-standards.yml interactively |
+| `/specos-status` | Everyone | Shows current session state (read-only) |
+| `/specos-help` | Everyone | Lists all commands and key files (no session needed) |
 
 ---
 
@@ -122,24 +126,86 @@ Additional fields are optional and free-form — agent never rejects them.
 
 ---
 
-## session.md schema
+## Local files — two, never committed
+
+**`local-workspace.yml`** — who you are on this machine. Written once by the first `/specos-start`.
+
+```yaml
+user: Your Name
+roles: [lead, backend]
+implementation_repos:
+  backend: ../repo_back
+  frontend: null
+  e2e: null
+memory_links:            # auto | a path | off
+  self: auto
+  backend: auto
+  frontend: ~/some/non-standard/memory
+  e2e: off
+```
+
+**`session.md`** — what you are working on right now. Rewritten every session.
 
 ```markdown
 # SpecOS session
 updated: YYYY-MM-DD
 
-roles: [lead, backend]
 active_feature: feature-folder-name
 task_id: SP-01
 task_description: Short description
 spec_path: specs/feature-name/spec.md
-implementation_repos:
-  backend: ../repo_back
-  frontend: null
-  e2e: null
 ```
 
-Always in `.gitignore`. Never committed.
+Both always in `.gitignore`. Never committed.
+
+---
+
+## Memory links
+
+Separate repos = separate agent memory namespaces. Without a link, a session started in the specs repo re-explores the backend repo it already learned.
+
+SpecOS does not store memory — it stores the map of where memory lives.
+
+**How the map gets built** — `/specos-start` Step 0.5, every session. Compares `implementation_repos` against `memory_links` and asks only about keys that have a repo path but no value. A key with a value is never re-asked.
+
+| Situation | What happens |
+|---|---|
+| New project | asked once on first start |
+| Project older than this feature | all keys missing → asked once on next start |
+| Repo added later | only the new key is asked about |
+| Monorepo | step skipped entirely — never asked |
+
+Max one question per session. `off` is permanent.
+
+**Values:** `auto` (derive each session, recommended) · a path (verbatim) · `off` (never)
+
+**Resolution, for any key that is not `off`:**
+
+| Step | Rule |
+|---|---|
+| Path | used verbatim |
+| `auto` | agent's own convention — Claude Code: `/Users/me/proj/api` → `~/.claude/projects/-Users-me-proj-api/memory` |
+| Fallback | agent with no memory system → `.specos/memory.md` inside the repo |
+| Absent | no memory yet — session proceeds as before |
+
+**Three rules:**
+- Index first — open a single entry only when its description matches the task
+- Verify before trusting — confirm any path or symbol still exists, correct it if stale
+- Memory answers *where* and *how*; the spec answers *what* and *why*. Memory never authorizes code without a `spec.md`
+
+Learnings are written back to the repo they describe, not the repo the session started in.
+
+`/specos-status` prints each link as `linked` · `auto` · `off` · `unmapped` · `broken`.
+
+**session.md is not memory:**
+
+| | `session.md` | Agent memory |
+|---|---|---|
+| Answers | what I am working on | what I know about this repo |
+| Scope | the project | one repo, one agent |
+| Lifetime | rewritten each session | accumulates |
+| Portable | yes — shared by the team | no — local, agent-specific |
+| Authoritative | yes, for the active task | no — verified before use |
 
 ---
 

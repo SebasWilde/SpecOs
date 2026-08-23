@@ -1,9 +1,10 @@
 ---
 feature: specos-v3
-version: 2.0
+version: 2.5
 status: approved
 lead: Sebastian Wilde
-date: 2026-04-15
+date: 2026-08-22
+keywords: [specs, perspectives, agent-agnostic, memory-links, multi-repo, monorepo]
 ---
 
 # SpecOS v3
@@ -116,6 +117,34 @@ Works with any AI agent (Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity
 4. Path not found: "I can't reach ../repo_back. Please check the path in your session.md."
 5. Session does not proceed until path is valid
 
+### Journey 13 — Dev works on a repo the agent already knows
+1. Dev runs `/specos-start` in the specs repo — a separate repo from the backend
+2. Agent reads `local-workspace.yml` and resolves `memory_links` for each configured repo
+3. Dev picks a backend task; agent hands off to `specos-dev`
+4. Before reading any source file, agent resolves the backend repo's memory location and reads its index
+5. One entry matches the task; agent opens it and confirms the paths it names still exist
+6. Agent goes straight to the right module instead of exploring the repo again
+7. At the end of the session, a new durable fact is written to the **backend repo's** memory, not the specs repo's
+
+### Journey 13b — No memory exists for the repo
+1. Same start, but the resolved memory location does not exist
+2. Agent continues exactly as it would without memory links — explores, implements
+3. Agent does not create memory directories for other repos preemptively
+
+### Journey 13c — Project already running before memory links existed
+1. Person runs `/specos-start` in a project whose `local-workspace.yml` predates this feature
+2. Agent reads it — `implementation_repos` has backend and frontend, `memory_links` is absent entirely
+3. Agent compares the two and finds both keys unmapped
+4. Agent asks once, listing only the unmapped keys, and offers: link automatically / give paths / skip
+5. Person picks automatic; agent writes `memory_links` with `auto` for both and confirms in one line
+6. Every later session finds the keys present and asks nothing
+
+### Journey 13d — A repo is added months later
+1. Lead adds an `e2e` path to `implementation_repos`
+2. Next `/specos-start` finds `e2e` has a path but no `memory_links` key
+3. Agent asks about `e2e` only — never re-asks about keys that already have a value
+4. Person answers "skip"; agent writes `e2e: off` and never asks again
+
 ---
 
 ## Acceptance Criteria
@@ -222,21 +251,63 @@ Works with any AI agent (Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity
 - [ ] Agnostic to task software — any ID format accepted
 
 ### Agent-agnostic compatibility
-- [ ] All skills work in Claude Code, OpenCode via slash commands
+- [ ] All skills work in Claude Code, OpenCode, Gemini CLI via slash commands
 - [ ] All skills work in Cursor, Codex, Kiro, Antigravity, Windsurf, Copilot via AGENTS.md
 - [ ] No external library, API, or binary dependency
+
+### Single source rule
+- [ ] `skills/` is the only place a skill's content is written
+- [ ] `adapters/` exists only for agents that cannot consume `skills/*.md` directly, and holds format, never content
+- [ ] An adapter is a delegator (Cursor `.mdc`), a generated artifact (Gemini `.toml`), or a shared section (generic) — never a copy of a skill
+- [ ] Adding a skill requires no edit to any per-agent adapter that delegates or is generated
+- [ ] `install.sh` and `update.sh` read every skill by glob from `skills/`, so a new skill ships without touching either script
 
 ### Repo structure flexibility
 - [ ] Works in monorepo
 - [ ] Works with separate repos — specs repo as entry point, implementation repos as destinations
-- [ ] Implementation repo paths in session.md — local, never committed
+- [ ] Implementation repo paths in local-workspace.yml — local, never committed
 - [ ] Agent validates paths before any session requiring code writing
+
+### Memory links
+- [ ] `local-workspace.yml` accepts an optional `memory_links` section mapping each repo key to `auto`, a path, or `off`
+- [ ] `/specos-start` reconciles `implementation_repos` against `memory_links` on every session, and asks only about keys that have no value
+- [ ] A key that already has a value is never overwritten and never re-asked
+- [ ] `off` is permanent — that key is never asked about again
+- [ ] Reconciliation covers three entry points identically: a new project, a project that predates the feature, and a repo added later
+- [ ] The whole step is skipped when `implementation_repos` has no non-null path
+- [ ] At most one memory-link question per session
+- [ ] Resolution order is: explicit path → `auto` derived from the agent's own convention → `.specos/memory.md` in the repo → none
+- [ ] A missing memory location degrades to current behaviour — the session proceeds, nothing is created
+- [ ] `specos-dev` resolves and reads the target repo's memory before reading any source file in it
+- [ ] Only the memory index is read; an individual entry is opened only when its description matches the task
+- [ ] Anything a memory names is verified to still exist before the agent acts on it, and corrected when stale
+- [ ] Learnings are written to the memory of the repo they describe, not the repo the session started in
+- [ ] Memory never satisfies the spec requirement — no code is written without a `spec.md`
+- [ ] Monorepo projects skip memory links entirely
+- [ ] No SpecOS-owned memory store is created — SpecOS maps locations, the agent owns the memory
 
 ---
 
 ## Out of Scope
 - CLI binary — bash script only for v3
-- Engram or any persistent memory system — session.md is sufficient
+- A SpecOS-owned memory store — v3 maps where each agent's own memory lives (`memory_links`), it never stores memory itself
+- `tasks.md` and `testcases.md` for this spec — see below
+
+---
+
+## This spec is the framework, not a project
+
+SpecOS is built for product projects: work that ships behavior someone can execute against. This spec describes SpecOS itself, whose deliverable is Markdown prompts. That difference changes which artifacts are worth keeping.
+
+`spec.md` and `CHANGELOG.md` earn their place — the first is the design record, the second is why each decision was made. `tasks.md` and `testcases.md` do not, and this folder deliberately has neither:
+
+- There is no runtime to execute a test case against. A `TC` whose expected result is "the agent asks only about unmapped keys" is not executable and not deterministic — it depends on the agent, the model, and the day.
+- The Acceptance Criteria above already state every one of those expectations, in one place. A `testcases.md` would restate them in a second place that nothing reads and that drifts.
+- The task list was a build log for a framework with no team splitting work by role. The changelog covers it better.
+
+**The breaking perspective still applies.** It is not waived — it takes the form this deliverable allows. For this repo that is `verify.sh`, which tests the part that genuinely is executable: `install.sh`, `update.sh`, and the invisible contracts between them and `skills/` — that line 3 of every skill becomes a Gemini command description, that every skill has a Cursor delegator, that no adapter has become a copy, that local files stay gitignored. Each of those has already broken once.
+
+**The general rule, for any project using SpecOS:** the two perspectives are mandatory, but the artifact that carries the breaking perspective follows the deliverable. Executable product → `testcases.md`. Non-executable deliverable → whatever actually verifies it. What is never optional is that something adversarial exists and runs.
 - Automatic MCP integration — outputs are manual in v3, MCP declared in specos-outputs.yml for v4
 - Automatic PR or merge detection — feature closure is manual
 - GitHub Actions or CI/CD pipelines
@@ -258,24 +329,28 @@ SpecOs/                             ← root (any folder name)
 ├── AGENTS.md                       ← global agent context (template)
 ├── constitution.md                 ← rules template
 ├── specos-outputs.yml              ← config template
+├── specos-standards.yml            ← project standards template
 ├── CHEATSHEET.md
 ├── CREDITS.md
 ├── LICENSE
-├── .gitignore                      ← includes .specos/session.md
-├── skills/
+├── .gitignore                      ← local-workspace.yml, .specos/, session.md
+├── skills/                         ← the single source for every skill
 │   ├── specos-init.md
 │   ├── specos-start.md
 │   ├── specos-lead.md
+│   ├── specos-lead-parallel.md
 │   ├── specos-dev.md
 │   ├── specos-qa.md
 │   ├── specos-distribute.md
+│   ├── specos-split.md
+│   ├── specos-group.md
+│   ├── specos-config.md
 │   ├── specos-help.md
 │   └── specos-status.md
-├── adapters/
-│   ├── claude-code/
-│   ├── opencode/
-│   ├── cursor/
-│   └── generic/
+├── adapters/                       ← only for agents that need a different format
+│   ├── cursor/                     ← .mdc delegators, one per skill
+│   ├── gemini/                     ← README only — .toml generated from skills/
+│   └── generic/                    ← AGENTS.md section for Codex, Copilot, Kiro…
 ├── specs/
 │   └── specos-v3/
 │       ├── spec.md
@@ -286,22 +361,87 @@ SpecOs/                             ← root (any folder name)
     └── feature-tags/
 ```
 
+### local-workspace.yml schema
+
+Local identity, one per machine. Never committed.
+
+```yaml
+user: Sebastian Wilde
+roles: [lead, backend]
+implementation_repos:
+  backend: ../repo_back
+  frontend: ../repo_front
+  e2e: null
+
+# Optional. Where each repo's agent memory lives on this machine.
+# auto = derive each session | a path = use verbatim | off = never
+# Added and maintained by /specos-start Step 0.5. Absent = not yet mapped.
+memory_links:
+  self: auto
+  backend: auto
+  frontend: ~/some/non-standard/memory
+  e2e: off
+```
+
 ### session.md schema
+
+Active session state. Rewritten every session, never committed.
 
 ```markdown
 # SpecOS session
 updated: YYYY-MM-DD
 
-roles: [lead, backend]
 active_feature: feature-folder-name
 task_id: TASK-42
 task_description: Short task description
 spec_path: specs/feature-name/spec.md
-implementation_repos:
-  backend: ../repo_back
-  frontend: ../repo_front
-  e2e: null
 ```
+
+### Memory link reconciliation
+
+Runs at `/specos-start` Step 0.5, on every session. Skipped entirely when `implementation_repos` has no non-null path.
+
+The map is maintained by difference, not by a one-time question: compare the repo keys that have a path against the keys present in `memory_links`, and ask only about the difference. This is what makes a new project, a project that predates the feature, and a repo added later all behave the same — none of them is a special case.
+
+| Key state | Behaviour |
+|---|---|
+| has a value (`auto`, a path, or `off`) | never asked about, never overwritten |
+| missing | asked once, then written |
+
+At most one question per session, listing only the missing keys. `off` is permanent by design — it is the answer that makes the question stop.
+
+### Memory link resolution
+
+Applies to any repo key that is not `off`.
+
+| Order | Source | Rule |
+|---|---|---|
+| 1 | Configured | the value is a path — used verbatim. For non-standard setups or cross-agent linking |
+| 2 | Derived | the value is `auto` — the running agent's own memory-path convention. Claude Code: absolute repo path with every `/` replaced by `-`, under `~/.claude/projects/`, plus `/memory` |
+| 3 | Fallback | agent with no memory system → `.specos/memory.md` inside the repo |
+| 4 | None | nothing resolves → session proceeds as if the feature did not exist |
+
+`auto` is the recommended value: it survives a repo being moved or renamed, and requires no knowledge of any agent's internals.
+
+### session.md vs agent memory
+
+They answer different questions and never substitute for each other.
+
+| | `session.md` | Agent memory |
+|---|---|---|
+| Answers | what I am working on | what I know about this repo |
+| Scope | the project | one repo, one agent |
+| Lifetime | rewritten every session | accumulates across sessions |
+| Portable | yes — same content for anyone on the team | no — local and agent-specific |
+| Authoritative | yes, for the active task | no — always verified before use |
+
+`session.md` is read first: it names the repo that matters, which is what makes the memory map worth resolving.
+
+Read contract: index only; open one entry when its description matches the task; verify what it names before acting; correct it when stale.
+
+Write contract: durable, verified facts about a repo go to that repo's memory. Never the session narrative, never anything already in the spec, `AGENTS.md`, or `specos-standards.yml`.
+
+Boundary: memory answers *where* and *how*. The spec answers *what* and *why*. Memory never authorizes code without a `spec.md`.
 
 ### tasks.md format
 

@@ -1,0 +1,7 @@
+---
+description: Configure specos-standards.yml interactively
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-config.md` from the SpecOS repo root and follow all instructions in it exactly.

@@ -1,3 +1,4 @@
-# SpecOS session state — local only, never committed
-.specos/session.md
+# SpecOS local files — never committed
+local-workspace.yml
+.specos/
 session.md
