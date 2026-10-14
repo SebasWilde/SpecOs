@@ -6,17 +6,19 @@ Each feature has its own folder:
 
 ```
 [feature-name]/
-├── spec.md        ← everything: journeys + ACs + technical
-├── tasks.md       ← subtasks by role
-├── testcases.md   ← QA test cases with TC-XX IDs
-└── CHANGELOG.md   ← spec change history
+├── spec.md        ← ACs with stable ids, out of scope, open questions
+├── tasks.md       ← tasks by role: [new] or [KEY], AC refs
+├── testcases.md   ← sketches and QA test cases (TC-XX) that cover ACs
+├── CHANGELOG.md   ← spec change history
+└── design.md      ← optional: the how, when non-trivial
 ```
 
 Features can also be nested under a group folder, where the group's `spec.md` carries
 `type: group` and holds only a domain summary and a list of sub-specs.
 
-To create a feature, run `/specos-lead`. See `examples/feature-tags/` for a complete
-end-to-end example.
+To create a feature, run `/specos-lead`; to change one, run it again and say what changed.
+See `examples/feature-tags/` for a complete end-to-end example, and run `/specos-status --check`
+to find uncovered ACs, dangling references and stale test-case stamps.
 
 ---
 

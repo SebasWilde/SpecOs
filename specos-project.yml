@@ -24,7 +24,7 @@ team:
   qa: human           # human | agent | both
 
 ids:
-  task_prefix: SP     # default task ID prefix (e.g. SP-01). Replace with yours.
+  task_prefix: SP     # optional hint for the shape of task keys (e.g. FK-927).
   testcase_prefix: TC # default test case ID prefix (e.g. TC-01)
 
 integrations:
@@ -45,7 +45,7 @@ integrations:
 
 outputs:
   tasks:
-    destination: manual   # manual = copy-paste from agent output
+    destination: manual   # manual = copy-paste | jira-csv = CSV for Jira's import
   testcases:
     destination: manual
   confluence_doc:
@@ -59,7 +59,9 @@ outputs:
 #   lead:
 #     max_tasks: 15                 # integer >= 1
 #     max_journeys: none            # integer >= 1 | none
-#     require_error_journey: true   # true | false
+#     require_error_journey: false  # true | false
+#     review: draft                 # draft | sections
+#     suggest_scenarios: true       # true | false
 #   qa:
 #     cases_per_ac: standard        # minimal | standard | exhaustive | integer
 #     include_negative_cases: true  # true | false
@@ -68,6 +70,7 @@ outputs:
 #     diagrams: ask                 # none | combined | per_journey | ask
 #     branch_info: ask              # ask | none
 #     task_title_max_words: 8       # integer >= 1
+#     task_detail: brief            # brief | full
 #   dev:
 #     require_tests: false          # true | false
 #

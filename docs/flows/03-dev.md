@@ -1,15 +1,13 @@
 # Flow: /specos-dev
 
 > **When to run:** Any developer picking up a task.
-> **What it does:** Loads the relevant spec, confirms the task scope, and implements in full context.
+> **What it does:** Loads the relevant spec, shows the task's ACs, implements in full context, and closes with a block for the PR.
 
 ---
 
 ## Full conversational transcript
 
-This transcript shows a backend developer picking up task `TAGS-01` (add `tags` field to the Post model) from the `feature-tags` spec.
-
----
+A backend developer picks up `TAGS-03` (limit of five tags) from the `feature-tags` spec, finds a gap, and finishes.
 
 > **User**
 > ```
@@ -18,158 +16,86 @@ This transcript shows a backend developer picking up task `TAGS-01` (add `tags` 
 
 > **Agent**
 >
-> No session found. Let me get some context.
->
-> What is your role on this project?
->
-> 1. Lead
-> 2. Backend dev
-> 3. Frontend dev
-> 4. QA
-> 5. Full-stack / builder
+> No session found. What is your task key or description?
 
 ---
 
 > **User**
 >
-> 2 — backend dev
+> TAGS-03
 
 ---
 
 > **Agent**
->
-> What task are you picking up? Provide the task ID (e.g., `SP-01` or `TAGS-01`) or describe it briefly.
-
----
-
-> **User**
->
-> TAGS-01
-
----
-
-> **Agent**
->
-> Loading spec for `TAGS-01`...
 >
 > Found in `specs/feature-tags/tasks.md`:
-> > **[TAGS-01]** Add `tags` field as ArrayField to the Post model (migration included)
+> > **[TAGS-03]** Validate maximum five tags in serializer (AC3, AC8) v1.0
 >
-> Loading `specs/feature-tags/spec.md`...
+> Loading `specs/feature-tags/spec.md` (v1.0, approved). No AC of this task is pending.
 >
-> ---
+> **Your ACs**
+> - **AC3** — A post has at most 5 tags; at the 5th the field is disabled and shows "Maximum 5 tags per post"
+> - **AC8** — The API answers 422 `invalid_tags` with detail "Maximum 5 tags per post" when more than 5 tags are sent
 >
-> **Context loaded. Here is your task scope:**
+> **Flows that will be tested** (from the sketches): TC-02 *Tag limit blocked at 6th tag* covers AC3 · TC-04 *API rejects more than 5 tags* covers AC8.
 >
-> **Task:** TAGS-01 — Add `tags` field as ArrayField to the Post model (migration included)
->
-> **Relevant acceptance criteria:**
-> - Tags are saved in lowercase regardless of the user's input *(normalization is backend responsibility)*
-> - Tags are saved when publishing or updating the post
->
-> **Data model from spec:**
-> ```
-> Post (existing table — add field):
->   tags: ArrayField(CharField(max_length=30), max_length=5, default=list)
-> No separate table — tags live in the post as an array.
-> ```
->
-> **Technical decision (from spec):**
-> - Array instead of separate table: tags are simple strings with no relationships.
-> - Backend normalizes to lowercase (not the frontend).
->
-> **Out of scope for this task:**
-> - Serializer validation (TAGS-02, TAGS-03)
-> - Normalization logic (TAGS-04)
-> - Deduplication logic (TAGS-05)
->
-> Ready to implement. Shall I proceed?
+> AC3's field behavior belongs to the frontend task; yours is the serializer side (AC8). Proceed?
 
 ---
 
 > **User**
 >
-> yes, go ahead
+> yes
 
 ---
 
 > **Agent**
 >
-> Implementing TAGS-01.
+> Implementing in `posts/serializers.py`... *(code and tests)*
 >
-> **Step 1 — Add the field to the model**
+> One thing the spec does not say: AC5 rejects a tag over 30 characters, but nothing says what the API returns for it.
 >
-> In `posts/models.py`:
-> ```python
-> from django.contrib.postgres.fields import ArrayField
-> from django.db import models
->
-> class Post(models.Model):
->     # ... existing fields ...
->     tags = ArrayField(
->         models.CharField(max_length=30),
->         size=5,
->         default=list,
->         blank=True,
->     )
+> ```
+> SPEC CHANGE REQUEST — feature-tags v1.0
+> Found: the error shape for a tag over 30 chars is undefined (found during TAGS-03)
+> Type: clarification
+> Proposed AC: A tag over 30 characters makes the API answer 422 invalid_tags
+> Options: 1) 422 invalid_tags, same as AC8   2) 400 with a field error
 > ```
 >
-> **Step 2 — Create the migration**
->
-> ```bash
-> python manage.py makemigrations posts --name="add_tags_to_post"
-> ```
->
-> This generates `posts/migrations/0005_add_tags_to_post.py` (number depends on your existing migrations).
->
-> **Step 3 — Apply locally**
->
-> ```bash
-> python manage.py migrate
-> ```
->
-> **Step 4 — Verify**
->
-> ```bash
-> python manage.py shell
-> >>> from posts.models import Post
-> >>> p = Post.objects.first()
-> >>> p.tags
-> []
-> >>> p.tags = ["django", "python"]
-> >>> p.save()
-> >>> Post.objects.get(pk=p.pk).tags
-> ['django', 'python']
-> ```
->
-> ---
->
-> TAGS-01 complete. The field is in place with the correct constraints.
->
-> **Normalization and deduplication are NOT in this task** — those are TAGS-04 and TAGS-05. Do not add that logic here.
->
-> Session updated: `task_id: TAGS-01`, `active_feature: feature-tags`.
+> Your role is `backend` only, so I cannot edit the spec. Hand this to the Lead. I'll keep going on AC3 and AC8, which it does not block.
 
 ---
 
 > **User**
 >
-> the migration number on my project would be 0003, not 0005 — that's fine right?
+> *(a day later — the Lead answered by dropping the error altogether: v1.1)* continue
 
 ---
 
 > **Agent**
 >
-> Yes, completely fine. Django generates migration numbers sequentially based on your existing migrations. The number itself doesn't matter — what matters is that it comes after all existing migrations for the `posts` app, which it will automatically.
+> Spec is v1.1. AC5 is now retired and AC11 says tags over 30 characters are truncated silently, so the request is answered by the new text. `TAGS-03` references neither — nothing to redo.
+>
+> Done. For the PR description:
+>
+> ```
+> TAGS-03 · spec feature-tags v1.1 · covers AC3, AC8
+> Spec changes during dev: v1.0→v1.1 (AC5 retired, AC11 added — not in this task)
+> Deviations: none
+> ```
+>
+> Session saved.
 
 ---
 
 ## Notes
 
-- The agent reads **only the spec for the active task**. It does not load unrelated specs.
-- Scope boundaries are explicit — the agent calls out what is NOT part of the current task and references the task IDs where that work belongs.
-- If the spec is ambiguous or missing a detail the dev needs, the agent stops and asks the Lead to update the spec rather than inventing requirements.
-- Session is saved at the end so the next `/specos-start` picks up from `TAGS-01` / `feature-tags` automatically.
+- The agent reads **only the spec for the active task**.
+- It refuses a spec with `status: draft`, and any task whose ACs are marked `[pending]`.
+- The AC refs in `tasks.md` are what it shows at the start — the task never restates them.
+- On a gap, a developer without the lead role gets a request to hand over; with `lead` or `builder` the agent continues in change mode in the same session and resumes with the new AC ids.
+- The closing block is printed, not written to a file — paste it into the PR or ticket.
 
 ---
 

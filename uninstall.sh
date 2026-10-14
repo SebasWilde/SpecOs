@@ -165,6 +165,14 @@ uninstall_copilot() {
   return 1
 }
 
+uninstall_check_script() {
+  if [[ -f "$HOME/.specos/specos-check.sh" ]]; then
+    rm -f "$HOME/.specos/specos-check.sh"
+    removed "~/.specos/specos-check.sh"
+    rmdir "$HOME/.specos" 2>/dev/null || true
+  fi
+}
+
 uninstall_generic() {
   if [[ -f "$REPO_ROOT/SPECOS-SECTION.md" ]]; then
     rm -f "$REPO_ROOT/SPECOS-SECTION.md"
@@ -188,6 +196,7 @@ uninstall_cursor      && REMOVED=$((REMOVED + 1)) || true
 uninstall_windsurf    && REMOVED=$((REMOVED + 1)) || true
 uninstall_copilot     && REMOVED=$((REMOVED + 1)) || true
 uninstall_generic
+uninstall_check_script
 
 echo ""
 if [[ $REMOVED -eq 0 ]]; then

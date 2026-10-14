@@ -63,41 +63,38 @@ Generate a project-specific `AGENTS.md` using the answers. Include:
 - Team roles and who holds them
 - SpecOS structure: `specs/`, `local-workspace.yml` (gitignored), `session.md` (gitignored)
 - Implementation repo paths if separate repos
-- Rule: no agent writes code without a spec in the repo
-- Rule: only Lead modifies `spec.md`
+- Rule: no agent writes code without an approved spec in the repo
+- Rule: changes to `spec.md` require Lead approval; an agent may write them only after that approval
 - Rule: `local-workspace.yml` and `session.md` are never committed
+- Optional files: `design.md` (the how, per feature) and `00-architecture.md` (context shared by a group)
 
 ### 2. constitution.md
 
 Generate `constitution.md` with exactly these 8 rules:
 
 1. Construction perspective always exists — someone defines and approves the spec before any code is written.
-2. Breaking perspective always exists — it cannot be the same logic that built the feature.
-3. No agent writes code without a spec committed to the repo.
-4. Only the Lead role modifies `spec.md`.
+2. Breaking perspective always exists — it cannot be the same logic that built the feature. The Lead's testcase sketches are seeds; the independent perspective is the QA invocation with spec-only context.
+3. No agent writes code without an approved spec in the repo. Committing it may follow implementation, but is mandatory before handing work to another person or agent.
+4. Changes to `spec.md` require Lead approval; an agent may write them only after that approval.
 5. A capped number of tasks per feature — the cap is `settings.lead.max_tasks` in `specos-project.yml`, 15 by default. Split into a new feature if more are needed.
 6. All outputs are written in English by default.
 7. A spec change affecting more than 50% of the content is a new feature, not an update.
-8. Every spec change requires a `CHANGELOG.md` entry: date, what changed, and why.
+8. Every spec change requires a `CHANGELOG.md` entry: what / why / impact, at most 3 lines.
 
 ### 3. specos-project.yml
 
 Generate `specos-project.yml` — the single committed config file. Use the team composition answers and the language answer from Question 6.
-
-The file is written in English: keys, comments, and any rules alike. That is independent of `language.specs`, which only sets the language of generated content.
 
 ```yaml
 # specos-project.yml
 # Everything configurable about this project. Committed to the repo.
 # Machine-specific paths and identity live in local-workspace.yml, never here.
 #
-# Written in English — keys, comments, and rules alike — whatever language.specs
-# says. The config language and the content language are independent.
+# Written in English whatever language.specs says.
 #
-# Three blocks, distinguished by who consumes them:
-#   team / ids / integrations / outputs  -> who does what, and where output goes
-#   settings                             -> closed schema. Skills read and obey.
-#   rules                                -> free-form. Skills read and interpret.
+# Three blocks: team / ids / integrations / outputs (who does what, where
+# output goes), settings (closed schema, skills obey), rules (free-form,
+# skills interpret).
 
 version: "2"
 
@@ -112,7 +109,7 @@ team:
   qa: human           # human | agent | both
 
 ids:
-  task_prefix: SP
+  task_prefix: SP     # optional hint for the shape of task keys
   testcase_prefix: TC
 
 integrations:
@@ -147,7 +144,9 @@ outputs:
 #   lead:
 #     max_tasks: 15                 # integer >= 1
 #     max_journeys: none            # integer >= 1 | none
-#     require_error_journey: true   # true | false
+#     require_error_journey: false  # true | false
+#     review: draft                 # draft | sections
+#     suggest_scenarios: true       # true | false
 #   qa:
 #     cases_per_ac: standard        # minimal | standard | exhaustive | integer
 #     include_negative_cases: true  # true | false
@@ -156,19 +155,15 @@ outputs:
 #     diagrams: ask                 # none | combined | per_journey | ask
 #     branch_info: ask              # ask | none
 #     task_title_max_words: 8       # integer >= 1
+#     task_detail: brief            # brief | full
 #   dev:
 #     require_tests: false          # true | false
 #
-# `ask` is a real choice, not a fallback: it keeps a question being asked
-# every run, which is what you want when the answer genuinely varies.
+# `ask` is a real choice: it keeps a question being asked every run.
 
 # --- Rules -----------------------------------------------------------------
 # Free-form. Any section name, organized by role: frontend, backend, qa, shared.
-# `shared` applies to every role. Skills interpret these as written.
-#
-# Use rules for anything a value cannot express — tone, naming conventions,
-# review expectations. Use settings for anything that is a number, a boolean,
-# or one option from a short list.
+# Use rules for what a value cannot express (tone, naming, review expectations).
 #
 #   rules:
 #     writing_style:
@@ -220,7 +215,7 @@ It uses **SpecOS v3** — a structured workflow for AI-assisted software develop
 
 | Folder / File | Purpose |
 |---|---|
-| `specs/` | One folder per feature. Each contains spec.md, tasks.md, testcases.md, CHANGELOG.md |
+| `specs/` | One folder per feature: spec.md (ACs with stable ids), tasks.md, testcases.md, CHANGELOG.md |
 | `AGENTS.md` | Project context — read automatically by AI agents |
 | `constitution.md` | The 8 rules every agent and team member follows |
 | `specos-project.yml` | Everything configurable: language, team, IDs, integrations, destinations, settings, rules |
@@ -237,15 +232,15 @@ Run `/specos-start` in your AI agent. It reads your session state and routes you
 
 ### 2. Define or update a spec (Lead role)
 
-Run `/specos-lead`. The agent will guide you through writing or refining a `spec.md` for a feature.
+Run `/specos-lead`. Explain the feature freely; the agent writes one draft and asks only what it cannot decide. The same skill changes an existing spec.
 
 ### 3. Implement a task (Dev role)
 
-Run `/specos-dev`. Provide your task ID (e.g. `SP-04`). The agent reads the spec, loads your implementation repo, and helps you build.
+Run `/specos-dev`. Provide your task key (e.g. `FK-42`). The agent reads the spec, loads your implementation repo, and helps you build.
 
 ### 4. Write or run test cases (QA role)
 
-Run `/specos-qa`. The agent generates test cases from the spec or helps you execute them.
+Run `/specos-qa`. The agent expands the Lead's testcase sketches into test cases and checks every AC is covered.
 
 ### 5. Distribute outputs
 
@@ -276,24 +271,18 @@ Run `/specos-distribute` to push specs, tasks, or test cases to your configured 
 
 All contributors (human and AI) follow the rules in `constitution.md`. The key ones:
 
-- No code is written without a `spec.md` committed to this repo.
-- Only the Lead role modifies `spec.md`.
+- No code is written without an approved `spec.md` in this repo.
+- Changes to `spec.md` require Lead approval.
 - Every spec change requires a `CHANGELOG.md` entry.
 
 ---
 
 ## Getting started
 
-```bash
-# First time setup (already done if you're reading this)
-bash install.sh
-
-# First session on this machine — will ask your name, role, and repo paths
-/specos-start
-```
+Run `/specos-start` — the first session on this machine asks your name, role, and repo paths.
 ```
 
-Fill in all `[placeholders]` using the answers collected during init. Do not leave any placeholder unfilled.
+Fill in every `[placeholder]` from the answers.
 
 ---
 

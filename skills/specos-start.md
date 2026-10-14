@@ -18,9 +18,7 @@ Look in the specs repo root for `specos-project.yml`:
 
 ### The offer
 
-Say: "These two config files are now one. I can merge them into specos-project.yml."
-
-Build the merged result and **print it in full before writing anything**:
+Say: "These two config files are now one. I can merge them into specos-project.yml." Build the merged result and **print it in full before writing anything**:
 
 - `specos-outputs.yml` contributes `version` (set it to `"2"`), `team`, `ids`, `integrations`, `outputs`
 - `specos-standards.yml` contributes `language` and every free-form section, which move under `rules:`
@@ -80,7 +78,7 @@ Leave as null any that don't apply."
 
 *(If monorepo, skip Q3 and set all paths to null.)*
 
-Do not ask about memory links here. Q3 is the last question — the map is built in Step 0.5, which handles first-time and already-running projects the same way.
+Memory links are not asked here — Step 0.5 builds the map.
 
 After collecting answers, write `local-workspace.yml` at the specs repo root:
 
@@ -93,7 +91,7 @@ implementation_repos:
   e2e: [path or null]
 ```
 
-Leave `memory_links` out of the file entirely. Step 0.5 adds it.
+Leave `memory_links` out; Step 0.5 adds it.
 
 Confirm: "local-workspace.yml saved. Welcome, [name]."
 
@@ -131,9 +129,9 @@ Linking them lets a session started here reuse what was already learned in those
 2. I'll give you the paths
 3. Skip — don't ask again"
 
-Write the answer into `memory_links` for the missing keys only. Never overwrite a key that already has a value. Then confirm in one line: "Mapped: [keys]." and continue.
+Write the answer into `memory_links` for the missing keys only, never overwriting a value. Confirm in one line: "Mapped: [keys]." 
 
-Ask at most once per session. If the user skips, write `off` — the point of `off` is that this question never returns.
+Ask at most once per session; a skip is written as `off`, so the question never returns.
 
 The resulting section:
 
@@ -160,7 +158,7 @@ For each repo key that is not `off`:
    - **Agent with no memory system:** look for `.specos/memory.md` inside the repo itself.
 3. **Absent** — the resolved location does not exist: that repo has no memory yet. Continue without it. Never create memory directories for other repos preemptively, and do not treat this as an error.
 
-Hold the resolved map for the rest of the session. Do not announce it unless the user asks, or unless 0.5a just wrote new keys.
+Hold the resolved map for the session; announce it only if asked or if 0.5a just wrote keys.
 
 ### Reading rules
 
@@ -168,8 +166,6 @@ Hold the resolved map for the rest of the session. Do not announce it unless the
 - Open an individual memory file only when its description relates to the active spec or task.
 - **Verify before trusting.** Memory is a point-in-time observation. Any file, directory, or symbol a memory names must be confirmed to still exist before you act on it. If it is stale, correct that memory file in this session.
 - **Memory never replaces a spec.** It answers *where* and *how*, never *what* or *why*. Nothing in memory authorizes writing code without a `spec.md`.
-
-Hold the resolved map for the rest of the session. Do not announce it unless the user asks.
 
 ---
 
@@ -179,17 +175,11 @@ Look for `session.md` in the specs repo root.
 
 **If session.md exists:** read it silently. Go to Step 3.
 
+**Old format** (`task_id`, `task_description` or `spec_path` present, or over 2 KB): build the new content from it (a task key becomes `task`; condense the rest into one `next` line, at most 3 `open` items, and `parked`), **print it in full and ask before replacing the file**. Name any decision buried in the old text — it belongs in the spec's CHANGELOG. If declined, keep reading the old file and ask next session.
+
 **If session.md does not exist:** go to Step 2.
 
-`session.md` and agent memory answer different questions and never substitute for each other:
-
-| | `session.md` | Agent memory |
-|---|---|---|
-| Answers | what I am working on | what I know about this repo |
-| Scope | the project | one repo, one agent |
-| Lifetime | rewritten every session | accumulates across sessions |
-| Portable | yes — same content for anyone | no — local and agent-specific |
-| Authoritative | yes, for the active task | no, always verified before use |
+`session.md` and agent memory never substitute for each other: `session.md` says what I am working on (project-wide, rewritten every session, authoritative for the active task); memory says what I know about one repo (local, accumulates, always verified before use).
 
 Read `session.md` first. It tells you which repo matters, which is what makes the memory map useful.
 
@@ -203,7 +193,7 @@ Using the `roles` from `local-workspace.yml`, ask one question:
 "What feature do you want to specify?"
 
 **If role is dev/backend/frontend only:**
-"What is your task ID or description? (e.g. SP-42 or 'implement login endpoint')"
+"What is your task key or description? (e.g. FK-42 or 'implement login endpoint')"
 
 **If role is qa only:**
 "Which spec or task do you want to work on?"
@@ -276,20 +266,21 @@ Then load and follow the instructions of the target skill.
 
 Locate the **specs repo root**: the directory that contains both `specs/` and `specos-project.yml`. This is where `session.md` must always be saved, regardless of which directory the agent is currently running from.
 
-- If you found `session.md` in Step 1, save back to that same location.
-- If this is a first session, search upward from the current directory for a folder containing `specs/` and `specos-project.yml`. Use that as the root.
+- If you found `session.md` in Step 1, save back to that same location; on a first session, search upward for the folder holding `specs/` and `specos-project.yml`.
 - Never save `session.md` inside an implementation repo (backend, frontend, e2e).
 
-Write or update `session.md` at that root with the current state:
+Rewrite `session.md` at that root **whole** with the current state — never append. It has this schema and nothing else:
 
-```markdown
-# SpecOS session
+```
 updated: YYYY-MM-DD
-
-active_feature: feature-folder-name        # can be group/sub-feature for nested specs
-task_id: TASK-XX
-task_description: Short description of the current task
-spec_path: specs/feature-name/spec.md     # e.g. specs/payments/checkout/spec.md
+active_feature: group/feature
+spec_version: 1.0
+task: KEY | [new] | null
+next: one line
+open:            # max 3, remove when resolved
+  - ...
+parked:          # other features, one line each
+  - feature: one line
 ```
 
-Use `null` for any field that does not apply. Do not commit this file — it is in `.gitignore`.
+Max 30 lines / 2 KB. Decisions go to the spec's CHANGELOG, repo learnings to that repo's memory, history stays in git — never a diary here. The spec path is `specs/<active_feature>/spec.md`. Use `null` where nothing applies. Never commit it.

@@ -39,21 +39,20 @@ The core insight: AI agents will write whatever you ask them to. SpecOS makes su
 
 Both perspectives are required. They cannot be the same logic.
 
-### The 12 skills
+### The 11 skills
 
 | Skill | Who uses it |
 |---|---|
 | `/specos-init` | Lead — first-time project setup |
 | `/specos-start` | Everyone — begins any session, runs local onboarding if needed, routes by role |
-| `/specos-lead` | Lead — builds spec + tasks collaboratively |
-| `/specos-lead-parallel` | Lead — drafts several specs in one pass |
+| `/specos-lead` | Lead — creates a spec in one draft, changes an existing one, or documents what is already built |
 | `/specos-dev` | Dev — implements with full spec context |
-| `/specos-qa` | QA — generates testcases.md from spec |
+| `/specos-qa` | QA — expands the Lead's testcase sketches into test cases |
 | `/specos-distribute` | Lead — generates outputs per specos-project.yml settings and rules |
 | `/specos-split` | Lead — splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead — groups related existing specs under a shared parent folder |
 | `/specos-config` | Lead — configures specos-project.yml interactively |
-| `/specos-status` | Everyone — shows current session state, read-only |
+| `/specos-status` | Everyone — shows current session state, read-only; `--check` runs the spec checks |
 | `/specos-help` | Everyone — lists commands and key files, no session needed |
 
 ---
@@ -73,7 +72,7 @@ SpecOS works with Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity, Winds
 
 **`local-workspace.yml`** — created once per machine on the first `/specos-start`. Stores who you are on this project: your name, roles, implementation repo paths, and memory links. Stable across sessions.
 
-**`session.md`** — updated every session. Stores the active feature, task ID, and spec path. Ephemeral — changes every time you switch tasks.
+**`session.md`** — rewritten whole every session: active feature, spec version, task, one `next` line, up to 3 `open` items, and `parked` features. Ephemeral, 30 lines at most — decisions go to the spec's CHANGELOG, repo learnings to that repo's memory.
 
 Both are always in `.gitignore`. Never committed.
 
@@ -157,7 +156,12 @@ SpecOs/
 │   ├── specos-qa.md
 │   ├── specos-distribute.md
 │   ├── specos-split.md
-│   └── specos-group.md
+│   ├── specos-group.md
+│   ├── specos-config.md
+│   ├── specos-status.md
+│   └── specos-help.md
+├── scripts/
+│   └── specos-check.sh       ← deterministic check, deployed to ~/.specos/ by the installer
 ├── adapters/
 │   ├── claude-code/          ← .claude/commands/ format
 │   ├── opencode/             ← .config/opencode/commands/ format
@@ -167,23 +171,23 @@ SpecOs/
 ├── specs/
 │   └── specos-v3/
 │       ├── spec.md
-│       ├── tasks.md
-│       ├── testcases.md
 │       └── CHANGELOG.md
 └── examples/
-    └── feature-tags/
+    ├── feature-tags/
+    └── check-fixture/        ← intentional defects, asserted by verify.sh
 ```
 
 ---
 
 ## Core files
 
-### spec.md — all in one
+### spec.md — behavior, as ACs with stable ids
 
 ```markdown
 ---
 feature: feature-name-in-kebab-case
 version: 1.0
+status: approved           # draft while open questions remain
 lead: name
 date: YYYY-MM-DD
 keywords: [relevant terms for agent search]
@@ -196,65 +200,79 @@ linked:
 ## What it does and why it exists
 [max 3 lines]
 
-## User Journeys
-
-### Journey 1 — [happy path]
-1. [step]
-
-### Journey 2 — [error path]
-1. [step]
-
 ## Acceptance Criteria
-- [ ] [verifiable criterion — verb + subject + measurable condition]
+
+### Limits
+- AC1 — The tags field accepts at most 5 tags; the 6th is not added
+- AC2 — A tag longer than 30 characters is truncated silently on confirm
+- AC3 — retired (v1.1): tags were rejected over 30 characters
+
+## Journeys                 # optional — only for a multi-step flow across screens or actors
 
 ## Out of Scope
 - [at least 1 item]
 
-## Technical Section
-### API Contracts [if applicable]
-### Data model [if applicable]
-### Technical decisions
+## Open questions           # each names the ACs it touches
 ```
 
-> No status field. Presence in the repo = approved.
+AC ids are stable: never renumbered, never reused; a removed AC stays as *retired*. Failure behavior is written as ACs, not as a separate error journey. A technical section is optional — when it is non-trivial (calculations, contracts) it goes in a separate `design.md` next to `spec.md`.
 
-### tasks.md — no checkboxes
+> `status: draft` while open questions remain, `approved` once the Lead confirms. In a change to an approved spec, an open question marks only the affected ACs `[pending]` — the spec stays approved.
+
+### tasks.md — a role view that references ACs
 
 ```markdown
 ## Backend
-- [SP-01] Description
+- [FK-927] Add tag validation to post model (AC1–AC3) v1.0
 
 ## Frontend
-- [SP-02] Description
-
-## QA
-- [SP-03] Description
+- [new] Build TagInput component (AC1, AC4) v1.0
 ```
 
-> No checkboxes. State lives in the team's task software.
-> Max 15 tasks. If you need more, split the feature.
+`[new]` until you give `/specos-distribute` the real key from your task software. The trailing `v1.0` is the spec version the task was written against. No checkboxes, no done/open state — that lives in the task software. Max 15 tasks; if you need more, split the feature. Old `[SP-01]` placeholders are still read, never silently treated as new: `/specos-distribute` asks first.
 
-### testcases.md — generated by specos-qa
+### testcases.md — sketches first, cases when QA reviews
 
 ```markdown
 # Test cases — feature-name
+> Sketches suggested by Lead, not reviewed.
+spec: v1.1
 
-## TC-01 — Title
-task: SP-03
-steps:
-  1. Step one
-  2. Step two
-expected: Expected result
+## TC-01 — Create a post with tags
+covers: AC1, AC4
 
-## TC-02 — Independent case
-task: null
+## TC-02 — Tag over 30 characters
+covers: AC2
 steps:
-  1. Step one
-expected: Expected result
+  1. Type a word longer than 30 characters and press Enter
+expected: The chip is truncated to 30 characters, no error shown
 ```
 
-> ID prefix configurable in specos-project.yml. Default: TC.
-> Additional fields are optional and free-form — never rejected.
+The Lead writes sketches only (a title and the ACs it `covers`). `/specos-qa` adds `steps:` and `expected:` and sets the `spec:` stamp. A case with `steps:` is expanded; one without is a sketch — there is no status field. Every AC must be covered by at least one case. ID prefix configurable in specos-project.yml (default `TC`); additional fields are free-form and never rejected.
+
+### Changing a spec
+
+Specs change constantly, especially during dev. Anyone who finds a gap raises a **spec change request** — classified as *clarification*, *addition*, *contradiction* or *out-of-scope* — with what was found, the proposed AC text and 1–2 options. If your role includes lead or builder, `/specos-lead` continues in change mode in the same session; otherwise the request is printed for the Lead and you keep working on what it does not block.
+
+Change mode edits the spec, bumps the version, writes a CHANGELOG entry of at most 3 lines (what / why / impact), and prints what is affected: tasks whose AC refs changed, testcases whose `covers` changed, and specs that `linked:` to this one. Only the delta gets `[new]` tasks; a task that already has a key is never edited.
+
+### Optional files
+
+- `design.md` — the *how* for one feature (calculations, contracts). Keeps `spec.md` about behavior.
+- `00-architecture.md` — context shared by a group; the group `spec.md` stays a summary plus a list.
+
+SpecOS documents them but never creates them for you.
+
+### Checking a specs repo
+
+`/specos-status --check` runs `specos-check.sh` (the installer copies it to `~/.specos/`) and prints warnings: ACs no test case covers, `covers` or task refs pointing to an AC that does not exist, `linked:` paths that are gone, a testcases stamp behind the spec version, AC ids repeated within a spec, sketches never expanded, a spec version missing from its CHANGELOG, `[new]` tasks still waiting for a key, an oversized `session.md`. Warnings only; `--strict` exits 1. `--impacts <feature>` lists the specs linking to a feature.
+
+To run it before every commit, add this to `.git/hooks/pre-commit` (SpecOS does not install it):
+
+```bash
+#!/usr/bin/env bash
+exec bash "$HOME/.specos/specos-check.sh" --strict .
+```
 
 ### specos-project.yml — everything configurable, committed
 
@@ -282,8 +300,10 @@ settings:
     include_negative_cases: true
   distribute:
     diagrams: per_journey       # none | combined | per_journey | ask
+    task_detail: brief          # brief | full
   lead:
     max_tasks: 15
+    review: draft               # draft | sections
 
 # --- Rules: free-form. Skills read these and interpret. ---
 rules:
@@ -298,7 +318,7 @@ rules:
       - "No hardcoded environment-specific values — use environment variables"
 ```
 
-**Settings vs rules** is the only distinction you need. A **setting** is a number, a boolean, or one option from a short list — the skill reads it and obeys, with no interpretation. A **rule** is a sentence — the skill reads it and interprets it. `cases_per_ac: 2` gives two cases every time; `"Direct tone, no filler"` cannot be reduced to a value.
+**Settings vs rules** is the only distinction you need. A **setting** is a number, a boolean, or one option from a short list — the skill reads it and obeys, with no interpretation. A **rule** is a sentence — the skill reads it and interprets it. `cases_per_ac: 2` aims for two cases per AC every time; `"Direct tone, no filler"` cannot be reduced to a value.
 
 Anything that can only be said in a sentence is a rule. Tone belongs there, not in settings: `neutral | conversational` would be two labels over a continuous space that each skill reads differently, which is exactly the inconsistency settings exist to remove.
 
@@ -306,7 +326,7 @@ Every setting is optional and has one documented default, so an absent `settings
 
 Rules keep the behaviour they always had: sections that read as quality gates are appended to task Acceptance Criteria, everything else is injected as a Standards section, and `specos-dev` enforces them during implementation.
 
-Run `/specos-config` to edit any of it interactively.
+Run `/specos-config` to edit any of it interactively. Set `outputs.tasks.destination: jira-csv` and `/specos-distribute` prints the tasks as a CSV (`Summary, Description, Issue Type, Parent`) ready for Jira's CSV import — no integration involved.
 
 **Settings catalog**
 
@@ -314,13 +334,16 @@ Run `/specos-config` to edit any of it interactively.
 |---|---|---|---|
 | `lead` | `max_tasks` | integer ≥ 1 | 15 |
 | `lead` | `max_journeys` | integer ≥ 1 \| none | none |
-| `lead` | `require_error_journey` | true \| false | true |
+| `lead` | `require_error_journey` | true \| false | false |
+| `lead` | `review` | draft \| sections | draft |
+| `lead` | `suggest_scenarios` | true \| false | true |
 | `qa` | `cases_per_ac` | minimal \| standard \| exhaustive \| integer | standard |
 | `qa` | `include_negative_cases` | true \| false | true |
 | `qa` | `batch_by` | journey \| ac \| all | journey |
 | `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
 | `distribute` | `branch_info` | ask \| none | ask |
 | `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
+| `distribute` | `task_detail` | brief \| full | brief |
 | `dev` | `require_tests` | true \| false | false |
 
 **The file is written in English** — keys, comments, and rules alike — regardless of `language.specs`. The two are independent: an English config file produces Spanish specs when `language.specs: es`. Rules are instructions the agent follows, and instructions are followed most reliably in English. `/specos-config` accepts a rule in any language, translates it, and shows you the English text before writing — nothing is reworded silently, and a literal string a rule requires in the output is never translated.
@@ -351,15 +374,19 @@ memory_links:
 
 ### session.md — active session state, never committed
 
-```markdown
-# SpecOS session
-updated: YYYY-MM-DD
-
-active_feature: feature-folder-name   # or group/sub-feature for nested specs
-task_id: SP-01
-task_description: Short task description
-spec_path: specs/feature-name/spec.md
 ```
+updated: YYYY-MM-DD
+active_feature: group/feature   # or just feature
+spec_version: 1.0
+task: KEY | [new] | null
+next: one line
+open:            # max 3, remove when resolved
+  - ...
+parked:          # other features, one line each
+  - feature: one line
+```
+
+Skills rewrite the whole file, never append. A session.md in the old format (`task_id`, `task_description`, `spec_path`, or over 2 KB) is shown re-written and replaced only after you agree.
 
 ---
 
@@ -369,20 +396,22 @@ spec_path: specs/feature-name/spec.md
 1. Run `curl install.sh | bash` once
 2. Run `/specos-init` — answers 7 questions, generates project config
 3. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
-4. Run `/specos-start` (or `/specos-lead` directly) for each new feature
-5. Build `spec.md` + `tasks.md` collaboratively, section by section
-6. Assign real task IDs from your task software when ready
-7. Run `/specos-distribute` to generate outputs
+4. Run `/specos-start` (or `/specos-lead` directly) for each new feature: explain it freely, answer the few questions, and get one draft — spec, tasks and testcase sketches
+5. Answer the open questions it shows; the spec becomes `approved` when you confirm
+6. Run `/specos-distribute`, create the tasks in your task software, and give back the keys in order
+7. When something changes, say "change X because Y" — `/specos-lead` handles versions, AC ids, CHANGELOG and impact
 
 ### Dev
 1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
-2. Provide task ID or description
-3. Agent loads only the relevant `spec.md` and implements in that context
+2. Provide task key or description
+3. Agent shows the task's ACs and the flows that will be tested, then implements in that context
+4. If the spec has a gap, it raises a spec change request instead of guessing
+5. At the end it prints a closing block for the PR or ticket
 
 ### QA
 1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
-2. Agent loads `spec.md` collaboratively builds `testcases.md`
-3. Review, adjust, add custom fields freely
+2. Agent loads the spec and the Lead's sketches, and expands them in batches
+3. Review, adjust, add cases live, add custom fields freely
 4. Run `/specos-distribute` to push output
 
 ---
@@ -405,7 +434,7 @@ Complete conversational flow transcripts (init → lead → dev → qa → distr
 - Windows support
 - Automatic translation — language is configured in specos-project.yml but content is written by the agent in the configured language, not translated
 - Per-feature or per-role setting overrides — `settings` is project-wide
-- Status fields anywhere
+- Status tracking of tasks or test cases — the only state is the spec's `status` and immutable facts (spec version, AC refs, presence of a ticket key)
 
 ---
 

@@ -1,106 +1,69 @@
-# Jira Tasks — feature-tags
+# Tasks — feature-tags
 
-> These tasks are created as subtasks of User Story PROJ-87.
-> Copy each block into Jira manually, or use output-jira.md with the AI.
+> Output of `/specos-distribute` with `task_detail: brief`. Only `[new]` tasks are printed; each ticket points to the spec instead of copying it.
+> Create them as subtasks of User Story PROJ-87, then give the keys back in order and `tasks.md` is updated.
 
+## First distribution — spec v1.0, twelve `[new]` tasks
+
+# Add tags array field to Post model
+Spec: specs/feature-tags/spec.md (v1.0) · AC7
+Array column plus migration; no separate table (see design.md).
 ---
-
-# [BE] Add tags field to Post model
-
-## Scope
-Add `tags` as an ArrayField to the Post model. Run migration. Field accepts up to 5 strings, each up to 30 characters. Normalize to lowercase before saving. Silently deduplicate before persisting.
-
-## Acceptance Criteria
-- Tags field added to Post model with correct constraints
-- Migration runs without errors on local and staging
-- Tags are stored in lowercase regardless of input
-- Duplicate tags in the same post are deduplicated before saving
-
+# Expose tags in Post serializer
+Spec: specs/feature-tags/spec.md (v1.0) · AC7
+Accept and return `tags` on create and PATCH.
+---
+# Validate maximum five tags in serializer
+Spec: specs/feature-tags/spec.md (v1.0) · AC3, AC8
+Reject more than 5 tags with 422 `invalid_tags`.
+---
+# Normalize tags to lowercase
+Spec: specs/feature-tags/spec.md (v1.0) · AC6
+Normalize in the backend before saving; the frontend shows what was typed.
+---
+# Deduplicate tags before saving
+Spec: specs/feature-tags/spec.md (v1.0) · AC4
+Drop repeated tags silently; return no error.
+---
+# Build TagInput component
+Spec: specs/feature-tags/spec.md (v1.0) · AC1, AC2
+Reusable chips input; Enter and comma confirm, X removes a chip.
+---
+# Disable field at five tags
+Spec: specs/feature-tags/spec.md (v1.0) · AC3
+Show "Maximum 5 tags per post" and re-enable when a chip is removed.
+---
+# Ignore duplicate tags silently
+Spec: specs/feature-tags/spec.md (v1.0) · AC4
+No chip, no message; the field clears.
+---
+# Integrate TagInput in create and edit forms
+Spec: specs/feature-tags/spec.md (v1.0) · AC1, AC10
+Wire to form state; pre-populate with existing tags on edit.
 ## Dev Notes
 ⚠️ Branch from: `main`
 ⚠️ PR to: `main`
-ℹ️ Run: `python manage.py makemigrations && python manage.py migrate`
-
 ---
-
-# [BE] Update Post serializer to handle tags
-
-## Scope
-Update the Post serializer to accept and return the `tags` field. Validate: maximum 5 tags per post, each up to 30 characters. Return 422 with `invalid_tags` error code if validation fails.
-
-## Acceptance Criteria
-- PATCH /api/posts/:id accepts `tags` array in request body
-- Response 200 includes updated `tags` array
-- Response 422 returned when more than 5 tags
-- Unit tests cover: limit of 5, duplicates, normalization, truncation
-
+# Show tags on public post view
+Spec: specs/feature-tags/spec.md (v1.0) · AC9
+Read-only chips on the post page and list cards.
 ---
-
-# [BE] Unit tests for tags validation
-
-## Scope
-Write unit tests covering all tag validation scenarios from the spec.
-
-## Acceptance Criteria
-- Test: adding exactly 5 tags succeeds
-- Test: adding 6 tags returns 422
-- Test: duplicate tags are deduplicated
-- Test: tags normalized to lowercase
-- Test: tag silently truncated to 30 chars
-
+# Test creating a post with tags
+Spec: specs/feature-tags/spec.md (v1.0) · AC1, AC2, AC7, AC9
+Run TC-01 once the frontend and backend tasks are merged.
 ---
+# Test editing tags and the limits
+Spec: specs/feature-tags/spec.md (v1.0) · AC3, AC4, AC10
+Run TC-02 and TC-03 on an existing post.
 
-# [FE] Build TagInput component
+> Give me the keys in order (e.g. FK-930 FK-931) and I'll replace `[new]` in tasks.md, or edit it by hand.
 
-## Scope
-Create a reusable TagInput component. Confirms tag on Enter or comma keypress. Displays confirmed tags as chips with an X button to remove. Disables input and shows "Maximum 5 tags" when limit is reached. Silently ignores duplicate tags.
+## Second distribution — spec v1.1, one `[new]` task
 
-## Acceptance Criteria
-- Enter and comma confirm the current tag
-- Each tag displays as a chip with remove button
-- Field disabled with message when 5 tags are present
-- Duplicate tag is ignored without error message
-- Component is reusable and not coupled to post logic
+The twelve keyed tasks are skipped.
 
----
+# Truncate tags to 30 chars on save
+Spec: specs/feature-tags/spec.md (v1.1) · AC11
+Cut any tag over 30 characters silently before persisting; replaces the rejection of AC5.
 
-# [FE] Integrate TagInput in post create and edit forms
-
-## Scope
-Add TagInput to the post creation and edit forms. Wire to form state. Ensure tags are included in the API request payload on submit. Pre-populate with existing tags when opening edit form.
-
-## Acceptance Criteria
-- TagInput visible in create form
-- TagInput visible in edit form pre-populated with existing tags
-- Tags included in PATCH request body on save
-- Existing tags load correctly when opening edit form
-
----
-
-# [FE] Display tags on public post view
-
-## Scope
-Show tags as read-only chips on the public post detail page and post list cards.
-
-## Acceptance Criteria
-- Tags visible on post detail page
-- Tags visible on post list cards
-- No tag container shown if post has no tags
-
----
-
-# [QA] Tags — full test suite
-
-## Scope
-Execute the complete test suite for the tags feature per the spec.
-
-## Acceptance Criteria
-- Happy path: create post with 3 tags, verify visible on public view
-- Edit tags: remove one, add a new one, verify update
-- Limit: attempt 6th tag, verify input blocked with correct message
-- Duplicate: add same tag twice, verify only one instance saved
-- Normalization: input "Django" and "DJANGO", verify stored as "django"
-
-## Dev Notes
-⚠️ Test alongside: `feat/tags` (backend + frontend)
-ℹ️ Run: `python manage.py migrate` before testing locally
+> Give me the keys in order (e.g. FK-930 FK-931) and I'll replace `[new]` in tasks.md, or edit it by hand.

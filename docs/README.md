@@ -23,10 +23,10 @@ All flows use the `feature-tags` example project (see `examples/feature-tags/`).
 | Flow | Skill | What it shows |
 |------|-------|---------------|
 | [01 — init](flows/01-init.md) | `/specos-init` | 6-question setup, files generated |
-| [02 — lead](flows/02-lead.md) | `/specos-lead` | Spec built section by section, approval loop |
-| [03 — dev](flows/03-dev.md) | `/specos-dev` | Task picked up, implemented with spec context |
-| [04 — qa](flows/04-qa.md) | `/specos-qa` | Test cases generated batch by batch |
-| [05 — distribute](flows/05-distribute.md) | `/specos-distribute` | Jira tasks, Confluence doc, and QA steps generated |
+| [02 — lead](flows/02-lead.md) | `/specos-lead` | One draft for a new feature, change mode for an existing one |
+| [03 — dev](flows/03-dev.md) | `/specos-dev` | Task picked up with its ACs, a spec gap raised, closing block |
+| [04 — qa](flows/04-qa.md) | `/specos-qa` | Sketches expanded batch by batch, draft shown before writing |
+| [05 — distribute](flows/05-distribute.md) | `/specos-distribute` | Brief `[new]` tasks, keys replaced in order, steps to test, Confluence |
 
 ---
 

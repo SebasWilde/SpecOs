@@ -1,25 +1,20 @@
 # Tasks — feature-tags
 
 ## Backend
-
-- [TAGS-01] Add `tags` field as ArrayField to the Post model (migration included)
-- [TAGS-02] Update Post serializer to include `tags` in request and response
-- [TAGS-03] Validate in serializer: maximum 5 tags, each tag maximum 30 chars
-- [TAGS-04] Normalize tags to lowercase before saving
-- [TAGS-05] Silently deduplicate tags before persisting
-- [TAGS-06] Unit tests: limit of 5 tags, duplicates, normalization, truncation
+- [TAGS-01] Add tags array field to Post model (AC7) v1.0
+- [TAGS-02] Expose tags in Post serializer (AC7) v1.0
+- [TAGS-03] Validate maximum five tags in serializer (AC3, AC8) v1.0
+- [TAGS-04] Normalize tags to lowercase (AC6) v1.0
+- [TAGS-05] Deduplicate tags before saving (AC4) v1.0
+- [new] Truncate tags to 30 chars on save (AC11) v1.1
 
 ## Frontend
-
-- [TAGS-07] Create TagInput component: text field + chips with X to remove
-- [TAGS-08] Trigger tag confirmation with Enter and comma
-- [TAGS-09] Show "Maximum 5 tags" message and disable field when limit is reached
-- [TAGS-10] Silently ignore duplicate tag (no error message)
-- [TAGS-11] Integrate TagInput in post creation and edit forms
-- [TAGS-12] Display tags as chips on the public post view
+- [TAGS-06] Build TagInput component (AC1, AC2) v1.0
+- [TAGS-07] Disable field at five tags (AC3) v1.0
+- [TAGS-08] Ignore duplicate tags silently (AC4) v1.0
+- [TAGS-09] Integrate TagInput in create and edit forms (AC1, AC10) v1.0
+- [TAGS-10] Show tags on public post view (AC9) v1.0
 
 ## QA
-
-- [TAGS-13] Happy path: create post with 3 tags, verify they appear on public view
-- [TAGS-14] Edit tags: remove one existing tag and add a new one, verify update
-- [TAGS-15] Limit: attempt to add 6th tag, verify input is blocked with correct message
+- [TAGS-11] Test creating a post with tags (AC1, AC2, AC7, AC9) v1.0
+- [TAGS-12] Test editing tags and the limits (AC3, AC4, AC10) v1.0

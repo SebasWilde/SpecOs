@@ -31,15 +31,14 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 |---|---|---|
 | `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-project.yml |
 | `/specos-start` | Everyone | Begins any session, routes by role and session state |
-| `/specos-lead` | Lead | Builds spec + tasks collaboratively, assigns SP-XX IDs, collects real IDs |
-| `/specos-lead-parallel` | Lead | Drafts several related specs in one pass |
-| `/specos-dev` | Dev | Loads only the relevant spec, writes to implementation repo |
-| `/specos-qa` | QA | Generates testcases.md collaboratively, assigns TC-XX IDs |
-| `/specos-distribute` | Lead / QA | Generates outputs per specos-project.yml settings + rules |
+| `/specos-lead` | Lead | New spec in one draft, change an existing spec, or document what exists |
+| `/specos-dev` | Dev | Loads only the relevant spec, shows the task's ACs, writes to implementation repo |
+| `/specos-qa` | QA | Expands the Lead's sketches into test cases, every AC covered |
+| `/specos-distribute` | Lead / QA | Brief `[new]` tasks, tests, Confluence, diagrams — per specos-project.yml |
 | `/specos-split` | Lead | Splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead | Groups related existing specs under a shared parent folder |
 | `/specos-config` | Lead | Configures specos-project.yml interactively |
-| `/specos-status` | Everyone | Shows current session state (read-only) |
+| `/specos-status` | Everyone | Shows current session state; `--check` runs the spec checks (read-only) |
 | `/specos-help` | Everyone | Lists all commands and key files (no session needed) |
 
 ---
@@ -48,30 +47,45 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 
 **Lead — new feature:**
 ```
-/specos-start → construction perspective
-→ spec.md section by section → Lead validates each
-→ tasks.md collaboratively → Lead adjusts
-→ SP-XX IDs assigned → real IDs collected → tasks.md updated
+/specos-start → construction perspective → explain the feature freely
+→ 0–4 questions only for real gaps → ONE draft: spec + tasks + sketches + CHANGELOG
+→ answer the open questions → status: approved
+→ /specos-distribute → create tasks → give the keys in order → [new] replaced
+```
+
+**Anyone — the spec has a gap:**
+```
+stop → classify: clarification | addition | contradiction | out-of-scope
+→ request: what was found + proposed AC text + 1–2 options
+→ lead/builder role: change mode in the same session, then resume with the new AC ids
+→ other roles: hand the printed block to the Lead, keep working on what it does not block
+```
+
+**Lead — change a spec:**
+```
+"change X because Y" → edit the spec, bump version, CHANGELOG (max 3 lines)
+→ impact list: tasks · testcases · linked specs → [new] tasks only for the delta
 ```
 
 **Dev — implement task:**
 ```
-/specos-start → provide task ID or description
-→ agent loads spec.md → implement in context
+/specos-start → provide task key or description
+→ agent shows the task's ACs + sketched flows → implement
+→ closing block for the PR: key · spec vX.Y · covers AC… · changes · deviations
 ```
 
-**QA — generate test cases:**
+**QA — expand test cases:**
 ```
-/specos-start → provide feature or task ID
-→ agent loads spec.md → testcases.md collaboratively
-→ QA edits freely → /specos-distribute
+/specos-start → provide feature or task key
+→ agent loads spec + sketches → expands in batches, shows the draft before writing
+→ "add TC: ..." adds cases live → /specos-distribute
 ```
 
 **Solo builder (agent takes breaking perspective):**
 ```
 /specos-start → construction → finish feature
 → agent proposes: "Want me to take the breaking perspective?"
-→ agent generates testcases.md, flags edge cases
+→ /specos-qa from the spec alone, flags gaps as spec change requests
 ```
 
 **Person with multiple roles:**
@@ -87,10 +101,12 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 
 | File | Who writes | What |
 |---|---|---|
-| `spec.md` | Lead + agent (collaborative) | Journeys, ACs, technical — everything |
-| `tasks.md` | Lead + agent (collaborative) | Tasks by role, no checkboxes, max 15 |
-| `testcases.md` | QA + agent (collaborative) | Test cases with TC-XX IDs, free-form fields |
-| `CHANGELOG.md` | Lead | Spec changes with date and reason |
+| `spec.md` | Lead + agent | ACs with stable ids (`AC1`, `AC21b`), out of scope, open questions. `status: draft \| approved` |
+| `tasks.md` | Lead + agent | Tasks by role: `[new]` or `[KEY]`, AC refs, spec version. No state, max 15 |
+| `testcases.md` | Lead (sketches) + QA | `## TC-01 — title`, `covers:` ACs; QA adds `steps:` / `expected:` |
+| `CHANGELOG.md` | Lead | Spec changes — what / why / impact, max 3 lines |
+| `design.md` | Lead (optional) | The how, when non-trivial. Never automated |
+| `00-architecture.md` | Lead (optional) | Context shared by a group. Never automated |
 
 ---
 
@@ -98,31 +114,44 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 
 ```markdown
 ## Backend
-- [SP-01] Description
+- [FK-927] Add tag validation to post model (AC1–AC3) v1.0
 
 ## Frontend
-- [SP-02] Description
-
-## QA
-- [SP-03] Description
+- [new] Build TagInput component (AC1, AC4) v1.0
 ```
 
-No checkboxes. State lives in the team's task software.
+No checkboxes, no state. Tasks reference ACs; they never restate them. Old `[SP-01]` placeholders are left alone; `/specos-distribute` asks before treating them as new.
 
 ---
 
 ## testcases.md format
 
 ```markdown
-## TC-01 — Title
-task: SP-03
+# Test cases — feature-name
+> Sketches suggested by Lead, not reviewed.
+spec: v1.1
+
+## TC-01 — Create a post with tags
+covers: AC1, AC4
+
+## TC-02 — Tag over 30 characters
+covers: AC2
 steps:
-  1. Step one
-  2. Step two
-expected: Expected result
+  1. Type a word longer than 30 characters and press Enter
+expected: Chip truncated to 30 characters, no error
 ```
 
-Additional fields are optional and free-form — agent never rejects them.
+A case with `steps:` is expanded, one without is a sketch — no status field. Additional fields are free-form.
+
+---
+
+## Checks
+
+```
+/specos-status --check            warnings: uncovered ACs, dangling refs, stale stamp, [new] tasks...
+/specos-status --check --strict   same, exit code 1 on any warning
+specos-check.sh --impacts <feature>   specs that link to a feature
+```
 
 ---
 
@@ -144,16 +173,18 @@ memory_links:            # auto | a path | off
   e2e: off
 ```
 
-**`session.md`** — what you are working on right now. Rewritten every session.
+**`session.md`** — what you are working on right now. Rewritten whole every session, 30 lines at most.
 
-```markdown
-# SpecOS session
+```
 updated: YYYY-MM-DD
-
-active_feature: feature-folder-name
-task_id: SP-01
-task_description: Short description
-spec_path: specs/feature-name/spec.md
+active_feature: group/feature
+spec_version: 1.0
+task: KEY | [new] | null
+next: one line
+open:            # max 3
+  - ...
+parked:          # other features
+  - feature: one line
 ```
 
 Both always in `.gitignore`. Never committed.
@@ -255,9 +286,9 @@ outputs:   { tasks: { destination: manual }, ... }
 
 # --- Settings: closed schema. Skills obey. Every key optional. ---
 settings:
-  lead:       { max_tasks: 15, max_journeys: none, require_error_journey: true }
+  lead:       { max_tasks: 15, max_journeys: none, require_error_journey: false, review: draft, suggest_scenarios: true }
   qa:         { cases_per_ac: standard, include_negative_cases: true, batch_by: journey }
-  distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8 }
+  distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8, task_detail: brief }
   dev:        { require_tests: false }
 
 # --- Rules: free-form. Skills interpret. Any section, by role. ---
@@ -290,13 +321,16 @@ Anything that can only be said in a sentence — tone, naming style, review expe
 |---|---|---|---|
 | `lead` | `max_tasks` | integer ≥ 1 | 15 |
 | `lead` | `max_journeys` | integer ≥ 1 \| none | none |
-| `lead` | `require_error_journey` | true \| false | true |
+| `lead` | `require_error_journey` | true \| false | false |
+| `lead` | `review` | draft \| sections | draft |
+| `lead` | `suggest_scenarios` | true \| false | true |
 | `qa` | `cases_per_ac` | minimal \| standard \| exhaustive \| integer | standard |
 | `qa` | `include_negative_cases` | true \| false | true |
 | `qa` | `batch_by` | journey \| ac \| all | journey |
 | `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
 | `distribute` | `branch_info` | ask \| none | ask |
 | `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
+| `distribute` | `task_detail` | brief \| full | brief |
 | `dev` | `require_tests` | true \| false | false |
 
 An absent key uses its default silently. An invalid value is reported once, then falls back to the default — a bad config never blocks a session. `ask` is a real choice: it keeps a question being asked every run.
@@ -311,11 +345,11 @@ Projects with `specos-outputs.yml` and `specos-standards.yml` are offered a merg
 
 ## Golden rules
 
-- **No code without a spec** — repo presence = approved
-- **No status fields** — task software is the source of truth
+- **No code without an approved spec** — `status: approved`, in the repo, up to date; commit before handing to anyone else
+- **No task or test state** — task software is the source of truth; the spec's `status` is the only one
 - **Max 15 tasks** — if more, split the feature
 - **Spec change >50% of content** — create a new feature
-- **Every spec change** — add CHANGELOG.md entry
+- **Every spec change** — Lead approves the text, then a CHANGELOG.md entry (what / why / impact, max 3 lines)
 
 ---
 

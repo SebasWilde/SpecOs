@@ -69,6 +69,36 @@ create_symlinks() {
   fi
 }
 
+
+# --- Retired skills and the check script ---
+# Skills removed from skills/ must also leave the agent directories: cp never deletes.
+RETIRED_SKILLS=(specos-lead-parallel)
+
+remove_retired() {
+  local name f removed_any=false
+  for name in "${RETIRED_SKILLS[@]}"; do
+    for f in \
+      "$HOME/.claude/commands/$name.md" \
+      "$HOME/.config/opencode/commands/$name.md" \
+      "$HOME/.opencode/commands/$name.md" \
+      "$HOME/.gemini/commands/$name.toml" \
+      "$REPO_ROOT/.cursor/rules/$name.mdc"; do
+      if [[ -e "$f" ]]; then rm -f "$f"; removed_any=true; fi
+    done
+  done
+  [[ "$removed_any" == "true" ]] && info "Removed retired skill(s): ${RETIRED_SKILLS[*]}"
+  return 0
+}
+
+# specos-check.sh is deployed once per machine, outside any agent directory, so
+# /specos-status --check can run it from any project.
+install_check_script() {
+  mkdir -p "$HOME/.specos"
+  cp -f "$REPO_ROOT/scripts/specos-check.sh" "$HOME/.specos/specos-check.sh"
+  chmod +x "$HOME/.specos/specos-check.sh"
+  success "Check script → ~/.specos/specos-check.sh"
+}
+
 # --- Agent installers ---
 
 _write_gemini_toml() {
@@ -186,6 +216,8 @@ install_generic() {
 
 # --- Main ---
 create_symlinks
+remove_retired
+install_check_script
 
 echo ""
 info "Detecting installed agents..."

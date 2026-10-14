@@ -26,7 +26,7 @@ Search `specs/` for the matching spec.md and load it.
 
 ## Step 2 — Define the sub-features
 
-Present a brief summary of the loaded spec (feature name, number of ACs, number of tasks) and ask:
+Summarize the loaded spec (name, ACs, tasks) and ask:
 "How do you want to split this spec? Give me the names and a one-line description for each sub-feature."
 
 Wait for the Lead's answer.
@@ -75,11 +75,11 @@ linked:
 ---
 ```
 
-**tasks.md** — tasks for that sub-feature only, using the same format as specos-lead.
+**tasks.md** — tasks for that sub-feature only, in the `specos-lead` format (`[new]` or the existing key, AC refs, spec version). AC ids are kept as they were — never renumbered.
 
 **CHANGELOG.md** — initial entry only.
 
-**testcases.md** — draft generated from the sub-spec ACs and journeys. Mark it as a draft at the top.
+**testcases.md** — the matching sketches only (`## TC-01 — title` + `covers:`), no steps, with the header "Sketches suggested by Lead, not reviewed."
 
 ### Rewrite the group spec.md
 
@@ -106,19 +106,12 @@ date: [today]
 
 ### Archive original files
 
-Rename `specs/[original-feature]/tasks.md` → `specs/[original-feature]/tasks.archived.md`
-Rename `specs/[original-feature]/testcases.md` → `specs/[original-feature]/testcases.archived.md`
-Rename `specs/[original-feature]/CHANGELOG.md` → `specs/[original-feature]/CHANGELOG.archived.md`
-
-Do not delete them.
+In `specs/[original-feature]/`, rename `tasks.md`, `testcases.md` and `CHANGELOG.md` to `tasks.archived.md`, `testcases.archived.md` and `CHANGELOG.archived.md`. Do not delete them.
 
 ---
 
 ## Step 5 — Save session
 
-Update `session.md`:
-- `active_feature`: `[original-feature]/[first-sub-feature]`
-- `spec_path`: `specs/[original-feature]/[first-sub-feature]/spec.md`
+Rewrite the whole `session.md` (schema in `/specos-start` Step 6) with `active_feature: [original-feature]/[first-sub-feature]`.
 
-Confirm to the Lead:
-"Split complete. [N] sub-specs created under specs/[original-feature]/. Original files archived."
+Confirm: "Split complete. [N] sub-specs under specs/[original-feature]/. Originals archived."

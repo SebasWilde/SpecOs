@@ -1,64 +1,45 @@
 # Test cases — feature-tags
+> Sketches suggested by Lead, not reviewed.
+spec: v1.1
 
-## TC-01 — Create post with tags (happy path)
-task: TAGS-13
+## TC-01 — Create a post with tags
+covers: AC1, AC2, AC7, AC9
 steps:
   1. Open the post creation form
-  2. Type "django" in the tags field and press Enter
-  3. Type "python" and press comma
-  4. Type "backend" and press Enter
-  5. Publish the post
-expected: Three tag chips appear below the field. Tags are visible on the public post view as "django", "python", "backend".
-
-## TC-02 — Edit tags on existing post
-task: TAGS-14
-steps:
-  1. Go to an existing post with tags and click "Edit"
-  2. Click the X on the "python" chip to remove it
-  3. Type "api" in the tags field and press Enter
-  4. Save the post
-expected: Tags updated — "python" removed, "api" added. Changes visible on public post view.
-
-## TC-03 — Tag limit blocked at 6th tag
-task: TAGS-15
-steps:
-  1. Open the post creation form
-  2. Add 5 tags (any words)
-  3. Attempt to type a 6th tag in the field
-expected: The tags field is disabled. Message "Maximum 5 tags per post" is visible. No 6th tag is added.
-
-## TC-04 — Duplicate tag is silently ignored
-task: TAGS-10
-steps:
-  1. Open the post creation form
-  2. Type "django" and press Enter
-  3. Type "django" again and press Enter
-expected: Only one "django" chip appears. No error message shown. Field clears silently.
-
-## TC-05 — Tags normalized to lowercase
-task: TAGS-04
-steps:
-  1. Open the post creation form
-  2. Type "Django" and press Enter
-  3. Type "PYTHON" and press Enter
+  2. Type "django" and press Enter; type "python" and press comma
+  3. Click the X on the "python" chip
   4. Publish the post
-expected: Tags are stored and displayed as "django" and "python" (lowercase).
+expected: Only "django" is saved, and its chip appears on the public post
 
-## TC-06 — Tag truncated at 30 characters
-task: TAGS-03
+## TC-02 — Tag limit blocked at 6th tag
+covers: AC3
 steps:
-  1. Open the post creation form
-  2. Type a word longer than 30 characters and press Enter
-expected: Tag chip is created with the input silently truncated to 30 characters. No error message.
+  1. Open the post creation form and add 5 tags
+  2. Try to type a 6th tag
+  3. Remove one chip
+expected: At 5 tags the field is disabled and shows "Maximum 5 tags per post"; after removing a chip it is enabled again
 
-## TC-07 — Tags saved on post update (PATCH endpoint)
-task: TAGS-02
+## TC-03 — Duplicate tag is ignored
+covers: AC4
 steps:
-  1. Send PATCH /api/posts/:id with body {"tags": ["django", "python"]}
-expected: Response 200 with tags field containing ["django", "python"]. Tags persisted.
+  1. Type "django" and press Enter
+  2. Type "django" again and press Enter
+expected: Only one "django" chip; no error; the field clears
 
-## TC-08 — API rejects more than 5 tags
-task: TAGS-03
+## TC-04 — API rejects more than 5 tags
+covers: AC8
+
+## TC-05 — Tags are saved in lowercase
+covers: AC6
 steps:
-  1. Send PATCH /api/posts/:id with body {"tags": ["a","b","c","d","e","f"]}
-expected: Response 422 with {"error": "invalid_tags", "detail": "Maximum 5 tags per post"}.
+  1. Type "Django" and press Enter; type "PYTHON" and press Enter
+  2. Publish the post
+expected: The post shows "django" and "python"
+
+## TC-06 — Over-long tag on an edited post
+covers: AC10, AC11
+steps:
+  1. Open an existing post and click Edit
+  2. Add a tag of 40 characters
+  3. Save
+expected: The chip is truncated to 30 characters; no error, no toast

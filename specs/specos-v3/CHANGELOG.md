@@ -1,5 +1,10 @@
 # Changelog — specos-v3
 
+## 2026-10-13 v2.7
+- What: one draft instead of ~8 gates; stable AC ids; spec change protocol; brief `[new]` tickets; fixed `session.md`; `specos-check.sh`; `lead-parallel` removed
+- Why: real use on a 64-spec project: approvals with no new information, no way to change a spec, tickets edited by hand, an 87 KB `session.md`
+- Impact: old specs still work; 13 settings; `require_error_journey` and `cases_per_ac` change meaning; see "Design decisions (v2.7)" in spec.md
+
 ## 2026-08-22 v2.6
 - `specos-project.yml` introduced — `specos-outputs.yml` and `specos-standards.yml` merge into one committed config file holding everything configurable about a project
 - Problem solved: the split between the two old files had no defensible line. Both were committed, both were project-level, and the boundary cut through single concerns — `ids.testcase_prefix` lived in outputs while *how many* test cases to write would have gone to standards. `language` was declared in **both files**, a duplication the merge removes by construction

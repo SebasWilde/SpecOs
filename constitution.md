@@ -10,18 +10,18 @@
 
 1. **Construction perspective always exists.**
    Someone defines and approves the spec before any work starts.
-   No feature is built without an approved `spec.md` pushed to the repo.
+   No feature is built without an approved `spec.md` in the repo.
 
 2. **Breaking perspective always exists.**
    The perspective that challenges and tests cannot be the same logic that built.
-   Human QA or agent QA — one of them always runs, and it is never the same agent that wrote the spec.
+   Human QA or agent QA — one of them always runs. The Lead's testcase sketches are seeds; the independent perspective is the QA invocation, working from the spec alone.
 
 3. **No agent writes code without a spec.**
-   `spec.md` present in this repo = approved. If it is absent, the agent does not proceed.
+   A `spec.md` with `status: approved`, present in this repo and up to date, lets agents proceed. If it is absent or still `draft`, the agent does not. Committing the spec may follow implementation, but is mandatory before handing the work to another person or agent.
 
-4. **Only the Lead modifies spec.md.**
-   Devs and QA read specs. They do not change them.
-   If an edge case is found during dev or testing, escalate to the Lead — do not edit the spec directly.
+4. **Changes to spec.md require Lead approval.**
+   An agent may write them only after that approval.
+   If an edge case is found during dev or testing, raise a spec change request to the Lead — do not edit the spec on your own.
 
 5. **A capped number of tasks per feature.**
    The cap is `settings.lead.max_tasks` in `specos-project.yml`, 15 by default. A feature that needs more is too large — split it into sub-features with their own specs. The number lives in the config, not here, so there is only one place to change it.
@@ -34,7 +34,7 @@
    Do not overwrite an existing spec. Create a new one with a new folder.
 
 8. **Every spec change requires a CHANGELOG.md entry.**
-   Format: date — what changed — why it changed.
+   Format: what / why / impact, at most 3 lines.
    No silent edits. No undocumented changes.
 
 ---
@@ -43,8 +43,8 @@
 
 A feature can start development when:
 
-- `spec.md` exists in `specs/[feature]/` and was pushed to the repo by the Lead
-- `tasks.md` exists with tasks assigned by role
+- `spec.md` exists in `specs/[feature]/` with `status: approved` and is up to date (committed before handing over, see rule 3)
+- `tasks.md` exists with tasks assigned by role, each referencing its ACs
 - The whole team read the spec
 
 ---
@@ -53,7 +53,7 @@ A feature can start development when:
 
 A feature is complete when:
 
-- All tasks in `tasks.md` are closed in the team's task software
+- All tasks in `tasks.md` are closed in the team's task software (`[new]` tasks have a key)
 - Tests pass in CI
 - `CHANGELOG.md` updated if the spec changed during development
 
@@ -61,6 +61,6 @@ A feature is complete when:
 
 ## Communication rules
 
-- If the spec changes during development: update `spec.md` + `CHANGELOG.md` before continuing
+- If the spec changes during development: Lead approves the text, then `spec.md` + `CHANGELOG.md` are updated before continuing
 - If a task is blocking another: note it in the PR, do not stay silent
-- If an edge case is not in the spec: escalate to the Lead, do not assume or invent
+- If an edge case is not in the spec: raise a spec change request to the Lead, do not assume or invent

@@ -27,13 +27,14 @@ Read `specos-project.yml` — it holds destinations, ID prefixes, settings, and 
 | `diagrams` | `none` \| `combined` \| `per_journey` \| `ask` | `ask` | How many flow diagrams to generate. Only `ask` asks. |
 | `branch_info` | `ask` \| `none` | `ask` | Whether to ask for branch/PR info before generating tasks |
 | `task_title_max_words` | integer ≥ 1 | `8` | Maximum words in a task title |
+| `task_detail` | `brief` \| `full` | `brief` | `brief` = title, spec reference, 1–3 lines of scope. `full` = the complete ticket template |
 
-An unknown key under `settings.distribute`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then fall back to that setting's default and continue. Collect every such problem into a single message; never abort over config.
+An unknown key under `settings.distribute`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then that setting falls back to its default. Collect every problem into one message; never abort over config.
 
-**Rules** — collect all entries under `rules` for the task's role and for `shared`, across every section. Apply them when generating output, as described below. Any `writing_style` rules govern how you word what you produce. Rules are sentences: follow them, never validate them. A rule's own language never changes the output language — that is `language.outputs` alone.
+**Rules** — collect all entries under `rules` for the task's role and for `shared`, across every section, and apply them as described below. `writing_style` rules govern how you word the output. Rules are sentences: follow them, never validate them. A rule's own language never changes the output language — that is `language.outputs` alone.
 
 Based on the selection and the `active_feature` in session.md (which may be `group/sub-feature`):
-- Tasks → read `specs/[active_feature]/tasks.md`
+- Tasks → read `specs/[active_feature]/tasks.md` and the matching `spec.md`; output only the `[new]` tasks. Tasks that already have a key are skipped. If some have an old `SP-` placeholder (`[SP-01]`), ask once: "[N] tasks with an SP- placeholder: treat them as new?" Yes: output them like `[new]`. No: skip them. With none, say "No [new] tasks."
 - Test cases → read `specs/[active_feature]/testcases.md`
 - Confluence doc → read `specs/[active_feature]/spec.md`
 - Flow diagrams → read `specs/[active_feature]/spec.md`
@@ -55,58 +56,61 @@ When `branch_info` is `ask`, ask only: "Do you have branch or PR info for these 
 
 Wait for the answer. If option 1, ask for the branch/PR info now. If option 2, ask per task before generating it.
 
-Then, for each task in `tasks.md`, output the following structure as raw markdown — never wrap it in a code block:
+Then, for each `[new]` task, output it as raw markdown — never wrap it in a code block. Print every role's tasks at once, grouped by role, no pauses.
+
+**`task_detail: brief`** (default) — the spec is the source of truth, so the ticket points to it instead of copying it:
 
 # [TITLE]
-
-## Context
-[Only include this section when the task requires background to be understood — e.g. a relevant API contract, data model decision, or architectural constraint from spec.md. If the scope is self-explanatory, omit this section entirely and go straight to Scope.]
-
-## Scope
-[Full description of what must be implemented. Copy every relevant detail from tasks.md and cross-reference the matching ACs and technical notes from spec.md. Do not summarize — include specifics: endpoint names, field names, validation rules, business logic, edge cases. Use prose; switch to bullets only when listing parallel steps or items with no logical sequence.]
-
-## Acceptance Criteria
-- [criterion — one sentence that states the condition and the observable outcome. Include enough context to be self-contained: what triggers it, what the result must be. Example: "When a user submits the form with an empty email field, the API returns 422 with an `email` error key." Do not copy vague phrases from the spec — rewrite them to be concrete and verifiable. Maximum 2 lines per criterion.]
-- [Append any entries from `rules` whose section name suggests a quality gate or acceptance condition (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). One bullet per entry. If nothing applies, omit.]
-
-## Standards
-[Only include this section when `rules` has entries for this task's role or `shared` in any non-AC section (e.g. `code_style`, `api_conventions`, `accessibility`, `security`, `naming`). List each entry as a bullet grouped by section name. If nothing applies, omit this section entirely.]
-
+Spec: specs/[feature]/spec.md (v[X.Y]) · AC1–AC3
+[1–3 lines: what to build, in prose. Name only what the ACs do not already say.]
 ## Dev Notes
-[Only include this section when branch/PR/command info was provided. If none was given, omit entirely.]
+[Only when branch/PR/command info was provided.]
 ⚠️ Branch from: `[branch]`
 ⚠️ PR to: `[branch]`
 ℹ️ Run: `[command if any]`
 
----
+The AC refs and version come from the task line in `tasks.md`. Brief has no Acceptance Criteria or Standards section: the ACs live in the spec, and `specos-dev` enforces `rules`.
+
+**`task_detail: full`** — the complete template:
+
+# [TITLE]
+
+## Context
+[Only when the task needs background (API contract, data model decision, architectural constraint from spec.md). Otherwise omit.]
+
+## Scope
+[What must be implemented, from tasks.md and the matching ACs and technical notes: endpoint and field names, validation rules, business logic, edge cases. Prose; bullets only for parallel steps.]
+
+## Acceptance Criteria
+- [One self-contained sentence per referenced AC: trigger and observable result, max 2 lines.]
+- [Append `rules` entries from quality-gate sections (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). Omit if none.]
+
+## Standards
+[Only when `rules` has non-AC entries for this role or `shared` (e.g. `code_style`, `security`). Bullets grouped by section name. Otherwise omit.]
+
+## Dev Notes
+[As in brief, only when provided.]
 
 Formatting rules (strict — apply before printing):
-- No blank line between `# TITLE` and the first `## Section`
-- Exactly one blank line between sections (after the section content, before the next `##`)
-- No blank lines inside a section's content
-- No trailing spaces on any line
-- No double blank lines anywhere in the output
-- If a section is omitted (Context or Dev Notes), do not leave a blank line in its place
+- Separate tasks with a line containing only `---`
+- No blank line between `# TITLE` and the next line; exactly one blank line between `##` sections
+- No blank lines inside a section's content, no trailing spaces, no double blank lines
+- An omitted section leaves no blank line in its place
 
 Content rules:
-- Title: at most `task_title_max_words` words (default 8), imperative verb first (e.g. "Add JWT validation to /auth endpoint")
-- Scope: never summarize — reproduce all relevant details from tasks.md and spec.md for that task
-- ACs: simple bullets, no nested lists. Each AC must state the condition + the expected outcome in one self-contained sentence. No vague language ("should work", "handle correctly") — rewrite to be concrete even if the spec is vague. Always append role defaults from `rules`.
-- Standards: show when `rules` has any non-AC entries for that role or shared. Group by section name. Simple bullets.
-- Never invent features or technical details not in the spec
-- Infer obvious technical details only when clearly implied by the spec
+- Title: at most `task_title_max_words` words (default 8), imperative verb first ("Add JWT validation to /auth endpoint")
+- Invent nothing absent from the spec; no vague language ("should work")
 
-Print tasks sequentially, grouped by role. Pause between role groups and ask: "Ready for the next group?"
+**Destination `jira-csv`** (`outputs.tasks.destination`) — print one CSV for Jira's CSV import in a fenced block instead of the blocks above. Columns `Summary,Description,Issue Type,Parent`: Summary = the title; Description = the ticket body per `task_detail`; Issue Type = `Sub-task`; Parent = the story key, asked once ("Parent issue key, or none?"). Double-quote every field, doubling inner `"`. Offer to save it as `specs/[feature]/outputs/jira-tasks.csv`.
 
-After printing all tasks, ask:
-"Create these tasks in your task software, then come back with the real IDs so I can update tasks.md."
+After printing, say:
+"Give me the keys in order (e.g. FK-930 FK-931) and I'll replace `[new]` in tasks.md, or edit it by hand."
 
-When the Lead provides the real IDs, update `specs/[feature-name]/tasks.md` replacing each SP-XX placeholder with the real ID.
-Confirm: "tasks.md updated with real IDs: [list the mapping]"
+When the Lead gives the keys, replace each `[new]` in printed order, keep the AC refs and version, and confirm the mapping; if the count differs, ask. With no keys, `[new]` stays and is offered again next time.
 
 ### Test cases output
 
-For each test case in `testcases.md`, generate a format appropriate for the destination:
+For each expanded test case in `testcases.md` (one with `steps:`), generate a format appropriate for the destination. List sketches (no `steps:`) as "not yet reviewed — run /specos-qa" and do not format them.
 
 **Manual / generic:**
 Print the raw `testcases.md` content formatted for readability.
@@ -189,7 +193,7 @@ When `diagrams` is `ask`, ask only: "How many diagrams do you need?
 
 If option 3: use one combined diagram when the spec has 2 journeys or fewer; use one per journey when there are 3 or more. Tell the Lead which approach you chose and why.
 
-Then generate Mermaid diagrams from the journeys in `spec.md` using this format:
+If the spec has no journeys, say so in one line and stop. Otherwise generate Mermaid diagrams from the journeys in `spec.md` using this format:
 
 ````markdown
 ## [Journey name or "Full flow"]

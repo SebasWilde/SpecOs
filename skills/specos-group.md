@@ -77,9 +77,7 @@ For each moved spec.md, add `group: [group-name]` to its frontmatter.
 
 ## Step 4 — Save session
 
-Update `session.md`:
-- `active_feature`: `[group-name]/[first-spec]`
-- `spec_path`: `specs/[group-name]/[first-spec]/spec.md`
+Rewrite the whole `session.md` (schema in `/specos-start` Step 6) with `active_feature: [group-name]/[first-spec]`.
 
 Confirm to the Lead:
 "Group created. [N] specs moved to specs/[group-name]/. Group summary written to specs/[group-name]/spec.md."

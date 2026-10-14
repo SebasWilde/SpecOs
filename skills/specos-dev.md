@@ -6,15 +6,15 @@ You are helping a developer implement a task. Your job is to load only the relev
 
 ## Step 1 — Identify the task
 
-If `session.md` exists and has a `task_id`, load it silently. Skip to Step 2.
+If `session.md` exists and has a `task` other than `null`, load it silently (for `[new]`, match by `next` or title in `active_feature`'s `tasks.md`). Skip to Step 2.
 
 If no task is loaded, ask:
-"What is your task ID or description? (e.g. SP-42 or 'implement login endpoint')"
+"What is your task key or description? (e.g. FK-42 or 'implement login endpoint')"
 
-Search all `tasks.md` files in `specs/` for the task ID or a description match — look in both `specs/*/tasks.md` and `specs/*/*/tasks.md`. Skip group-level folders (they have no tasks.md).
+Search all `tasks.md` files in `specs/` for the key or a title match — look in both `specs/*/tasks.md` and `specs/*/*/tasks.md`. Skip group-level folders (they have no tasks.md). Old `[SP-01]` lines are legacy placeholders, not ticket keys.
 
-If found: confirm — "Found task [ID] in feature [feature-name]: [task description]. Is this correct?"
-If not found: "I couldn't find that task in any spec. Check the task ID or ask your Lead."
+If found, confirm: "Found task [key] in [feature-name]: [title]. Correct?"
+If not: "I couldn't find that task in any spec. Check the key or ask your Lead."
 
 ---
 
@@ -22,7 +22,11 @@ If not found: "I couldn't find that task in any spec. Check the task ID or ask y
 
 Read `specs/[feature-name]/spec.md` for the matched feature.
 
-Do not read any other spec. Do not load unrelated context.
+Read no other spec and load no unrelated context.
+
+**Refuse when the spec is not ready.** If it has `status: draft` or its Open questions is not empty and the task cannot be separated from them, say "This spec is still a draft — tell the Lead" and stop. If an AC the task references is marked `[pending]`, refuse only this task and name the AC. A spec without `status` is treated as approved.
+
+**Show the task's ACs** — the full text of each AC in the task's refs (`AC1–AC3`, ranges included) — and the sketched flows in `testcases.md` that cover them, as a self-check before coding.
 
 Read `AGENTS.md` to understand the project structure (stack, conventions, repo layout).
 
@@ -57,27 +61,15 @@ If the project is a monorepo, work in the current directory.
 
 ## Step 3.5 — Load that repo's memory before exploring it
 
-**Do this before reading any source file in the implementation repo.** Separate repos mean separate agent memory: what you learned last time you worked in the backend repo is not in scope when the session starts from the specs repo. This step recovers it.
+**Before reading any source file in the implementation repo**, recover what was learned there. Resolve the location from `memory_links` in `local-workspace.yml`:
 
-Resolve the memory location for the target repo from `memory_links` in `local-workspace.yml`:
-
-- **`off`** — skip memory entirely for this repo. Go to Step 4.
+- **`off`** — skip memory. Go to Step 4.
 - **A path** — use it verbatim.
-- **`auto`, or the key is missing** — derive it from the running agent's own convention:
-  - **Claude Code:** `~/.claude/projects/<absolute repo path with every `/` replaced by `-`>/memory`
-  - **Any agent that scopes memory per project directory:** apply that agent's convention.
-  - **Agent with no memory system:** look for `.specos/memory.md` inside the repo.
+- **`auto`, or the key is missing** — derive it from the running agent's convention. Claude Code: `~/.claude/projects/<absolute repo path with every `/` replaced by `-`>/memory`. Agent with no memory system: `.specos/memory.md` inside the repo.
 
-If the resolved location does not exist, that repo has no memory yet — continue without it and go to Step 4. Never create memory directories for other repos preemptively.
+If the location does not exist, continue without memory; never create directories for other repos. If the key was missing, mention once at the end: "`[key]` isn't mapped in local-workspace.yml — run `/specos-start` to map it."
 
-If the key was missing rather than set, mention it once at the end of the session: "`[key]` isn't mapped in local-workspace.yml — run `/specos-start` to map it." Do not stop to ask mid-task.
-
-Then:
-- Read the **index only** (`MEMORY.md` or equivalent). Open an individual memory file only when its description relates to this task.
-- **Verify before trusting.** Any path, module, or symbol a memory names must be confirmed to still exist before you act on it. If it is stale, correct that memory file now.
-- **Memory never replaces the spec.** It tells you *where* code lives and *how* this repo does things. It never tells you *what* to build — that is the spec's job, and nothing in memory authorizes work without one.
-
-If memory already answers where this task's code belongs, go straight there. Do not re-explore what memory and verification already confirmed.
+Read the **index only** and open an entry only when its description relates to this task. **Verify before trusting**: confirm any path, module, or symbol it names still exists, and correct a stale entry now. Memory tells you *where* and *how*, never *what* — nothing in it authorizes work without a spec. If it already answers where this task's code belongs, go straight there.
 
 ---
 
@@ -89,19 +81,20 @@ Work from the spec. For each piece of code you write:
 - Follow conventions from `AGENTS.md`
 - Do not use `print()` or `console.log()` unless the spec explicitly requires logging output
 
-If you encounter something that requires a spec change (missing AC, ambiguous requirement, discovered edge case):
-"This case is not covered by the spec: [description]. I'll stop here — this needs a spec update before I continue."
-Do not invent requirements.
+On a gap (missing AC, ambiguity, a wrong AC, an edge case): stop and follow the spec change request protocol in `specos-lead` — classify it, state what you found, the proposed AC text and 1–2 options. If your role includes lead or builder, continue in change mode in this same session; otherwise print the request for the Lead and keep working on what it does not block. Changes to spec.md require Lead approval; an agent may write them only after that approval. Never invent requirements.
 
 ---
 
 ## Step 5 — Save session
 
-After the session, update `session.md`:
-- `task_id`: the current task ID
-- `task_description`: short description
-- `active_feature`: the feature folder name
-- `spec_path`: path to the spec
+Rewrite the whole `session.md`, never append — schema in `/specos-start` Step 6.
+
+Then print a closing block for the PR or ticket (no file):
+```
+[key] · spec [feature] v[X.Y] · covers AC…
+Spec changes during dev: v[X]→v[Y] (…)
+Deviations: …
+```
 
 ---
 
@@ -110,16 +103,16 @@ After the session, update `session.md`:
 If you learned something about the **implementation repo** that will still be true next month, write it to **that repo's** memory location — the one resolved in Step 3.5 — not to the specs repo's memory. Knowledge has to land where the next session will look for it.
 
 Worth recording:
-- Where a kind of code lives, and why it lives there
-- A convention this repo follows that is not written in `AGENTS.md` or `specos-project.yml`
-- A gotcha that cost you time and will cost the next session the same
-- Which files a feature actually touched, when that mapping is not obvious from the spec
+- Where a kind of code lives, and why
+- A convention not written in `AGENTS.md` or `specos-project.yml`
+- A gotcha that cost you time
+- Which files a feature touched, when not obvious from the spec
 
 Not worth recording:
 - The narrative of this session
 - Anything already in the spec, `AGENTS.md`, `specos-project.yml`, or the commit history
 - Anything you did not verify
 
-If the agent has no memory system, append to `.specos/memory.md` in that repo and make sure `.specos/` is gitignored there.
+With no memory system, append to `.specos/memory.md` in that repo (gitignored).
 
-Keep entries short and factual, and update an existing entry rather than adding a near-duplicate. Memory is local and per-machine — never commit it, and never treat it as a substitute for a spec.
+Keep entries short and factual; update an existing entry rather than adding a near-duplicate. Memory is local — never commit it, and it never substitutes for a spec.

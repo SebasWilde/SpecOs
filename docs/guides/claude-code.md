@@ -20,7 +20,7 @@ Run the installer from the SpecOS repo root:
 curl -fsSL https://raw.githubusercontent.com/SebasWilde/SpecOs/main/install.sh | bash
 ```
 
-The installer detects Claude Code automatically and copies the 6 skill files to `~/.claude/commands/`:
+The installer detects Claude Code automatically and copies the 11 skill files to `~/.claude/commands/`:
 
 ```
 ~/.claude/commands/
@@ -29,7 +29,12 @@ The installer detects Claude Code automatically and copies the 6 skill files to 
 ├── specos-lead.md
 ├── specos-dev.md
 ├── specos-qa.md
-└── specos-distribute.md
+├── specos-distribute.md
+├── specos-split.md
+├── specos-group.md
+├── specos-config.md
+├── specos-status.md
+└── specos-help.md
 ```
 
 It also creates two symlinks in the SpecOS repo root:
@@ -42,7 +47,7 @@ It also creates two symlinks in the SpecOS repo root:
 ls ~/.claude/commands/specos-*.md
 ```
 
-You should see all 6 files. If you see them, skills are ready to use from any Claude Code session.
+You should see all 11 files. If you see them, skills are ready to use from any Claude Code session.
 
 ---
 
@@ -116,19 +121,14 @@ Claude Code reads `session.md` silently (if it exists) and routes you to the rig
 
 After `/specos-start`, if your role is `lead`, you'll be routed to `/specos-lead`.
 
-The agent builds the spec **section by section**, waiting for your approval at each step:
+Explain the feature freely. The agent asks 0–4 questions, only for real gaps, then writes **one draft**:
 
-1. Feature summary
-2. User journeys (happy paths + error cases)
-3. Acceptance Criteria
-4. Out of Scope
-5. Technical section *(optional)*
-6. Tasks grouped by role
-
-At the end, it writes:
-- `specs/[feature-name]/spec.md`
-- `specs/[feature-name]/tasks.md`
+- `specs/[feature-name]/spec.md` — ACs with stable ids, out of scope, open questions
+- `specs/[feature-name]/tasks.md` — tasks as `[new]`, each referencing its ACs
+- `specs/[feature-name]/testcases.md` — sketches only
 - `specs/[feature-name]/CHANGELOG.md`
+
+In chat you only see the open questions and the assumptions the agent made for you. Answer them and the spec becomes `approved`. To change a spec later, say "change X because Y" — the agent bumps the version, writes the CHANGELOG entry and lists what is affected.
 
 > See the full conversational flow at [`docs/flows/02-lead.md`](../flows/02-lead.md)
 
@@ -145,17 +145,17 @@ At the end, it writes:
 /specos-start
 ```
 
-Provide your task ID (e.g., `SP-01` or `TAGS-01`). The agent:
+Provide your task key (e.g., `TAGS-01`). The agent:
 1. Finds the task in `specs/*/tasks.md`
-2. Loads only the relevant `spec.md`
-3. Shows you the exact scope and relevant ACs
-4. Implements in that context
+2. Loads only the relevant `spec.md` (it refuses a draft)
+3. Shows you the task's ACs and the flows that will be tested
+4. Implements in that context, and closes with a block for your PR
 
 > See the full conversational flow at [`docs/flows/03-dev.md`](../flows/03-dev.md)
 
 **Tips for Claude Code:**
 - Claude Code can read and edit implementation files directly. The agent will navigate to the right files based on `AGENTS.md` paths.
-- If the spec is ambiguous, the agent will stop and tell you — escalate to the Lead rather than guessing.
+- If the spec has a gap, the agent stops and writes a spec change request — hand it to the Lead rather than guessing.
 - Session is saved after each task so `/specos-start` the next day picks up automatically.
 
 ---
@@ -168,9 +168,9 @@ Provide your task ID (e.g., `SP-01` or `TAGS-01`). The agent:
 
 Select role `QA`, provide the feature name. The agent:
 1. Loads the spec
-2. Proposes test cases in batches (one per journey or AC group)
-3. Waits for approval before the next batch
-4. Writes `specs/[feature]/testcases.md`
+2. Loads the Lead's sketches and expands them into test cases in batches
+3. Shows the draft in chat before writing anything
+4. Writes `specs/[feature]/testcases.md` with a `spec: vX.Y` stamp
 
 > See the full conversational flow at [`docs/flows/04-qa.md`](../flows/04-qa.md)
 
@@ -190,11 +190,11 @@ The agent generates formatted outputs ready to paste:
 
 | Output | Destination |
 |--------|-------------|
-| Jira tasks | One block per task, copy into Jira as subtasks |
+| Tasks | Brief `[new]` tickets that point to the spec; give back the keys and `tasks.md` is updated |
 | Confluence doc | Structured page, paste into your Confluence space |
-| Steps to test | QA checklist, paste into your test management tool |
+| Steps to test | Reviewed test cases, paste into your test management tool |
 
-All outputs are saved to `specs/[feature]/outputs/` and printed in-session.
+All outputs are printed in-session.
 
 > See the full output format at [`docs/flows/05-distribute.md`](../flows/05-distribute.md)
 
@@ -221,6 +221,6 @@ This removes `~/.claude/commands/specos-*.md` and the repo symlinks. Project fil
 | `/specos-start` | Everyone | Every session |
 | `/specos-lead` | Lead | New feature |
 | `/specos-dev` | Dev | Pick up a task |
-| `/specos-qa` | QA | After spec approved |
+| `/specos-qa` | QA | After the Lead's sketches exist |
 | `/specos-distribute` | Lead | Before pushing to Jira/Confluence |
 | `bash uninstall.sh` | Anyone | Remove SpecOS from machine |

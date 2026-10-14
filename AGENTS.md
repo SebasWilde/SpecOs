@@ -17,13 +17,15 @@
 ```
 specs/
 └── [feature-name]/              ← single feature
-    ├── spec.md          ← journeys, ACs, technical — everything
-    ├── tasks.md         ← subtasks by role, no checkboxes, no status fields
-    ├── testcases.md     ← QA test cases with TC-XX IDs
-    └── CHANGELOG.md     ← spec change history
+    ├── spec.md          ← ACs with stable ids, out of scope, open questions
+    ├── tasks.md         ← tasks by role: [new] or [KEY], AC refs — no checkboxes, no state
+    ├── testcases.md     ← sketches and QA test cases (TC-XX) that cover ACs
+    ├── CHANGELOG.md     ← spec change history
+    └── design.md        ← optional: the how, when non-trivial
 
 └── [group-name]/                ← group of related features
     ├── spec.md          ← domain summary + list of sub-specs only (type: group)
+    ├── 00-architecture.md  ← optional: context shared by the group
     └── [sub-feature]/
         ├── spec.md
         ├── tasks.md
@@ -33,9 +35,10 @@ specs/
 
 - All specs live in `specs/`. Features can be flat or nested under a group.
 - Group `spec.md` files have `type: group` in frontmatter — agents skip them for implementation.
-- No agent writes code without a `spec.md` present in this repo.
-- Only the Lead role modifies `spec.md`.
-- Repo presence = approved. No status field in the spec.
+- No agent writes code without an approved `spec.md` in this repo (committing may follow implementation, but is mandatory before handing work to another person or agent).
+- Changes to `spec.md` require Lead approval; an agent may write them only after that approval.
+- `spec.md` frontmatter has `status: draft | approved`. `draft` while open questions remain; `approved` only after the Lead confirms.
+- The spec's ACs are the single source of truth. `tasks.md` and `testcases.md` reference AC ids and never restate them.
 
 ---
 
@@ -96,8 +99,8 @@ Rules: read the memory index first and open only the entries that match the task
 
 ## What the agent MUST NEVER do
 
-- Never write code without a `spec.md` present in this repo
-- Never modify `spec.md` unless the active role is Lead
+- Never write code without an approved `spec.md` in this repo
+- Never modify `spec.md` without Lead approval of the change
 - Never change the database schema without creating a migration
 - Never add dependencies without updating the dependencies file
 - Never commit directly to `main` or `master`
@@ -125,13 +128,12 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 |---|---|
 | `/specos-start` | Begin any session — lead, dev, QA, or resume |
 | `/specos-init` | First-time project setup (run once per project) |
-| `/specos-lead` | Create or update a spec collaboratively |
-| `/specos-lead-parallel` | Draft several related specs in one pass |
+| `/specos-lead` | Create, change or document a spec |
 | `/specos-dev` | Implement a task with full spec context |
-| `/specos-qa` | Generate test cases from a spec |
+| `/specos-qa` | Expand testcase sketches into test cases |
 | `/specos-distribute` | Generate outputs per specos-project.yml settings and rules |
 | `/specos-split` | Split a large spec into sub-specs under a group folder |
 | `/specos-group` | Group related existing specs under a shared parent folder |
 | `/specos-config` | Configure specos-project.yml interactively |
-| `/specos-status` | Show current session state (read-only) |
+| `/specos-status` | Show current session state; `--check` runs the spec checks (read-only) |
 | `/specos-help` | List all commands and key files |

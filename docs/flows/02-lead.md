@@ -1,15 +1,13 @@
 # Flow: /specos-lead
 
-> **When to run:** Lead, at the start of every new feature.
-> **What it does:** Builds spec.md and tasks.md collaboratively, section by section, waiting for approval at each step.
+> **When to run:** Lead, for every new feature and every later change to its spec.
+> **What it does:** New feature — one draft instead of a stream of approvals. Existing feature — change mode: version, AC ids, CHANGELOG and impact handled for you.
 
 ---
 
-## Full conversational transcript
+## Part 1 — A new feature
 
-This transcript shows the Lead building the `feature-tags` spec (the same one in `examples/feature-tags/`). Each section is proposed by the agent and approved or adjusted by the Lead before moving on.
-
----
+This transcript builds the `feature-tags` spec (the one in `examples/feature-tags/`). The Lead explains freely, the agent asks only what it cannot decide, writes one draft, and shows only what needs a decision.
 
 > **User**
 > ```
@@ -18,10 +16,7 @@ This transcript shows the Lead building the `feature-tags` spec (the same one in
 
 > **Agent**
 >
-> Session loaded. Welcome back.
->
-> Roles: `lead, backend`
-> No active feature.
+> Roles: `lead, backend`. No active feature.
 >
 > What feature do you want to specify today?
 
@@ -29,106 +24,79 @@ This transcript shows the Lead building the `feature-tags` spec (the same one in
 
 > **User**
 >
-> Post tags — users should be able to add tags to their posts
+> Post tags. Users add up to 5 tags to a post, as chips. Enter or comma confirms one. Duplicates are ignored, tags are stored lowercase, and they show on the public post. They can edit them later too. Filtering by tag comes later, not now.
 
 ---
 
 > **Agent**
 >
-> Starting `/specos-lead` for feature: **post-tags**.
+> `specs/feature-tags/` does not exist — new mode. Two questions, because the rest is clear:
 >
-> I'll build the spec section by section. Approve each section before we move to the next.
->
-> ---
->
-> **Section 1 of 5 — Feature summary**
->
-> Proposed:
->
-> > Users need to organize and filter their posts by category. Tags allow labeling each post with keywords to make it easier to search and navigate related content.
->
-> Approve, or tell me what to change.
+> 1. What happens when someone types a 6th tag — block the field, or accept and reject on save?
+> 2. Is there a maximum length for one tag?
 
 ---
 
 > **User**
 >
-> approved
+> 1. Block the field with a message. 2. 30 characters.
 
 ---
 
 > **Agent**
 >
-> **Section 2 of 5 — User journeys**
+> Draft written to `specs/feature-tags/`:
 >
-> Proposed:
+> - `spec.md` — 10 ACs in 3 groups, one journey, out of scope, `status: draft`
+> - `tasks.md` — 12 tasks, all `[new]`, each with its AC refs
+> - `testcases.md` — 4 sketches (no steps) for the main flows
+> - `CHANGELOG.md` — v1.0
 >
-> **Journey 1 — Add tags when creating a post**
-> 1. The user is in the post creation form
-> 2. Types a word in the tags field and presses Enter or comma
-> 3. The tag appears as a chip/badge below the field
-> 4. The user can add up to 5 tags per post
-> 5. The user publishes the post — tags are saved and appear visible on the post
+> I added one journey because the flow crosses screens (create form → public post → edit form). Everything else, failure behavior included, is an AC.
 >
-> **Journey 2 — Edit tags on an existing post**
-> 1. The user goes to one of their posts and clicks "Edit"
-> 2. Sees the current tags as removable chips
-> 3. Can remove a tag by clicking the X on the chip
-> 4. Can add new tags as long as they don't exceed the limit of 5
-> 5. Saves the changes — tags are updated on the post
+> **Assumptions I made for you**
+> - A tag over 30 characters is rejected with an error (AC5)
+> - The API answers 422 with `invalid_tags` past 5 tags (AC8)
+> - Only the post owner can edit tags (AC10)
 >
-> **Journey 3 — Tag limit exceeded**
-> 1. The user tries to add a 6th tag
-> 2. The field is disabled and shows: "Maximum 5 tags per post"
-> 3. The user cannot add more tags until removing one
->
-> **Journey 4 — Duplicate tag**
-> 1. The user tries to add a tag that already exists on the post
-> 2. The system silently ignores the duplicate
-> 3. The field clears without adding the repeated chip
->
-> Approve, or tell me what to change.
+> **Open questions**
+> - Q1 (AC5): reject or truncate silently? You did not say.
 
 ---
 
 > **User**
 >
-> approved
+> Q1 — reject with an error. The rest is fine.
 
 ---
 
 > **Agent**
 >
-> **Section 3 of 5 — Acceptance Criteria**
+> Applied. No open questions left; `status: approved`.
 >
-> Proposed (one verifiable criterion per observable behavior):
->
-> - [ ] The tags field accepts Enter and comma as separators to confirm a tag
-> - [ ] Each tag displays as a chip with an X button to remove
-> - [ ] The maximum tags per post is exactly 5 — the 6th attempt is not added
-> - [ ] Duplicate tags on the same post are silently ignored
-> - [ ] Tags are saved when publishing or updating the post
-> - [ ] Tags are visible on the public post view
-> - [ ] Each tag has a maximum of 30 characters — silently truncated on confirm
-> - [ ] Tags are saved in lowercase regardless of the user's input
->
-> Approve, or tell me what to change.
+> Next: `/specos-distribute` prints the tasks. Create them in your task software and give me the keys.
+
+Nothing was shown section by section; the Lead read one draft and answered one question.
 
 ---
+
+## Part 2 — A change (two weeks later)
+
+QA reported that rejecting a long tag interrupts the writing flow. Dev found it while working on `TAGS-03`.
 
 > **User**
 >
-> for the truncation, I want it to be silent — no error shown to the user
+> change AC5: truncate silently instead of rejecting. QA says the error interrupts typing. Found during TAGS-03.
 
 ---
 
 > **Agent**
 >
-> Updated:
+> `specs/feature-tags/` exists — change mode. Proposed text:
 >
-> - [ ] Each tag has a maximum of 30 characters — **silently truncated on confirm, no error shown**
+> > AC5 → retired (v1.1). New **AC11** — A tag longer than 30 characters is truncated silently on confirm.
 >
-> All other criteria unchanged. Approve?
+> Approve?
 
 ---
 
@@ -140,146 +108,29 @@ This transcript shows the Lead building the `feature-tags` spec (the same one in
 
 > **Agent**
 >
-> **Section 4 of 5 — Out of Scope**
+> Spec now v1.1. CHANGELOG entry:
 >
-> Proposed:
->
-> - Filtering posts by tag (next feature)
-> - Global or system-suggested tags
-> - Tags with custom colors
-> - Tag limit at the account level (only at the post level)
->
-> Approve, or tell me what to add or remove.
-
----
-
-> **User**
->
-> approved
-
----
-
-> **Agent**
->
-> **Section 5 of 5 — Technical section** *(optional)*
->
-> Do you want to include a technical section? This is useful for API contracts, data model decisions, or notes for the dev team.
->
-> Reply with `yes`, `no`, or describe what to include.
-
----
-
-> **User**
->
-> yes — add API contracts and data model. Tags live in the Post as an array, no separate table. Backend normalizes to lowercase.
-
----
-
-> **Agent**
->
-> Proposed technical section:
->
-> **API Contracts**
->
-> `PATCH /api/posts/:id`
-> ```json
-> // Request body (partial):
-> { "tags": ["django", "python", "backend"] }
->
-> // Response 200:
-> { "id": "uuid", "tags": ["django", "python", "backend"], "updated_at": "..." }
->
-> // Response 422 — if more than 5 tags:
-> { "error": "invalid_tags", "detail": "Maximum 5 tags per post" }
+> ```
+> ## 2026-03-18 v1.1
+> - What: AC5 retired, AC11 added — a tag over 30 characters is truncated silently instead of rejected
+> - Why: QA reported that rejecting the tag interrupted the writing flow (found during TAGS-03)
+> - Impact: TAGS-03 is closed, so a [new] task covers AC11; no testcase covered AC5; no linked specs
 > ```
 >
-> **Data model**
-> ```
-> Post (existing table — add field):
->   tags: ArrayField(CharField(max_length=30), max_length=5, default=list)
-> No separate table — tags live in the post as an array.
-> ```
+> **Impact**
+> - Tasks whose refs include AC5: none (`TAGS-03` refs AC3, AC8)
+> - Testcases covering AC5: none (the sketches TC-01–TC-04 cover other ACs)
+> - Specs that link to this one: none
 >
-> **Technical decisions**
-> - Array instead of separate table: tags are simple strings with no relationships. A separate table adds unnecessary complexity.
-> - Backend lowercase normalization: the frontend shows input as the user types it (UX), but the backend normalizes before saving.
-> - Silent truncation to 30 chars: chosen over rejection to avoid interrupting the writing flow.
->
-> Approve?
+> Added `[new] Truncate tags to 30 chars on save (AC11) v1.1`. `TAGS-03` was not touched.
 
----
-
-> **User**
->
-> approved
-
----
-
-> **Agent**
->
-> Spec complete. Building tasks.
->
-> ---
->
-> **Tasks — proposed list**
->
-> ## Backend
-> - [SP-01] Add `tags` field as ArrayField to the Post model (migration included)
-> - [SP-02] Update Post serializer to include `tags` in request and response
-> - [SP-03] Validate in serializer: maximum 5 tags, each tag maximum 30 chars
-> - [SP-04] Normalize tags to lowercase before saving
-> - [SP-05] Silently deduplicate tags before persisting
-> - [SP-06] Unit tests: limit of 5 tags, duplicates, normalization, truncation
->
-> ## Frontend
-> - [SP-07] Create TagInput component: text field + chips with X to remove
-> - [SP-08] Trigger tag confirmation with Enter and comma
-> - [SP-09] Show "Maximum 5 tags" message and disable field when limit is reached
-> - [SP-10] Silently ignore duplicate tag (no error message)
-> - [SP-11] Integrate TagInput in post creation and edit forms
-> - [SP-12] Display tags as chips on the public post view
->
-> ## QA
-> - [SP-13] Happy path: create post with 3 tags, verify they appear on public view
-> - [SP-14] Edit tags: remove one existing tag and add a new one, verify update
-> - [SP-15] Limit: attempt to add 6th tag, verify input is blocked with correct message
->
-> Total: 15 tasks. Approve, or tell me what to adjust.
-
----
-
-> **User**
->
-> approved. Once we create the tasks in Jira I'll give you the real IDs.
-
----
-
-> **Agent**
->
-> Understood. Using `SP-XX` as placeholders for now. Replace them with real IDs after running `/specos-distribute` and creating the tasks in Jira.
->
-> Writing files...
->
-> ✓ `specs/feature-tags/spec.md` — version 1.0
-> ✓ `specs/feature-tags/tasks.md`
-> ✓ `specs/feature-tags/CHANGELOG.md` — initial entry
->
-> Session updated.
->
-> ---
->
-> **Spec is approved.** Its presence in the repo is the approval signal — no status field needed.
->
-> **Next steps:**
-> - Run `/specos-distribute` to generate Jira-ready task output
-> - Assign real IDs, then hand off to dev with `/specos-start`
-> - QA runs `/specos-qa` to generate test cases from this spec
+The ids of the other ACs did not change, so every other task and test case still points at the right thing.
 
 ---
 
 ## Notes
 
-- The agent proposes each section and waits for explicit approval before continuing. It never moves forward on its own.
-- If you say "add X" or "change Y", the agent shows the updated version and asks for approval again.
-- Once files are written, the spec version is `1.0`. Any future change bumps it to `1.1`, `1.2`, etc. and gets a CHANGELOG entry.
-- The `SP-XX` placeholders are intentional — real IDs come from your task software after distribution.
+- `review: sections` (in `specos-project.yml`) restores the old section-by-section approvals.
+- A change that would rewrite more than half of the spec is proposed as a new feature instead.
+- Open questions in a change mark only the affected ACs `[pending]`; the spec stays approved and only the tasks that reference those ACs wait.
+- "Document what already exists" runs as-is mode: the agent asks permission before reading any implementation code.
