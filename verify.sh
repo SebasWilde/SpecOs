@@ -436,6 +436,14 @@ OLD_MODES=$(grep -rIn -E "brief \\?\| full|brief \| full" "$REPO_ROOT/README.md"
 [[ "$OLD_MODES" -eq 0 ]] || { bad "$OLD_MODES place(s) still list task_detail as brief | full"; V28_BAD=$((V28_BAD+1)); }
 [[ $V28_BAD -eq 0 ]] && ok "v2.8 contracts: never-commit line, closing summary, commit message, ticket modes, open rule"
 
+# v2.9: the message before any question, assumptions in the spec, gates on triggers.
+V29_BAD=0
+for k in "What I understood" "Assumptions (I decided these; confirm or change)" "Open questions" "A1 · " "Q1 · " "my proposal:" "Files: specs/" "Never cite an id" "## Assumptions" "## Decisions" "Opening a gate because" "more than 5 assumptions" "more than 15 ACs" "No assumptions, no open questions" "Lead's language"; do
+  grep -qF "$k" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead lacks: $k"; V29_BAD=$((V29_BAD+1)); }
+done
+grep -q "32-3-assets-and-loans" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead has no complete example of the message"; V29_BAD=$((V29_BAD+1)); }
+[[ $V29_BAD -eq 0 ]] && ok "v2.9 contracts: understood/assumptions message with example, Assumptions section, gates"
+
 # Optional destination: jira-csv must be readable by distribute and settable through config.
 JC_BAD=0
 for f in skills/specos-distribute.md skills/specos-config.md specos-project.yml README.md; do
@@ -472,7 +480,7 @@ bash "$CHECK" "$FIX" --session "$FIX/oversized-session.md" --strict >/dev/null 2
 expect() {
   if grep -qF -- "$1" <<< "$CHECK_OUT"; then ok "fixture: $1"; else bad "fixture is missing the warning: $1"; fi
 }
-expect "specs checked: 5 (groups skipped: 1)"
+expect "specs checked: 8 (groups skipped: 1)"
 expect "2 AC(s) have no test case covering them: AC3, AC21b"
 expect "task [FK-101] references AC7, which does not exist"
 expect "task [FK-102] references AC4, which is retired"
@@ -490,7 +498,9 @@ expect "AC1×2, AC2×2 — ids repeated, legacy per-journey numbering?"
 expect "info  testcases.md has expanded cases but no spec: stamp"
 expect "info  1 legacy SP- placeholder(s)"
 expect "info  2 legacy SP- placeholder(s)"
-expect "13 warning(s) in 3 spec(s)"
+expect "status is draft but there is no ## Assumptions or ## Open questions with content"
+expect "status is approved but ## Assumptions still has 1 item(s) — unconfirmed assumptions"
+expect "15 warning(s) in 5 spec(s)"
 
 # What must NOT be reported matters as much: the control spec, the legacy spec,
 # the group and the old [SP-01] key all parse without a warning.
@@ -505,17 +515,27 @@ if grep -qi "crash\|awk:" <<< "$CHECK_OUT"; then bad "the check script crashed o
 
 # session.md `open` is for the active task: more than 3 entries is a warning, 3 or fewer is silent.
 OPEN_OUT=$(bash "$CHECK" "$FIX" --session "$FIX/session-open-overflow.md" 2>&1)
-if grep -qF "session.md open has 5 entries (max 3, active task only)" <<< "$OPEN_OUT" && grep -qF "13 warning(s) in 3 spec(s)" <<< "$OPEN_OUT"; then
+if grep -qF "session.md open has 5 entries (max 3, active task only)" <<< "$OPEN_OUT" && grep -qF "15 warning(s) in 5 spec(s)" <<< "$OPEN_OUT"; then
   ok "a session.md with 5 open entries warns (and only that warning is added)"
 else
   bad "the open-entries check did not fire as expected"
 fi
 OK_OUT=$(bash "$CHECK" "$FIX" --session "$FIX/session-ok.md" 2>&1)
-if grep -qF "12 warning(s) in 3 spec(s)." <<< "$OK_OUT" && ! grep -q "^session.md" <<< "$OK_OUT"; then
+if grep -qF "14 warning(s) in 5 spec(s)." <<< "$OK_OUT" && ! grep -q "^session.md" <<< "$OK_OUT"; then
   ok "a session.md with 3 open entries and 3 parked entries is silent"
 else
   bad "a valid session.md produced a warning (false positive)"
 fi
+
+# session.md task: must be a key, [new] or null — never prose.
+TASK_OUT=$(bash "$CHECK" "$FIX" --session "$FIX/session-bad-task.md" 2>&1)
+if grep -qF "session.md task is 'none (draft, no keys)'" <<< "$TASK_OUT" && grep -qF "15 warning(s) in 5 spec(s)" <<< "$TASK_OUT"; then
+  ok "a session.md task: that is prose warns"
+else
+  bad "the task: check did not fire as expected"
+fi
+if grep -q "session.md task is" <<< "$OK_OUT"; then bad "a valid task: (FK-10) was flagged"; else ok "task: FK-10 is accepted"; fi
+if grep -q "specs/draft-ok\|specs/clean-feature" <<< "$CHECK_OUT"; then bad "the control or the draft with listed assumptions produced output (false positive)"; else ok "a draft with assumptions and open questions is silent, and so is the control"; fi
 
 IMPACT_OUT=$(bash "$CHECK" "$FIX" --impacts payments/checkout 2>&1)
 if grep -q "specs/clean-feature/spec.md" <<< "$IMPACT_OUT"; then ok "--impacts lists the specs that link to a feature"; else bad "--impacts did not list clean-feature"; fi

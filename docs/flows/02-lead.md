@@ -45,34 +45,36 @@ This transcript builds the `feature-tags` spec (the one in `examples/feature-tag
 
 > **Agent**
 >
-> Draft written to `specs/feature-tags/`:
+> Draft written to `specs/feature-tags/` (`spec.md` with 10 ACs and one journey, 12 `[new]` tasks, 4 test sketches, `CHANGELOG.md`). Before you review it, this is what I understood and what I decided on your behalf:
 >
-> - `spec.md` — 10 ACs in 3 groups, one journey, out of scope, `status: draft`
-> - `tasks.md` — 12 tasks, all `[new]`, each with its AC refs
-> - `testcases.md` — 4 sketches (no steps) for the main flows
-> - `CHANGELOG.md` — v1.0
+> **What I understood**
+> - Users label each post with up to 5 tags, shown as chips, to organize and filter posts by category.
+> - Used by anyone writing or editing a post; the tags also show on the public post.
+> - Changes: a tags field in the post form, saved with the post. Out: filtering by tag.
 >
-> I added one journey because the flow crosses screens (create form → public post → edit form). Everything else, failure behavior included, is an AC.
->
-> **Assumptions** (each with its alternative — nothing is asked until you have seen them)
-> - A1 · the API answers 422 `invalid_tags` past 5 tags (AC8) · or 400 with a field error
-> - A2 · only the post owner can edit tags (AC10) · or any editor of the post
-> - A3 · purpose for the ticket: "organize and filter posts by category" *(inferred)* · or another wording
+> **Assumptions (I decided these; confirm or change)**
+> A1 · The API answers 422 `invalid_tags` past 5 tags · alternative: 400 with a field error
+> A2 · Only the post owner can edit tags · alternative: any editor of the post
+> A3 · Purpose for the ticket: "let people organize and filter their posts by category" *(inferred)* · alternative: another wording
 >
 > **Open questions**
-> - Q1 (AC5): reject a tag over 30 characters with an error, or truncate silently? You did not say.
+> Q1 · Reject a tag over 30 characters with an error, or truncate silently? · my proposal: reject with an error
+>
+> Files: `specs/feature-tags/spec.md` (draft, not approved)
+>
+> Do you confirm the three assumptions above, or which one do you change? And what is your answer to the open question?
 
 ---
 
 > **User**
 >
-> Q1 — reject with an error. A1–A3 are fine.
+> Reject with an error. The assumptions are fine.
 
 ---
 
 > **Agent**
 >
-> Applied: Q1 is now a dated line under `## Decisions` (there is no `## Open questions` section left), and `status: approved`.
+> Applied. The two confirmed assumptions and the answer are now dated lines under `## Decisions`; A3 is the `Purpose:` line, no longer marked inferred. `## Assumptions` and `## Open questions` are gone, so `status: approved`.
 >
 > ```
 > Spec feature-tags v1.0 (approved) · 10 ACs · 12 tasks [new] · 4 test sketches
@@ -83,7 +85,7 @@ This transcript builds the `feature-tags` spec (the one in `examples/feature-tag
 > Session saved: active = feature-tags
 > ```
 
-Nothing was shown section by section; the Lead saw every assumption, answered one question, and got a closing summary with the session already saved.
+Nothing was shown section by section. The Lead saw every assumption in full before being asked anything, and the draft cannot be approved while one is still listed.
 
 ---
 
@@ -146,7 +148,7 @@ The ids of the other ACs did not change, so every other task and test case still
 
 ## Notes
 
-- `review: sections` (in `specos-project.yml`) restores the old section-by-section approvals.
+- `review: sections` (in `specos-project.yml`) forces section-by-section approval. Otherwise one draft is the default, and an extra gate opens only on a trigger (more than 5 assumptions or 3 open questions, an assumption about calculations, data model, permissions or money, a contradiction with an approved spec, more than 15 ACs or 2 journeys, a self-contradicting request), and the agent says why.
 - A change that would rewrite more than half of the spec is proposed as a new feature instead.
 - Open questions in a change mark only the affected ACs `[pending]`; the spec stays approved and only the tasks that reference those ACs wait.
 - "Document what already exists" runs as-is mode: the agent asks permission before reading any implementation code.

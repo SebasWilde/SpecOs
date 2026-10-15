@@ -1,5 +1,10 @@
 # Changelog — specos-v3
 
+## 2026-10-15 v2.9
+- What: `specos-lead` prints a fixed "understood / assumptions / open questions" message and keeps assumptions in `## Assumptions`; extra gates open only on triggers; three new checks
+- Why: a session asked to confirm A1–A5 that existed in no file, and wrote its own choice under `## Decisions` as if the Lead had made it
+- Impact: no setting changes; specs without `## Assumptions` still work; `approved` needs it empty; `session.md` `task:` must be a key, `[new]` or `null`
+
 ## 2026-10-14 v2.8
 - What: lead lists every assumption and closes with a summary, commit message and saved session; dev raises gaps in chat and shows a commit message; `standard` self-contained tickets
 - Why: first real use — assumptions confirmed unseen, session left stale, gaps parked in `open`, tickets unreadable without the spec, a spec committed unasked

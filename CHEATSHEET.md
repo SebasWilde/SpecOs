@@ -49,7 +49,9 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 ```
 /specos-start → construction perspective → explain the feature freely
 → 0–4 questions only for real gaps → ONE draft: spec + tasks + sketches + CHANGELOG
-→ it lists open questions + every assumption → you answer → status: approved
+→ it prints what it understood + every assumption + every open question (full text, with alternatives)
+→ you answer → assumptions become dated Decisions → status: approved (only when none is left)
+→ extra gates open only on a trigger, and it says why
 → closing summary: commit message, session saved (never commits on its own)
 → /specos-distribute → create tasks → give the keys in order → [new] replaced
 ```
@@ -180,7 +182,7 @@ memory_links:            # auto | a path | off
 updated: YYYY-MM-DD
 active_feature: group/feature
 spec_version: 1.0
-task: KEY | [new] | null
+task: KEY | [new] | null   # never prose
 next: one sentence
 open:            # max 3, ACTIVE task only
   - ...

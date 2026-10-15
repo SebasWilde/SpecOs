@@ -49,5 +49,7 @@ Purpose: let people organize and filter their posts by category.
 
 ## Decisions
 
+- 2026-03-15 · The API answers 422 `invalid_tags` past 5 tags (AC8).
+- 2026-03-15 · Only the post owner can edit tags (AC10).
 - 2026-03-15 · A tag over 30 characters is rejected with an error (AC5).
 - 2026-03-18 · Changed to silent truncation (AC11): the error interrupted typing. Found during TAGS-03.

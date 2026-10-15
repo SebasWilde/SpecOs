@@ -13,6 +13,8 @@
 #   AC references    AC1, AC1–AC11 (en dash or hyphen), AC1-3
 #   task lines       - [FK-927] Title (AC1–AC3) v1.0   |   - [new] ...   |   - [SP-01] ...
 #   testcases        ## TC-01 — title, then covers: / steps: / expected:, and a `spec: v1.1` stamp
+#   status           draft needs ## Assumptions or ## Open questions with content; approved must have no ## Assumptions
+#   session.md       task: is a ticket key, [new] or null
 set -uo pipefail
 
 ROOT="."
@@ -65,6 +67,22 @@ fm_linked() {
     on && /^[ \t]*-[ \t]+/ { sub(/^[ \t]*-[ \t]+/, ""); gsub(/["'"'"']/, ""); sub(/[ \t]+#.*$/, ""); sub(/[ \t]+$/, ""); print; next }
     on && /^[^ \t-]/ { on = 0 }
   ' < <(tr -d '\r' < "$1")
+}
+
+# Number of content lines under a `## <heading>` section (none / n/a / - count as empty).
+sec_content() {
+  norm "$1" | awk -v h="$2" '
+    /^[ \t]*```/ { fence = !fence; next }
+    fence { next }
+    /^##[ \t]+/ { t = $0; sub(/^##[ \t]+/, "", t); sub(/[ \t]+$/, "", t); on = (tolower(t) == tolower(h)); next }
+    on {
+      l = $0; gsub(/^[ \t]+|[ \t]+$/, "", l)
+      if (l == "") next
+      lt = tolower(l); gsub(/[.*_]/, "", lt)
+      if (lt ~ /^(none|n\/a|-)$/) next
+      n++
+    }
+    END { print n + 0 }'
 }
 
 list_specs() {
@@ -328,6 +346,17 @@ while IFS= read -r spec; do
       "$AWK_CHECK" "$TMP/spec.in" "$TMP/tasks.in" "$TMP/testcases.in" >> "$res" 2>/dev/null || \
     echo "  warn  check crashed on this spec (awk error)" >> "$res"
 
+  # draft / approved against the Assumptions and Open questions sections
+  status="$(fm "$spec" status)"
+  if [[ "$status" == "draft" || "$status" == "approved" ]]; then
+    n_as=$(sec_content "$spec" "Assumptions"); n_oq=$(sec_content "$spec" "Open questions")
+    if [[ "$status" == "draft" && "$n_as" -eq 0 && "$n_oq" -eq 0 ]]; then
+      echo "  warn  status is draft but there is no ## Assumptions or ## Open questions with content — approve it, or list what is open" >> "$res"
+    elif [[ "$status" == "approved" && "$n_as" -gt 0 ]]; then
+      echo "  warn  status is approved but ## Assumptions still has $n_as item(s) — unconfirmed assumptions" >> "$res"
+    fi
+  fi
+
   # linked: paths
   while IFS= read -r l; do
     [[ -z "$l" || "$l" == *"["* ]] && continue
@@ -372,6 +401,15 @@ if [[ -f "$SESSION" ]]; then
   if [[ "$lines" -gt 30 || "$bytes" -gt 2048 ]]; then
     SESS_OUT="  warn  session.md is $lines lines / $bytes bytes (limit 30 lines / 2 KB) — rewrite it"
     NWARN=$((NWARN+1))
+  fi
+  # `task:` is a ticket key, [new] or null — never prose.
+  if grep -q '^task:' "$SESSION"; then
+    tval=$(tr -d '\r' < "$SESSION" | awk '/^task:/ { sub(/^task:[ \t]*/, ""); sub(/[ \t]+#.*$/, ""); gsub(/["'"'"']/, ""); sub(/[ \t]+$/, ""); print; exit }')
+    if [[ ! "$tval" =~ ^(null|\[new\]|[A-Za-z][A-Za-z0-9]*-[0-9]+)$ ]]; then
+      SESS_OUT="${SESS_OUT:+$SESS_OUT
+}  warn  session.md task is '$tval' — use a ticket key (PROJ-123), [new] or null"
+      NWARN=$((NWARN+1))
+    fi
   fi
   # `open` is for questions about the active task: at most 3 entries.
   nopen=$(tr -d '\r' < "$SESSION" | awk '

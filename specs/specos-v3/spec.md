@@ -1,9 +1,9 @@
 ---
 feature: specos-v3
-version: 2.8
+version: 2.9
 status: approved
 lead: Sebastian Wilde
-date: 2026-10-14
+date: 2026-10-15
 keywords: [specs, perspectives, agent-agnostic, memory-links, multi-repo, monorepo, project-config, spec-change, stable-ac-ids]
 ---
 
@@ -294,13 +294,13 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 **Creating — `/specos-lead`, new mode**
 - AC1 — Modes are auto-detected: new (the feature folder does not exist), change (it exists), as-is (document existing behavior; asks permission before reading implementation code and leaves `tasks.md` empty by convention)
 - AC2 — New mode asks 0–4 questions, only for real gaps — never "describe the feature"
-- AC3 — New mode writes ONE draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) and lists in chat the open questions and every assumption made on the Lead's behalf, one short line each with its alternative — it never asks the Lead to confirm assumptions it has not listed
+- AC3 — New mode writes ONE draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) and prints the message in AC45 before asking the Lead to review or accept anything
 - AC4 — `lead.review` is `draft` (default) or `sections`; `sections` restores the per-section gates
 - AC5 — `lead.suggest_scenarios` defaults to true; at most one sketch per 2 ACs, max 8
 - AC6 — ACs carry stable ids (`AC1`, `AC21b`), are grouped by theme with plain headings, and a removed AC stays as "retired"
 - AC7 — Journeys are optional: proposed only for a multi-step flow across screens or actors, with the reason; `require_error_journey` defaults to false and failure behavior is stored as ACs
 - AC8 — A technical section is optional; when non-trivial the agent proposes a separate `design.md` and keeps `spec.md` about behavior
-- AC9 — Frontmatter `status` is `draft` or `approved`: a new v1.0 spec is `draft` while open questions remain and `approved` only after the Lead confirms
+- AC9 — Frontmatter `status` is `draft` or `approved`: a new v1.0 spec is `draft` while `## Assumptions` or `## Open questions` has content, and `approved` only when both are empty or removed and the Lead has confirmed
 
 **Tasks**
 - AC10 — `tasks.md` lines are `- [new] Title, max 8 words (AC1–AC3) v1.0`, or `- [FK-927] Title (AC1–AC11) v1.0` once keyed; no checkboxes, no state
@@ -351,6 +351,15 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 - AC42 — `standard` tickets are self-contained: title, `Spec:` path and version without AC ids, optional `Context` (marked "(inferred)" when inferred), `Scope` bullets, `Test cases` titles, and a checklist of 4–8 `Acceptance criteria` condensed from the spec ACs, never with ids; no Dev Notes
 - AC43 — `/specos-status --check` warns when `session.md` `open` has more than 3 entries
 - AC44 — `specos-lead`, `specos-dev`, `specos-qa` and `specos-distribute` never commit or push on their own; when asked they list the files and the message first
+
+**Visible assumptions and gates (v2.9)**
+- AC45 — Before any review question, `specos-lead` prints a message with "What I understood" (3–5 lines), "Assumptions" (`A1 · full text · alternative`), "Open questions" (`Q1 · full text · my proposal`) and "Files"; headings follow the Lead's language and spec content follows `language.specs`; with nothing to list it says "No assumptions, no open questions"
+- AC46 — An id (`A1`, `Q2`) is never cited without its full text, including inside an options prompt, and the skill carries a complete example of the message
+- AC47 — While `draft`, the spec has a `## Assumptions` section (`A1 — assumed X. Alternative: Y.`) with the same ids as the chat; it is omitted when empty
+- AC48 — A confirmed assumption moves to `## Decisions` under the date in one line (the Lead's changed choice is what is recorded); a rejected one disappears; the agent's own choices are never written as Decisions
+- AC49 — One draft stays the default; an extra gate opens only on a trigger, with the line "Opening a gate because …": more than 5 assumptions or more than 3 open questions (review by blocks); an assumption about calculations, data model, permissions or money (confirm it before writing the ACs that depend on it); a contradiction with an approved spec (pause with the affected statements); more than 15 ACs or 2 journeys (propose `/specos-split`); a self-contradicting request (one question)
+- AC50 — Fixed gates never depend on a trigger: the AC45 message before approving, permission before reading implementation code in as-is mode, permission before committing; the Lead can open any gate at any time and `lead.review: sections` forces section-by-section
+- AC51 — `/specos-status --check` warns on a `draft` spec with neither `## Assumptions` nor `## Open questions` with content, on an `approved` spec that still has `## Assumptions` with content, and on a `session.md` `task:` that is not a key, `[new]` or `null`
 
 ### Agent-agnostic compatibility
 - [ ] All skills work in Claude Code, OpenCode, Gemini CLI via slash commands
@@ -554,7 +563,7 @@ Active session state. Rewritten whole every session (never appended), never comm
 updated: YYYY-MM-DD
 active_feature: group/feature
 spec_version: 1.0
-task: KEY | [new] | null
+task: KEY | [new] | null   # a ticket key, [new] or null — never prose
 next: one sentence
 open:            # max 3, about the ACTIVE task only; remove when resolved
   - ...
@@ -838,6 +847,7 @@ On approval both old files are deleted in the same step, so no project ever hold
 - **Retired skills:** `install.sh` and `update.sh` delete them from every agent directory, since copying never removes.
 - **Self-contained tickets (v2.8):** the ticket lives in Jira, so it explains itself instead of pointing at ACs. `tasks.md` keeps `(AC1–AC11) vX.Y` as the repo's pointer. `brief` is read as `link` so old configs keep working.
 - **Never commit unasked (v2.8):** a session committed a spec nobody asked it to. Branches and targets remain project policy, not SpecOS's.
+- **Assumptions have a home (v2.9):** telling the agent to list its assumptions did not work, because the template had nowhere to put them and nothing checked it. They now go in a fixed message (AC45), a `## Assumptions` section and a check, and the agent's own choices can no longer pose as the Lead's decisions. Thresholds for the extra gates are constants in the skill, not settings; change mode keeps the change-request block and does not print the message.
 
 ### GitHub branching strategy
 

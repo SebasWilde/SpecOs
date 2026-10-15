@@ -213,6 +213,8 @@ Purpose: [one line — the ticket's Context reads it; "(inferred)" if the agent 
 ## Out of Scope
 - [at least 1 item]
 
+## Assumptions              # only while draft: A1 — assumed X. Alternative: Y.
+
 ## Open questions           # each names the ACs it touches; omitted when none
 
 ## Decisions                # resolved questions, dated, one line each
@@ -259,6 +261,10 @@ Specs change constantly, especially during dev. Anyone who finds a gap raises a 
 
 Change mode edits the spec, bumps the version, writes a CHANGELOG entry of at most 3 lines (what / why / impact), and prints what is affected: tasks whose AC refs changed, testcases whose `covers` changed, and specs that `linked:` to this one. Only the delta gets `[new]` tasks; a task that already has a key is never edited.
 
+### Commits
+
+Skills never commit or push on their own. When you ask, they list the files and the message first. `/specos-lead` closes with a suggested spec commit message (`Add <feature> spec`, `Update <feature> to vX.Y`, `Key <feature> task as FK-xxx`) and `/specos-dev` with a code one.
+
 ### Optional files
 
 - `design.md` — the *how* for one feature (calculations, contracts). Keeps `spec.md` about behavior.
@@ -268,7 +274,7 @@ SpecOS documents them but never creates them for you.
 
 ### Checking a specs repo
 
-`/specos-status --check` runs `specos-check.sh` (the installer copies it to `~/.specos/`) and prints warnings: ACs no test case covers, `covers` or task refs pointing to an AC that does not exist, `linked:` paths that are gone, a testcases stamp behind the spec version, AC ids repeated within a spec, sketches never expanded, a spec version missing from its CHANGELOG, `[new]` tasks still waiting for a key, an oversized `session.md`. Warnings only; `--strict` exits 1. `--impacts <feature>` lists the specs linking to a feature.
+`/specos-status --check` runs `specos-check.sh` (the installer copies it to `~/.specos/`) and prints warnings: ACs no test case covers, `covers` or task refs pointing to an AC that does not exist, `linked:` paths that are gone, a testcases stamp behind the spec version, AC ids repeated within a spec, sketches never expanded, a spec version missing from its CHANGELOG, `[new]` tasks still waiting for a key, an oversized `session.md`, or one with more than 3 `open` entries. Warnings only; `--strict` exits 1. `--impacts <feature>` lists the specs linking to a feature.
 
 To run it before every commit, add this to `.git/hooks/pre-commit` (SpecOS does not install it):
 
@@ -381,7 +387,7 @@ memory_links:
 updated: YYYY-MM-DD
 active_feature: group/feature   # or just feature
 spec_version: 1.0
-task: KEY | [new] | null
+task: KEY | [new] | null   # a ticket key, [new] or null — never prose
 next: one sentence
 open:            # max 3 questions about the ACTIVE task, remove when resolved
   - ...
@@ -400,7 +406,7 @@ parked:          # other features, one line each
 2. Run `/specos-init` — answers 7 questions, generates project config
 3. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
 4. Run `/specos-start` (or `/specos-lead` directly) for each new feature: explain it freely, answer the few questions, and get one draft — spec, tasks and testcase sketches
-5. Read the open questions and the assumptions it lists (each with its alternative), and answer; the spec becomes `approved` when you confirm. It closes with a summary, a commit message, and the session saved — it never commits on its own
+5. Read the message it prints before asking anything — what it understood, every assumption (each with its alternative), every open question (each with its proposal) — and answer. Confirmed assumptions move to `## Decisions`; the spec becomes `approved` when `## Assumptions` and `## Open questions` are empty. It closes with a summary, a commit message, and the session saved — it never commits on its own
 6. Run `/specos-distribute`, create the tasks in your task software, and give back the keys in order
 7. When something changes, say "change X because Y" — `/specos-lead` handles versions, AC ids, CHANGELOG and impact
 
@@ -408,8 +414,8 @@ parked:          # other features, one line each
 1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
 2. Provide task key or description
 3. Agent shows the task's ACs and the flows that will be tested, then implements in that context
-4. If the spec has a gap, it raises a spec change request instead of guessing
-5. At the end it prints a closing block for the PR or ticket
+4. If the spec has a gap, it raises a spec change request in the chat instead of guessing (never parked in `session.md`)
+5. At the end it prints a closing block for the PR or ticket, with a commit message `type(KEY): Imperative description` (`feat`, `change`, `improvement`, `chore`). It only shows the message; it never commits
 
 ### QA
 1. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
