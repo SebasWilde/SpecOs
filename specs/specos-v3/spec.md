@@ -1,9 +1,9 @@
 ---
 feature: specos-v3
-version: 2.7
+version: 2.8
 status: approved
 lead: Sebastian Wilde
-date: 2026-10-13
+date: 2026-10-14
 keywords: [specs, perspectives, agent-agnostic, memory-links, multi-repo, monorepo, project-config, spec-change, stable-ac-ids]
 ---
 
@@ -24,7 +24,7 @@ Works with any AI agent (Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity
 2. Agent reads `session.md` — does not exist, asks: "What feature do you want to specify?"
 3. Lead explains the feature freely; agent asks 0–4 questions only for real gaps
 4. Agent writes ONE draft: `spec.md` (summary, ACs with stable ids, out of scope, open questions), `tasks.md` and `testcases.md` sketches, `CHANGELOG.md`
-5. In chat the agent shows only what needs a decision: open questions and the assumptions it made on the Lead's behalf
+5. In chat the agent lists the open questions and every assumption it made on the Lead's behalf, one line each with its alternative, before asking anything
 6. Lead answers; agent applies the answers and sets `status: approved` once the Lead confirms
 7. Later, `/specos-distribute` prints the tasks; Lead creates them in the task software and gives the keys, agent replaces `[new]`
 
@@ -294,7 +294,7 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 **Creating — `/specos-lead`, new mode**
 - AC1 — Modes are auto-detected: new (the feature folder does not exist), change (it exists), as-is (document existing behavior; asks permission before reading implementation code and leaves `tasks.md` empty by convention)
 - AC2 — New mode asks 0–4 questions, only for real gaps — never "describe the feature"
-- AC3 — New mode writes ONE draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) and shows in chat only the open questions and the assumptions made on the Lead's behalf
+- AC3 — New mode writes ONE draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) and lists in chat the open questions and every assumption made on the Lead's behalf, one short line each with its alternative — it never asks the Lead to confirm assumptions it has not listed
 - AC4 — `lead.review` is `draft` (default) or `sections`; `sections` restores the per-section gates
 - AC5 — `lead.suggest_scenarios` defaults to true; at most one sketch per 2 ACs, max 8
 - AC6 — ACs carry stable ids (`AC1`, `AC21b`), are grouped by theme with plain headings, and a removed AC stays as "retired"
@@ -317,15 +317,15 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 
 **Dev, QA and sketches**
 - AC19 — `specos-dev` refuses a `status: draft` spec and any task that references a `[pending]` AC, and tells the Lead
-- AC20 — At task start `specos-dev` shows the task's ACs and the sketched flows; at the end it prints a closing block for the PR or ticket (no file)
+- AC20 — At task start `specos-dev` shows the task's ACs and the sketched flows; at the end it prints a closing block for the PR or ticket with a commit message (no file)
 - AC21 — On a gap, dev and qa follow the change protocol by pointer to `specos-lead` — it is defined once
 - AC22 — Lead writes sketches only (`## TC-01 — title` + `covers:`), with the header "Sketches suggested by Lead, not reviewed."
 - AC23 — QA fills in `steps:`/`expected:` and the `spec: vX.Y` stamp; sketches are seeds, and the independent breaking perspective is the QA invocation with spec-only context
 
 **Distribute and session**
-- AC24 — `specos-distribute` outputs only `[new]` tasks; `distribute.task_detail` is `brief` (default) or `full`; every role is printed at once
+- AC24 — `specos-distribute` outputs only `[new]` tasks; `distribute.task_detail` is `standard` (default), `link` or `full` (`brief` is read as `link`); every role is printed at once
 - AC25 — After the tasks are printed the agent asks for the keys in order and replaces `[new]`; an unanswered `[new]` stays visible and is offered next time
-- AC26 — `session.md` follows the schema below, skills rewrite it whole, and an old-format file (over 2 KB) is shown re-written and replaced only after the Lead agrees
+- AC26 — `session.md` follows the schema below, `open` holds only questions about the active task, skills rewrite it whole and demote carried-over items to `parked`, and an old-format file (over 2 KB) is shown re-written and replaced only after the Lead agrees
 
 - AC34 — `outputs.tasks.destination: jira-csv` prints the tasks as one CSV (`Summary,Description,Issue Type,Parent`) for Jira's CSV import; the keys step still applies in row order
 
@@ -339,6 +339,18 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 **Rules and structure**
 - AC32 — `specos-lead-parallel` no longer exists: 11 skills, with no reference left in adapters, docs or installers
 - AC33 — `design.md` (the how, per feature) and `00-architecture.md` (shared context of a group) are documented as optional files and never automated
+
+**Adjustments from first real use (v2.8)**
+- AC35 — `specos-lead` closes with a fixed summary: spec, version, status, AC count, tasks, sketches, open questions, next step and a commit message (`Add <feature> spec`, `Update <feature> to vX.Y`, `Key <feature> task as FK-xxx`); the summary stays at 3 lines or fewer
+- AC36 — `specos-lead` saves `session.md` as the last step of that summary, which states "Session saved: active = …"
+- AC37 — A spec summary is at most about 50 words; an AC states one condition and one observable outcome in about 40 words, and the detail goes in an example AC
+- AC38 — Resolved questions go under a dated `## Decisions` section; with no open question the `## Open questions` section is omitted
+- AC39 — `spec.md` may carry a one-line `Purpose:`; when unclear the agent asks it as an open question or infers it and marks it "(inferred)"
+- AC40 — A gap found by `specos-dev` follows the spec change request protocol in the chat; it is never parked silently in `session.md` `open`
+- AC41 — The `specos-dev` closing block ends with `Commit message:` in the form `type(KEY): Imperative description` (types `feat`, `change`, `improvement`, `chore`; one line of about 72 characters; no AC ids); the key comes from the task, a `[new]` task makes the agent ask for it, and the message is only shown
+- AC42 — `standard` tickets are self-contained: title, `Spec:` path and version without AC ids, optional `Context` (marked "(inferred)" when inferred), `Scope` bullets, `Test cases` titles, and a checklist of 4–8 `Acceptance criteria` condensed from the spec ACs, never with ids; no Dev Notes
+- AC43 — `/specos-status --check` warns when `session.md` `open` has more than 3 entries
+- AC44 — `specos-lead`, `specos-dev`, `specos-qa` and `specos-distribute` never commit or push on their own; when asked they list the files and the message first
 
 ### Agent-agnostic compatibility
 - [ ] All skills work in Claude Code, OpenCode, Gemini CLI via slash commands
@@ -543,14 +555,14 @@ updated: YYYY-MM-DD
 active_feature: group/feature
 spec_version: 1.0
 task: KEY | [new] | null
-next: one line
-open:            # max 3, remove when resolved
+next: one sentence
+open:            # max 3, about the ACTIVE task only; remove when resolved
   - ...
 parked:          # other features, one line each
   - feature: one line
 ```
 
-Decisions go to the spec's CHANGELOG, repo learnings to that repo's memory, history stays in git. The spec path is derived: `specs/<active_feature>/spec.md`. An old-format file (`task_id`, `task_description`, `spec_path`, or over 2 KB) is shown re-written and replaced only after the Lead agrees.
+`open` is for questions about the active task; housekeeping and other features go to `parked`. Decisions go to the spec's CHANGELOG, repo learnings to that repo's memory, history stays in git. The spec path is derived: `specs/<active_feature>/spec.md`. An old-format file (`task_id`, `task_description`, `spec_path`, or over 2 KB) is shown re-written and replaced only after the Lead agrees.
 
 ### Memory link reconciliation
 
@@ -703,7 +715,7 @@ settings:
     diagrams: ask
     branch_info: ask
     task_title_max_words: 8
-    task_detail: brief
+    task_detail: standard
   dev:
     require_tests: false
 
@@ -782,7 +794,7 @@ Tone is the clearest example of a candidate that fails (2) and belongs in `rules
 | `distribute` | `diagrams` | `none` \| `combined` \| `per_journey` \| `ask` | `ask` | Asked on every run, always answered the same |
 | `distribute` | `branch_info` | `ask` \| `none` | `ask` | Same — a question with a stable per-project answer |
 | `distribute` | `task_title_max_words` | integer ≥ 1 | `8` | Hardcoded; teams whose tracker allows longer titles cannot change it |
-| `distribute` | `task_detail` | `brief` \| `full` | `brief` | Tickets were dense copies of the spec and were edited by hand every time |
+| `distribute` | `task_detail` | `standard` \| `link` \| `full` | `standard` | Tickets were dense copies of the spec and were edited by hand every time. `standard` is self-contained (no AC ids); `link` (formerly `brief`) only points to the spec |
 | `dev` | `require_tests` | `true` \| `false` | `false` | No setting exists; teams enforce it outside SpecOS |
 
 `ask` is a first-class value, not a fallback: it is how a project keeps a question it genuinely wants asked every run.
@@ -824,6 +836,8 @@ On approval both old files are deleted in the same step, so no project ever hold
 - **Check script:** `scripts/specos-check.sh`, deployed to `~/.specos/` by install/update so `/specos-status --check` runs from any project. It reports warnings; `--strict` exits 1. Legacy specs (no AC ids, `SP-` placeholders, testcases without `covers:`) get `info` lines, never warnings.
 - **`SP-` placeholders:** never treated as `[new]` silently; `/specos-distribute` asks once.
 - **Retired skills:** `install.sh` and `update.sh` delete them from every agent directory, since copying never removes.
+- **Self-contained tickets (v2.8):** the ticket lives in Jira, so it explains itself instead of pointing at ACs. `tasks.md` keeps `(AC1–AC11) vX.Y` as the repo's pointer. `brief` is read as `link` so old configs keep working.
+- **Never commit unasked (v2.8):** a session committed a spec nobody asked it to. Branches and targets remain project policy, not SpecOS's.
 
 ### GitHub branching strategy
 

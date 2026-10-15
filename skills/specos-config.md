@@ -118,7 +118,7 @@ distribute
   diagrams               none | combined | per_journey | ask       default ask     [current: X]
   branch_info            ask | none                                default ask     [current: X]
   task_title_max_words   integer >= 1                              default 8       [current: X]
-  task_detail            brief | full                              default brief   [current: X]
+  task_detail            standard | link | full                    default standard [current: X]
 dev
   require_tests          true | false                              default false   [current: X]
 ```
@@ -127,7 +127,7 @@ Show `[current: ...]` only for keys present in the file. Omit the marker entirel
 
 Ask: "Which setting do you want to change? (or 'clear [skill].[key]' to go back to the default)"
 
-Validate the value against the accepted set; if it does not match, say what is accepted and ask again — never write an invalid value. Explain in one line what changes, e.g. "diagrams: per_journey — /specos-distribute will generate one diagram per journey and stop asking."
+Validate the value against the accepted set (`brief` is the old `task_detail` name: write `link`); if it does not match, say what is accepted and ask again — never write an invalid value. Explain in one line what changes, e.g. "diagrams: per_journey — /specos-distribute will generate one diagram per journey and stop asking."
 
 **Never write a setting the Lead did not set.** Defaults stay out of the file; a cleared setting is removed.
 Then return to Step 2.

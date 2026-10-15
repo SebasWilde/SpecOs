@@ -70,7 +70,7 @@ outputs:
 #     diagrams: ask                 # none | combined | per_journey | ask
 #     branch_info: ask              # ask | none
 #     task_title_max_words: 8       # integer >= 1
-#     task_detail: brief            # brief | full
+#     task_detail: standard         # standard | link | full
 #   dev:
 #     require_tests: false          # true | false
 #

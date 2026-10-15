@@ -198,7 +198,8 @@ linked:
 # Feature Title
 
 ## What it does and why it exists
-[max 3 lines]
+[max 3 lines, ~50 words]
+Purpose: [one line — the ticket's Context reads it; "(inferred)" if the agent guessed it]
 
 ## Acceptance Criteria
 
@@ -212,7 +213,9 @@ linked:
 ## Out of Scope
 - [at least 1 item]
 
-## Open questions           # each names the ACs it touches
+## Open questions           # each names the ACs it touches; omitted when none
+
+## Decisions                # resolved questions, dated, one line each
 ```
 
 AC ids are stable: never renumbered, never reused; a removed AC stays as *retired*. Failure behavior is written as ACs, not as a separate error journey. A technical section is optional — when it is non-trivial (calculations, contracts) it goes in a separate `design.md` next to `spec.md`.
@@ -300,7 +303,7 @@ settings:
     include_negative_cases: true
   distribute:
     diagrams: per_journey       # none | combined | per_journey | ask
-    task_detail: brief          # brief | full
+    task_detail: standard       # standard | link | full
   lead:
     max_tasks: 15
     review: draft               # draft | sections
@@ -326,7 +329,7 @@ Every setting is optional and has one documented default, so an absent `settings
 
 Rules keep the behaviour they always had: sections that read as quality gates are appended to task Acceptance Criteria, everything else is injected as a Standards section, and `specos-dev` enforces them during implementation.
 
-Run `/specos-config` to edit any of it interactively. Set `outputs.tasks.destination: jira-csv` and `/specos-distribute` prints the tasks as a CSV (`Summary, Description, Issue Type, Parent`) ready for Jira's CSV import — no integration involved.
+Run `/specos-config` to edit any of it interactively. `distribute.task_detail` picks the ticket: `standard` (default) is self-contained — context, scope, test case titles and a short acceptance checklist, no AC ids — `link` only points to the spec (it was called `brief`), `full` is the long template. Set `outputs.tasks.destination: jira-csv` and `/specos-distribute` prints the tasks as a CSV (`Summary, Description, Issue Type, Parent`) ready for Jira's CSV import — no integration involved.
 
 **Settings catalog**
 
@@ -343,7 +346,7 @@ Run `/specos-config` to edit any of it interactively. Set `outputs.tasks.destina
 | `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
 | `distribute` | `branch_info` | ask \| none | ask |
 | `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
-| `distribute` | `task_detail` | brief \| full | brief |
+| `distribute` | `task_detail` | standard \| link \| full | standard |
 | `dev` | `require_tests` | true \| false | false |
 
 **The file is written in English** — keys, comments, and rules alike — regardless of `language.specs`. The two are independent: an English config file produces Spanish specs when `language.specs: es`. Rules are instructions the agent follows, and instructions are followed most reliably in English. `/specos-config` accepts a rule in any language, translates it, and shows you the English text before writing — nothing is reworded silently, and a literal string a rule requires in the output is never translated.
@@ -379,14 +382,14 @@ updated: YYYY-MM-DD
 active_feature: group/feature   # or just feature
 spec_version: 1.0
 task: KEY | [new] | null
-next: one line
-open:            # max 3, remove when resolved
+next: one sentence
+open:            # max 3 questions about the ACTIVE task, remove when resolved
   - ...
 parked:          # other features, one line each
   - feature: one line
 ```
 
-Skills rewrite the whole file, never append. A session.md in the old format (`task_id`, `task_description`, `spec_path`, or over 2 KB) is shown re-written and replaced only after you agree.
+`open` is only for questions about the active task; anything else carried over goes to `parked`. Skills rewrite the whole file, never append. A session.md in the old format (`task_id`, `task_description`, `spec_path`, or over 2 KB) is shown re-written and replaced only after you agree.
 
 ---
 
@@ -397,7 +400,7 @@ Skills rewrite the whole file, never append. A session.md in the old format (`ta
 2. Run `/specos-init` — answers 7 questions, generates project config
 3. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
 4. Run `/specos-start` (or `/specos-lead` directly) for each new feature: explain it freely, answer the few questions, and get one draft — spec, tasks and testcase sketches
-5. Answer the open questions it shows; the spec becomes `approved` when you confirm
+5. Read the open questions and the assumptions it lists (each with its alternative), and answer; the spec becomes `approved` when you confirm. It closes with a summary, a commit message, and the session saved — it never commits on its own
 6. Run `/specos-distribute`, create the tasks in your task software, and give back the keys in order
 7. When something changes, say "change X because Y" — `/specos-lead` handles versions, AC ids, CHANGELOG and impact
 

@@ -2,6 +2,8 @@
 
 You generate formatted outputs from a spec, task list, or test cases — ready to paste into any external tool.
 
+Never commit or push on your own. When the Lead asks, list the files and the message first.
+
 ---
 
 ## Step 1 — Identify what to output
@@ -25,9 +27,9 @@ Read `specos-project.yml` — it holds destinations, ID prefixes, settings, and 
 | Setting | Accepted values | Default | Effect |
 |---|---|---|---|
 | `diagrams` | `none` \| `combined` \| `per_journey` \| `ask` | `ask` | How many flow diagrams to generate. Only `ask` asks. |
-| `branch_info` | `ask` \| `none` | `ask` | Whether to ask for branch/PR info before generating tasks |
+| `branch_info` | `ask` \| `none` | `ask` | Whether to ask for branch/PR info (`link` and `full` only) |
 | `task_title_max_words` | integer ≥ 1 | `8` | Maximum words in a task title |
-| `task_detail` | `brief` \| `full` | `brief` | `brief` = title, spec reference, 1–3 lines of scope. `full` = the complete ticket template |
+| `task_detail` | `standard` \| `link` \| `full` | `standard` | `standard` = self-contained ticket. `link` = title + spec pointer. `full` = the long template |
 
 An unknown key under `settings.distribute`, or a value outside the accepted set, is reported **once** — name the key, the value found, and what is accepted — then that setting falls back to its default. Collect every problem into one message; never abort over config.
 
@@ -47,59 +49,34 @@ If the file does not exist: "No [file] found for this feature. Run /specos-lead 
 
 ### Tasks output
 
-When `branch_info` is `none`, skip this question entirely and omit the Dev Notes section from every task.
+`standard` has no Dev Notes, so it never asks about branches. For `link` and `full`: `branch_info: none` skips the question and omits Dev Notes; `ask` asks only "Do you have branch or PR info for these tasks? 1. Same for all (tell me once) 2. Per task 3. None" and waits.
 
-When `branch_info` is `ask`, ask only: "Do you have branch or PR info for these tasks?
-1. Same for all tasks — tell me once
-2. Per task — I'll ask as I go
-3. None"
+Output each `[new]` task as raw markdown, never in a code block: every role at once, grouped by role, no pauses, tasks separated by a line with only `---`.
 
-Wait for the answer. If option 1, ask for the branch/PR info now. If option 2, ask per task before generating it.
+**`standard`** (default) — the ticket lives in Jira, so it explains itself: no AC ids, no need to open the spec. Sections in this order:
 
-Then, for each `[new]` task, output it as raw markdown — never wrap it in a code block. Print every role's tasks at once, grouped by role, no pauses.
+[Title: imperative, at most `task_title_max_words` words (default 8)]
+Spec: [path] (v[X.Y])
 
-**`task_detail: brief`** (default) — the spec is the source of truth, so the ticket points to it instead of copying it:
+Context
+* [One or two bullets with the purpose, from the spec's `Purpose:` (keep "(inferred)" if marked). Omit the section if there is none.]
 
-# [TITLE]
-Spec: specs/[feature]/spec.md (v[X.Y]) · AC1–AC3
-[1–3 lines: what to build, in prose. Name only what the ACs do not already say.]
-## Dev Notes
-[Only when branch/PR/command info was provided.]
-⚠️ Branch from: `[branch]`
-⚠️ PR to: `[branch]`
-ℹ️ Run: `[command if any]`
+Scope
+* [The steps as short bullets: "Add…", "Edit…", "Push…"]
 
-The AC refs and version come from the task line in `tasks.md`. Brief has no Acceptance Criteria or Standards section: the ACs live in the spec, and `specos-dev` enforces `rules`.
+Test cases ([path]/testcases.md)
+* [Titles of the TCs whose `covers` touch the task's ACs, sketches included. Omit if none.]
 
-**`task_detail: full`** — the complete template:
+Acceptance criteria
+- [ ] [Up to 8 items (fewer when the spec says less), one line each: observable outcomes in plain words, condensed from the spec ACs — never pasted, never with ids. Keep one concrete example with numbers when the spec has it. Append the `rules.acceptance_criteria` entries for the task's role.]
 
-# [TITLE]
+Style: bullets, non-technical, nothing invented (`rules.writing_style` applies).
 
-## Context
-[Only when the task needs background (API contract, data model decision, architectural constraint from spec.md). Otherwise omit.]
+**`link`** (a `brief` value is read as `link`) — the title, `Spec: [path] (v[X.Y]) · AC1–AC3` (refs from the task line) and 1–3 lines of scope. Dev Notes only when branch info was given.
 
-## Scope
-[What must be implemented, from tasks.md and the matching ACs and technical notes: endpoint and field names, validation rules, business logic, edge cases. Prose; bullets only for parallel steps.]
+**`full`** — `# TITLE` then `##` sections: Context (only when needed), Scope (full prose: endpoint and field names, validation rules, edge cases), Acceptance Criteria (one self-contained sentence per referenced AC, plus quality-gate `rules` entries), Standards (non-AC `rules` for the role or `shared`), Dev Notes (`⚠️ Branch from`, `⚠️ PR to`, `ℹ️ Run`, only when provided). Omit empty sections.
 
-## Acceptance Criteria
-- [One self-contained sentence per referenced AC: trigger and observable result, max 2 lines.]
-- [Append `rules` entries from quality-gate sections (e.g. `acceptance_criteria`, `qa_gates`, `definition_of_done`). Omit if none.]
-
-## Standards
-[Only when `rules` has non-AC entries for this role or `shared` (e.g. `code_style`, `security`). Bullets grouped by section name. Otherwise omit.]
-
-## Dev Notes
-[As in brief, only when provided.]
-
-Formatting rules (strict — apply before printing):
-- Separate tasks with a line containing only `---`
-- No blank line between `# TITLE` and the next line; exactly one blank line between `##` sections
-- No blank lines inside a section's content, no trailing spaces, no double blank lines
-- An omitted section leaves no blank line in its place
-
-Content rules:
-- Title: at most `task_title_max_words` words (default 8), imperative verb first ("Add JWT validation to /auth endpoint")
-- Invent nothing absent from the spec; no vague language ("should work")
+Formatting: no trailing spaces, no double blank lines, no vague language ("should work"), nothing absent from the spec.
 
 **Destination `jira-csv`** (`outputs.tasks.destination`) — print one CSV for Jira's CSV import in a fenced block instead of the blocks above. Columns `Summary,Description,Issue Type,Parent`: Summary = the title; Description = the ticket body per `task_detail`; Issue Type = `Sub-task`; Parent = the story key, asked once ("Parent issue key, or none?"). Double-quote every field, doubling inner `"`. Offer to save it as `specs/[feature]/outputs/jira-tasks.csv`.
 

@@ -373,6 +373,17 @@ if [[ -f "$SESSION" ]]; then
     SESS_OUT="  warn  session.md is $lines lines / $bytes bytes (limit 30 lines / 2 KB) — rewrite it"
     NWARN=$((NWARN+1))
   fi
+  # `open` is for questions about the active task: at most 3 entries.
+  nopen=$(tr -d '\r' < "$SESSION" | awk '
+    /^open:/ { on = 1; next }
+    on && /^[A-Za-z_]+:/ { on = 0 }
+    on && /^[ \t]+-[ \t]/ { n++ }
+    END { print n + 0 }')
+  if [[ "$nopen" -gt 3 ]]; then
+    SESS_OUT="${SESS_OUT:+$SESS_OUT
+}  warn  session.md open has $nopen entries (max 3, active task only) — move the rest to parked"
+    NWARN=$((NWARN+1))
+  fi
 fi
 
 # --- report -----------------------------------------------------------------

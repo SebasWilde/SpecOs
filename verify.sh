@@ -416,6 +416,26 @@ else
   bad "SP- placeholder handling is inconsistent between distribute, lead and the docs"
 fi
 
+# v2.8: what the chat shows, how a session closes, and what dev prints.
+V28_BAD=0
+for name in lead dev qa distribute; do
+  grep -q "Never commit or push on your own. When the Lead asks, list the files and the message first." "$REPO_ROOT/skills/specos-$name.md" \
+    || { bad "$name does not carry the never-commit line"; V28_BAD=$((V28_BAD+1)); }
+done
+for k in "every assumption" "Session saved: active =" "Commit message:" "## Decisions" "Purpose:" "(inferred)"; do
+  grep -qF "$k" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead lacks: $k"; V28_BAD=$((V28_BAD+1)); }
+done
+for k in "Commit message:" "type(KEY): Imperative description" "improvement" "Never park it in"; do
+  grep -qF "$k" "$REPO_ROOT/skills/specos-dev.md" || { bad "specos-dev lacks: $k"; V28_BAD=$((V28_BAD+1)); }
+done
+for k in "standard" "link" "Test cases" "Acceptance criteria" "brief"; do
+  grep -qF "$k" "$REPO_ROOT/skills/specos-distribute.md" || { bad "specos-distribute lacks: $k"; V28_BAD=$((V28_BAD+1)); }
+done
+grep -q "ACTIVE task" "$REPO_ROOT/skills/specos-start.md" || { bad "specos-start does not limit open to the active task"; V28_BAD=$((V28_BAD+1)); }
+OLD_MODES=$(grep -rIn -E "brief \\?\| full|brief \| full" "$REPO_ROOT/README.md" "$REPO_ROOT/CHEATSHEET.md" "$REPO_ROOT/skills" "$REPO_ROOT/specos-project.yml" "$REPO_ROOT/docs" 2>/dev/null | wc -l | tr -d ' ')
+[[ "$OLD_MODES" -eq 0 ]] || { bad "$OLD_MODES place(s) still list task_detail as brief | full"; V28_BAD=$((V28_BAD+1)); }
+[[ $V28_BAD -eq 0 ]] && ok "v2.8 contracts: never-commit line, closing summary, commit message, ticket modes, open rule"
+
 # Optional destination: jira-csv must be readable by distribute and settable through config.
 JC_BAD=0
 for f in skills/specos-distribute.md skills/specos-config.md specos-project.yml README.md; do
@@ -482,6 +502,20 @@ if grep -q "specs/payments (" <<< "$CHECK_OUT"; then bad "the group spec was che
 if grep -q "specs/payments/checkout" <<< "$CHECK_OUT"; then ok "specs nested two levels deep are checked"; else bad "the nested spec was not checked"; fi
 if grep -q "FK-123\|FK-124" <<< "$CHECK_OUT"; then bad "valid [FK-123] tasks were reported"; else ok "[FK-123], [SP-01] and [new] keys parse; AC1–AC3 (en dash) ranges resolve"; fi
 if grep -qi "crash\|awk:" <<< "$CHECK_OUT"; then bad "the check script crashed on the fixture"; else ok "no crashes on the fixture"; fi
+
+# session.md `open` is for the active task: more than 3 entries is a warning, 3 or fewer is silent.
+OPEN_OUT=$(bash "$CHECK" "$FIX" --session "$FIX/session-open-overflow.md" 2>&1)
+if grep -qF "session.md open has 5 entries (max 3, active task only)" <<< "$OPEN_OUT" && grep -qF "13 warning(s) in 3 spec(s)" <<< "$OPEN_OUT"; then
+  ok "a session.md with 5 open entries warns (and only that warning is added)"
+else
+  bad "the open-entries check did not fire as expected"
+fi
+OK_OUT=$(bash "$CHECK" "$FIX" --session "$FIX/session-ok.md" 2>&1)
+if grep -qF "12 warning(s) in 3 spec(s)." <<< "$OK_OUT" && ! grep -q "^session.md" <<< "$OK_OUT"; then
+  ok "a session.md with 3 open entries and 3 parked entries is silent"
+else
+  bad "a valid session.md produced a warning (false positive)"
+fi
 
 IMPACT_OUT=$(bash "$CHECK" "$FIX" --impacts payments/checkout 2>&1)
 if grep -q "specs/clean-feature/spec.md" <<< "$IMPACT_OUT"; then ok "--impacts lists the specs that link to a feature"; else bad "--impacts did not list clean-feature"; fi

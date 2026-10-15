@@ -1,5 +1,10 @@
 # Changelog — specos-v3
 
+## 2026-10-14 v2.8
+- What: lead lists every assumption and closes with a summary, commit message and saved session; dev raises gaps in chat and shows a commit message; `standard` self-contained tickets
+- Why: first real use — assumptions confirmed unseen, session left stale, gaps parked in `open`, tickets unreadable without the spec, a spec committed unasked
+- Impact: `task_detail` is `standard | link | full` (`brief` still read as `link`); `open` is active-task only (checked); skills never commit unasked
+
 ## 2026-10-13 v2.7
 - What: one draft instead of ~8 gates; stable AC ids; spec change protocol; brief `[new]` tickets; fixed `session.md`; `specos-check.sh`; `lead-parallel` removed
 - Why: real use on a 64-spec project: approvals with no new information, no way to change a spec, tickets edited by hand, an 87 KB `session.md`

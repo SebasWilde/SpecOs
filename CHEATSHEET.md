@@ -49,7 +49,8 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 ```
 /specos-start → construction perspective → explain the feature freely
 → 0–4 questions only for real gaps → ONE draft: spec + tasks + sketches + CHANGELOG
-→ answer the open questions → status: approved
+→ it lists open questions + every assumption → you answer → status: approved
+→ closing summary: commit message, session saved (never commits on its own)
 → /specos-distribute → create tasks → give the keys in order → [new] replaced
 ```
 
@@ -71,7 +72,7 @@ stop → classify: clarification | addition | contradiction | out-of-scope
 ```
 /specos-start → provide task key or description
 → agent shows the task's ACs + sketched flows → implement
-→ closing block for the PR: key · spec vX.Y · covers AC… · changes · deviations
+→ closing block for the PR: key · spec vX.Y · covers AC… · changes · deviations · commit message `type(KEY): …`
 ```
 
 **QA — expand test cases:**
@@ -180,8 +181,8 @@ updated: YYYY-MM-DD
 active_feature: group/feature
 spec_version: 1.0
 task: KEY | [new] | null
-next: one line
-open:            # max 3
+next: one sentence
+open:            # max 3, ACTIVE task only
   - ...
 parked:          # other features
   - feature: one line
@@ -288,7 +289,7 @@ outputs:   { tasks: { destination: manual }, ... }
 settings:
   lead:       { max_tasks: 15, max_journeys: none, require_error_journey: false, review: draft, suggest_scenarios: true }
   qa:         { cases_per_ac: standard, include_negative_cases: true, batch_by: journey }
-  distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8, task_detail: brief }
+  distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8, task_detail: standard }
   dev:        { require_tests: false }
 
 # --- Rules: free-form. Skills interpret. Any section, by role. ---
@@ -330,7 +331,7 @@ Anything that can only be said in a sentence — tone, naming style, review expe
 | `distribute` | `diagrams` | none \| combined \| per_journey \| ask | ask |
 | `distribute` | `branch_info` | ask \| none | ask |
 | `distribute` | `task_title_max_words` | integer ≥ 1 | 8 |
-| `distribute` | `task_detail` | brief \| full | brief |
+| `distribute` | `task_detail` | standard \| link \| full | standard |
 | `dev` | `require_tests` | true \| false | false |
 
 An absent key uses its default silently. An invalid value is reported once, then falls back to the default — a bad config never blocks a session. `ask` is a real choice: it keeps a question being asked every run.

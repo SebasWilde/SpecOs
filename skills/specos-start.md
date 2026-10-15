@@ -1,6 +1,6 @@
 # specos-start
 
-You are the entry point for every SpecOS session. Your job is to read context, ask the minimum necessary questions, and route to the correct skill.
+You are the entry point for every SpecOS session: read context, ask the minimum, and route to the right skill.
 
 ---
 
@@ -187,7 +187,7 @@ Read `session.md` first. It tells you which repo matters, which is what makes th
 
 ## Step 2 — Route by role
 
-Using the `roles` from `local-workspace.yml`, ask one question:
+Using `roles` from `local-workspace.yml`, ask one question:
 
 **If role is lead only:**
 "What feature do you want to specify?"
@@ -216,14 +216,13 @@ Wait for the answer before continuing.
 
 ## Step 3 — Validate implementation repo paths
 
-If the session requires writing code (dev or qa roles), check `implementation_repos` from `local-workspace.yml`.
+If the session writes code (dev or qa), check `implementation_repos` in `local-workspace.yml`.
 
 For each path that is not `null`:
-- Check if the path is accessible from the current directory
-- If not accessible: "I can't reach `[path]`. Please update the path in local-workspace.yml."
+- Check the path is accessible from the current directory; if not: "I can't reach `[path]`. Please update the path in local-workspace.yml."
 - Do not proceed until all required paths are valid.
 
-If no implementation repos are configured (monorepo), skip this step.
+Monorepo (no repos configured): skip this step.
 
 ---
 
@@ -231,12 +230,9 @@ If no implementation repos are configured (monorepo), skip this step.
 
 Look for any `spec.md` files inside `specs/` — search both `specs/*/spec.md` and `specs/*/*/spec.md` (one or two levels deep). Skip any `spec.md` that has `type: group` in its frontmatter — those are group summaries, not implementable specs.
 
-**If no specs exist and the role is dev or qa:**
-"No specs available right now. Check with your Lead."
-Stop here. Do not invent work.
+**No specs, role dev or qa:** "No specs available right now. Check with your Lead." Stop; do not invent work.
 
-**If no specs exist and the role is lead or builder:**
-Continue — lead is about to create the first spec.
+**No specs, role lead or builder:** continue — lead is about to create the first spec.
 
 ---
 
@@ -255,10 +251,7 @@ Based on the resolved role and perspective, hand off to the appropriate skill:
 | builder — implement | specos-dev |
 | builder — test | specos-qa |
 
-Announce the handoff:
-"Starting [skill name] for [feature or task]. Let's go."
-
-Then load and follow the instructions of the target skill.
+Announce "Starting [skill name] for [feature or task]. Let's go.", then load and follow the target skill.
 
 ---
 
@@ -276,11 +269,11 @@ updated: YYYY-MM-DD
 active_feature: group/feature
 spec_version: 1.0
 task: KEY | [new] | null
-next: one line
-open:            # max 3, remove when resolved
+next: one sentence
+open:            # max 3 questions about the ACTIVE task; remove when resolved
   - ...
 parked:          # other features, one line each
   - feature: one line
 ```
 
-Max 30 lines / 2 KB. Decisions go to the spec's CHANGELOG, repo learnings to that repo's memory, history stays in git — never a diary here. The spec path is `specs/<active_feature>/spec.md`. Use `null` where nothing applies. Never commit it.
+Carried-over items not about the active task (housekeeping, other features) go to `parked`, one line each — demote them when you rewrite the file. Max 30 lines / 2 KB. Decisions go to the spec's CHANGELOG, repo learnings to that repo's memory, history stays in git — never a diary here. The spec path is `specs/<active_feature>/spec.md`. Use `null` where nothing applies. Never commit it.

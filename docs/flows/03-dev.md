@@ -63,7 +63,7 @@ A backend developer picks up `TAGS-03` (limit of five tags) from the `feature-ta
 > Options: 1) 422 invalid_tags, same as AC8   2) 400 with a field error
 > ```
 >
-> Your role is `backend` only, so I cannot edit the spec. Hand this to the Lead. I'll keep going on AC3 and AC8, which it does not block.
+> Your role is `backend` only, so I cannot edit the spec. Hand this to the Lead. I'll keep going on AC3 and AC8, which it does not block. I'm not leaving this in `session.md` `open`: it is in this message, and the Lead needs to see it.
 
 ---
 
@@ -83,9 +83,11 @@ A backend developer picks up `TAGS-03` (limit of five tags) from the `feature-ta
 > TAGS-03 · spec feature-tags v1.1 · covers AC3, AC8
 > Spec changes during dev: v1.0→v1.1 (AC5 retired, AC11 added — not in this task)
 > Deviations: none
+> Commit message:
+> feat(TAGS-03): Validate a maximum of five tags in the serializer
 > ```
 >
-> Session saved.
+> I only show the message; I don't commit. Session saved.
 
 ---
 
@@ -95,7 +97,8 @@ A backend developer picks up `TAGS-03` (limit of five tags) from the `feature-ta
 - It refuses a spec with `status: draft`, and any task whose ACs are marked `[pending]`.
 - The AC refs in `tasks.md` are what it shows at the start — the task never restates them.
 - On a gap, a developer without the lead role gets a request to hand over; with `lead` or `builder` the agent continues in change mode in the same session and resumes with the new AC ids.
-- The closing block is printed, not written to a file — paste it into the PR or ticket.
+- The closing block is printed, not written to a file — paste it into the PR or ticket. Its commit message is `type(KEY): Imperative description` (`feat`, `change`, `improvement` or `chore`); for a `[new]` task the agent asks for the key instead of inventing one.
+- The agent never commits on its own.
 
 ---
 

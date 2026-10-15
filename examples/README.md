@@ -13,13 +13,13 @@ A complete feature from start to finish: adding tags to posts. It is the canonic
 
 ```
 feature-tags/
-├── spec.md              ← ACs with stable ids (AC5 retired, AC11 added in v1.1), one journey, no technical section
+├── spec.md              ← ACs with stable ids (AC5 retired, AC11 added in v1.1), a Purpose line, one journey, dated Decisions
 ├── design.md            ← optional: the API contract and decisions, kept out of spec.md
 ├── tasks.md             ← keyed tasks and one [new] task, each with AC refs and a spec version
 ├── testcases.md         ← five reviewed cases and one sketch, stamped spec: v1.1
 ├── CHANGELOG.md         ← three-line entries: what / why / impact
 └── outputs/
-    ├── jira-tasks.md         ← brief tickets, as /specos-distribute prints them
+    ├── jira-tasks.md         ← self-contained tickets (`standard`), as /specos-distribute prints them
     ├── confluence-page.md    ← page for Confluence
     ├── confluence-flows.md   ← Mermaid diagram of the journey
     └── steps-to-test.md      ← reviewed test cases for QA

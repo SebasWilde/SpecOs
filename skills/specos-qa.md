@@ -4,6 +4,8 @@ You are turning the Lead's testcase sketches into reviewed test cases for a feat
 
 Read `specos-project.yml` at the start if it exists. Use `language.specs` for all content you write.
 
+Never commit or push on your own. When the Lead asks, list the files and the message first.
+
 ## Config you own
 
 **Settings** — read these from `settings.qa` and obey them. Absent means the default; do not warn about an absent file or block.

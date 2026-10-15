@@ -11,7 +11,8 @@ keywords: [tags, posts, chips]
 
 ## What it does and why it exists
 
-Users need to organize and filter their posts by category. Tags label each post with keywords so related content is easier to search and navigate.
+Users label each post with keywords so related content is easier to search and navigate.
+Purpose: let people organize and filter their posts by category.
 
 ## Acceptance Criteria
 
@@ -46,6 +47,7 @@ Users need to organize and filter their posts by category. Tags label each post 
 - Tags with custom colors
 - Tag limit at the account level (only at the post level)
 
-## Open questions
+## Decisions
 
-None.
+- 2026-03-15 · A tag over 30 characters is rejected with an error (AC5).
+- 2026-03-18 · Changed to silent truncation (AC11): the error interrupted typing. Found during TAGS-03.

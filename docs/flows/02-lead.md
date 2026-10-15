@@ -54,29 +54,36 @@ This transcript builds the `feature-tags` spec (the one in `examples/feature-tag
 >
 > I added one journey because the flow crosses screens (create form → public post → edit form). Everything else, failure behavior included, is an AC.
 >
-> **Assumptions I made for you**
-> - A tag over 30 characters is rejected with an error (AC5)
-> - The API answers 422 with `invalid_tags` past 5 tags (AC8)
-> - Only the post owner can edit tags (AC10)
+> **Assumptions** (each with its alternative — nothing is asked until you have seen them)
+> - A1 · the API answers 422 `invalid_tags` past 5 tags (AC8) · or 400 with a field error
+> - A2 · only the post owner can edit tags (AC10) · or any editor of the post
+> - A3 · purpose for the ticket: "organize and filter posts by category" *(inferred)* · or another wording
 >
 > **Open questions**
-> - Q1 (AC5): reject or truncate silently? You did not say.
+> - Q1 (AC5): reject a tag over 30 characters with an error, or truncate silently? You did not say.
 
 ---
 
 > **User**
 >
-> Q1 — reject with an error. The rest is fine.
+> Q1 — reject with an error. A1–A3 are fine.
 
 ---
 
 > **Agent**
 >
-> Applied. No open questions left; `status: approved`.
+> Applied: Q1 is now a dated line under `## Decisions` (there is no `## Open questions` section left), and `status: approved`.
 >
-> Next: `/specos-distribute` prints the tasks. Create them in your task software and give me the keys.
+> ```
+> Spec feature-tags v1.0 (approved) · 10 ACs · 12 tasks [new] · 4 test sketches
+> Open: none
+> Next: /specos-distribute for the ticket text, then give me the key
+> Commit message: Add feature-tags spec
+> Not committed. Say "commit" and I will list the files first.
+> Session saved: active = feature-tags
+> ```
 
-Nothing was shown section by section; the Lead read one draft and answered one question.
+Nothing was shown section by section; the Lead saw every assumption, answered one question, and got a closing summary with the session already saved.
 
 ---
 
@@ -123,6 +130,15 @@ QA reported that rejecting a long tag interrupts the writing flow. Dev found it 
 > - Specs that link to this one: none
 >
 > Added `[new] Truncate tags to 30 chars on save (AC11) v1.1`. `TAGS-03` was not touched.
+>
+> ```
+> Spec feature-tags v1.1 (approved) · 10 ACs · 1 task [new] · 4 test sketches
+> Open: none
+> Next: /specos-distribute for the ticket text, then give me the key
+> Commit message: Update feature-tags to v1.1
+> Not committed. Say "commit" and I will list the files first.
+> Session saved: active = feature-tags
+> ```
 
 The ids of the other ACs did not change, so every other task and test case still points at the right thing.
 
@@ -134,3 +150,4 @@ The ids of the other ACs did not change, so every other task and test case still
 - A change that would rewrite more than half of the spec is proposed as a new feature instead.
 - Open questions in a change mark only the affected ACs `[pending]`; the spec stays approved and only the tasks that reference those ACs wait.
 - "Document what already exists" runs as-is mode: the agent asks permission before reading any implementation code.
+- The agent never commits on its own. Say "commit" and it lists the files and the message first.

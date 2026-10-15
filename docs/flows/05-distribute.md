@@ -1,7 +1,7 @@
 # Flow: /specos-distribute
 
 > **When to run:** Lead, after the spec is approved (tasks), and again after QA reviews (steps to test).
-> **What it does:** Prints formatted outputs ready to paste into Jira, Confluence, or any test tool. Tasks come out brief by default: they point to the spec instead of copying it.
+> **What it does:** Prints formatted outputs ready to paste into Jira, Confluence, or any test tool. Tasks come out self-contained by default, so the ticket reads on its own in Jira.
 
 ---
 
@@ -33,29 +33,33 @@ The Lead distributes the tasks of `feature-tags`, then the QA steps and the Conf
 
 ---
 
-### Output 1 — Tasks (`task_detail: brief`)
+### Output 1 — Tasks (`task_detail: standard`)
 
-`tasks.md` has 12 tasks, all `[new]`. `branch_info` is `none` in this project, so there is no Dev Notes section. All roles print at once.
+`tasks.md` has 12 tasks, all `[new]`. `standard` has no Dev Notes, so the agent does not ask about branches. All roles print at once; the tickets carry no AC ids and can be read without opening the spec.
 
 > **Agent**
 >
-> # Add tags array field to Post model
-> Spec: specs/feature-tags/spec.md (v1.0) · AC7
-> Array column with the migration; no separate table.
-> ---
-> # Expose tags in Post serializer
-> Spec: specs/feature-tags/spec.md (v1.0) · AC7
-> Accept and return `tags` on create and PATCH.
-> ---
-> # Validate maximum five tags in serializer
-> Spec: specs/feature-tags/spec.md (v1.0) · AC3, AC8
-> Reject more than 5 tags with 422 `invalid_tags`.
-> ---
-> # Build TagInput component
-> Spec: specs/feature-tags/spec.md (v1.0) · AC1, AC2
-> Reusable chips input; Enter and comma confirm, X removes.
+> Add tags field to Post model
+> Spec: specs/feature-tags/spec.md (v1.0)
 >
-> *(…eight more, same shape, grouped by role)*
+> Context
+> * Users need to organize and filter their posts by category, so each post can carry up to 5 tags. *(inferred)*
+>
+> Scope
+> * Add a `tags` list to the Post model, with its migration.
+> * Keep it on the post itself; no separate table.
+>
+> Test cases (specs/feature-tags/testcases.md)
+> * Create a post with tags
+>
+> Acceptance criteria
+> - [ ] A post can be saved with up to 5 tags and returns them when read.
+> - [ ] A post saved without tags returns an empty list.
+> - [ ] The migration runs on existing posts without changing them.
+> ---
+> Build TagInput component
+> Spec: specs/feature-tags/spec.md (v1.0)
+> *(…same sections; ten more tickets, grouped by role)*
 >
 > Give me the keys in order (e.g. FK-930 FK-931) and I'll replace `[new]` in tasks.md, or edit it by hand.
 
@@ -71,7 +75,7 @@ The Lead distributes the tasks of `feature-tags`, then the QA steps and the Conf
 >
 > `tasks.md` updated, in the order printed: `[new]` → `TAGS-01` … `TAGS-12`. AC refs and versions kept.
 
-The Lead pastes each brief into Jira and edits nothing by hand.
+The Lead pastes each ticket into Jira and edits nothing by hand. `tasks.md` still keeps the AC refs (`(AC7) v1.0`) as the repo's pointer.
 
 ---
 
@@ -107,13 +111,26 @@ The v1.1 change added one task, `[new] Truncate tags to 30 chars on save (AC11) 
 
 > **Agent**
 >
-> # Truncate tags to 30 chars on save
-> Spec: specs/feature-tags/spec.md (v1.1) · AC11
-> Cut any tag over 30 characters silently before persisting.
+> Truncate tags to 30 characters on save
+> Spec: specs/feature-tags/spec.md (v1.1)
+>
+> Context
+> * A tag that is too long used to be rejected with an error, which interrupted people while typing.
+>
+> Scope
+> * Cut any tag longer than 30 characters before saving it.
+> * Return no error for it.
+>
+> Test cases (specs/feature-tags/testcases.md)
+> * Over-long tag on an edited post
+>
+> Acceptance criteria
+> - [ ] A tag longer than 30 characters is saved cut to 30 characters, with no error.
+> - [ ] Example: a tag of 40 characters comes back with its first 30.
 >
 > Give me the keys in order (e.g. FK-930 FK-931) and I'll replace `[new]` in tasks.md, or edit it by hand.
 
-If the Lead gives no key, `[new]` stays in `tasks.md` and the same task is offered next time. `task_detail: full` restores the long ticket (Context, Scope, Acceptance Criteria, Standards).
+If the Lead gives no key, `[new]` stays in `tasks.md` and the same task is offered next time. `task_detail: link` gives only the title and a pointer to the spec (the old `brief`); `full` gives the long ticket.
 
 ---
 
@@ -135,7 +152,7 @@ See `examples/feature-tags/outputs/` for each output as it is saved.
 
 ## Notes
 
-- Tasks are the only output that changes: brief by default, `[new]` only, all roles at once, keys replaced in order. With `outputs.tasks.destination: jira-csv` they come out as one CSV for Jira's import instead.
+- Tasks are the only output that changes: self-contained (`standard`) by default, `[new]` only, all roles at once, keys replaced in order. With `outputs.tasks.destination: jira-csv` they come out as one CSV for Jira's import instead.
 - Test cases, the Confluence page and the diagrams are generated as before. Sketches are listed as not yet reviewed instead of being formatted without steps.
 - A spec without journeys has no diagrams; the agent says so in one line.
 - Outputs are printed in session; copy them into your tool. Nothing is created in Jira for you.
