@@ -32,6 +32,9 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 | `/specos-init` | Lead | First-time setup — 7 questions, generates AGENTS.md + constitution.md + specos-project.yml |
 | `/specos-start` | Everyone | Begins any session, routes by role and session state |
 | `/specos-lead` | Lead | New spec in one draft, change an existing spec, or document what exists |
+| `/specos-understand` | internal | Loaded by `/specos-lead`: reads specs, writes nothing, prints the plan message |
+| `/specos-write` | internal | Loaded by `/specos-lead` after your go-ahead: writes the spec files |
+| `/specos-change` | internal | Loaded by `/specos-lead`: edits an existing spec, spec change requests |
 | `/specos-dev` | Dev | Loads only the relevant spec, shows the task's ACs, writes to implementation repo |
 | `/specos-qa` | QA | Expands the Lead's sketches into test cases, every AC covered |
 | `/specos-distribute` | Lead / QA | Brief `[new]` tasks, tests, Confluence, diagrams — per specos-project.yml |
@@ -49,8 +52,9 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 ```
 /specos-start → construction perspective → explain the feature freely
 → 0–4 questions only for real gaps → ONE draft: spec + tasks + sketches + CHANGELOG
-→ it prints what it understood + every assumption + every open question (full text, with alternatives)
-→ you answer → assumptions become dated Decisions → status: approved (only when none is left)
+→ (internally: specos-understand → your go-ahead → specos-write) Phase 1 (read-only): it prints what it understood, every assumption and open question (full text, with alternatives), the plan, the files to create and the existing ones to modify
+→ it stops; you answer or say "go ahead" → Phase 2 writes the files, assumptions become dated Decisions
+→ status: approved only when none is left
 → extra gates open only on a trigger, and it says why
 → closing summary: commit message, session saved (never commits on its own)
 → /specos-distribute → create tasks → give the keys in order → [new] replaced

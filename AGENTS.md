@@ -129,6 +129,9 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 | `/specos-start` | Begin any session — lead, dev, QA, or resume |
 | `/specos-init` | First-time project setup (run once per project) |
 | `/specos-lead` | Create, change or document a spec |
+| `/specos-understand` | Internal — loaded by `/specos-lead`: reads specs, writes nothing, prints the plan message |
+| `/specos-write` | Internal — loaded by `/specos-lead` after the Lead's go-ahead: writes the spec files |
+| `/specos-change` | Internal — loaded by `/specos-lead`: edits an existing spec, spec change requests |
 | `/specos-dev` | Implement a task with full spec context |
 | `/specos-qa` | Expand testcase sketches into test cases |
 | `/specos-distribute` | Generate outputs per specos-project.yml settings and rules |

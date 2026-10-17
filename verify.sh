@@ -327,6 +327,9 @@ fi
 
 head_ "Spec flow"
 
+SK="$REPO_ROOT/skills"
+LEADSET=$(cat "$SK/specos-lead.md" "$SK/specos-understand.md" "$SK/specos-write.md" "$SK/specos-change.md")
+
 # The retired skill must leave no trace outside the spec's own history.
 RETIRED_HITS=$(grep -rIl "lead-parallel" "$REPO_ROOT" --exclude-dir=.git --exclude=verify.sh --exclude-dir=specos-v3 --exclude=install.sh --exclude=update.sh 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$RETIRED_HITS" -eq 0 ]]; then ok "no file references specos-lead-parallel"; else bad "$RETIRED_HITS file(s) still reference specos-lead-parallel"; fi
@@ -359,29 +362,29 @@ OLD_RULE=$(grep -rIn -E "Only the Lead (role )?modifies|unless the user holds th
 # The status field: the contradiction this version removed.
 NOSTATUS=$(grep -rIn -i -E "no status field in the spec|no status fields|status fields anywhere|repo presence = approved|presence in the repo means approved" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/README.md" "$REPO_ROOT/CHEATSHEET.md" "$REPO_ROOT/constitution.md" "$REPO_ROOT/skills" "$REPO_ROOT/docs" 2>/dev/null | wc -l | tr -d ' ')
 [[ "$NOSTATUS" -eq 0 ]] && ok "no template says the spec has no status field or that presence alone is approval" || bad "$NOSTATUS place(s) still describe the old 'no status field' approval"
-if grep -q "status: draft" "$REPO_ROOT/skills/specos-lead.md" || grep -q "draft" "$REPO_ROOT/skills/specos-lead.md"; then
-  ok "specos-lead writes status: draft | approved"
+if grep -q "draft" "$SK/specos-write.md" && grep -q "approved" "$SK/specos-write.md"; then
+  ok "specos-write writes status: draft | approved"
 else
-  bad "specos-lead does not describe the status field"
+  bad "specos-write does not describe the status field"
 fi
 grep -q "status: draft | approved" "$REPO_ROOT/AGENTS.md" && ok "AGENTS template documents the status field" || bad "AGENTS template does not document the status field"
 
 # Rule 2 vs specos-lead: lead writes sketches only, never steps.
-if grep -q "Sketches suggested by Lead, not reviewed" "$REPO_ROOT/skills/specos-lead.md" \
-   && grep -q "Sketches suggested by Lead, not reviewed" "$REPO_ROOT/skills/specos-split.md" \
-   && ! grep -qi "without asking" "$REPO_ROOT/skills/specos-lead.md"; then
-  ok "lead and split write sketches, not full test cases"
+if grep -q "Sketches suggested by Lead, not reviewed" "$SK/specos-write.md" \
+   && grep -q "Sketches suggested by Lead, not reviewed" "$SK/specos-split.md" \
+   && ! grep -qi "without asking" "$SK/specos-write.md"; then
+  ok "write and split write sketches, not full test cases"
 else
-  bad "lead or split still writes full testcases (breaks constitution rule 2)"
+  bad "write or split still writes full testcases (breaks constitution rule 2)"
 fi
 grep -q "spec-only context\|from the spec alone" "$REPO_ROOT/constitution.md" && ok "constitution rule 2 names the QA invocation as the independent perspective" || bad "constitution rule 2 was not updated"
 
-# The change protocol is defined once, in lead; dev and qa point at it.
+# The change protocol is defined once, in specos-change; dev and qa point at it.
 for name in dev qa; do
-  if grep -q "spec change request" "$REPO_ROOT/skills/specos-$name.md" && grep -q "specos-lead" "$REPO_ROOT/skills/specos-$name.md"; then
-    ok "$name points to the spec change request protocol in specos-lead"
+  if grep -q "spec change request" "$SK/specos-$name.md" && grep -q "specos-change" "$SK/specos-$name.md"; then
+    ok "$name points to the spec change request protocol in specos-change"
   else
-    bad "$name does not point to the protocol in specos-lead"
+    bad "$name does not point to the protocol in specos-change"
   fi
 done
 PROTO_COPIES=$(grep -l "Type: clarification" "$REPO_ROOT"/skills/*.md | wc -l | tr -d ' ')
@@ -402,10 +405,10 @@ OLD_FIELDS=$(grep -ln "task_description:\|spec_path:" "$REPO_ROOT"/skills/*.md |
 
 # tasks.md: no SP-XX assignment left in any skill.
 if grep -l "SP-XX" "$REPO_ROOT"/skills/*.md >/dev/null 2>&1; then bad "a skill still assigns SP-XX placeholders"; else ok "no skill assigns SP-XX placeholders"; fi
-if grep -q "\[new\]" "$REPO_ROOT/skills/specos-lead.md" && grep -q "\[new\]" "$REPO_ROOT/skills/specos-distribute.md"; then
-  ok "lead writes and distribute replaces [new]"
+if grep -q "\[new\]" "$SK/specos-write.md" && grep -q "\[new\]" "$SK/specos-distribute.md"; then
+  ok "write writes and distribute replaces [new]"
 else
-  bad "lead or distribute does not handle [new]"
+  bad "write or distribute does not handle [new]"
 fi
 
 # SP- placeholders: distribute asks, it never converts them silently.
@@ -418,12 +421,12 @@ fi
 
 # v2.8: what the chat shows, how a session closes, and what dev prints.
 V28_BAD=0
-for name in lead dev qa distribute; do
-  grep -q "Never commit or push on your own. When the Lead asks, list the files and the message first." "$REPO_ROOT/skills/specos-$name.md" \
+for name in lead understand write change dev qa distribute start; do
+  grep -q "Never commit or push on your own. When the Lead asks, list the files and the message first." "$SK/specos-$name.md" \
     || { bad "$name does not carry the never-commit line"; V28_BAD=$((V28_BAD+1)); }
 done
 for k in "every assumption" "Session saved: active =" "Commit message:" "## Decisions" "Purpose:" "(inferred)"; do
-  grep -qF "$k" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead lacks: $k"; V28_BAD=$((V28_BAD+1)); }
+  grep -qF "$k" <<< "$LEADSET" || { bad "the lead skills lack: $k"; V28_BAD=$((V28_BAD+1)); }
 done
 for k in "Commit message:" "type(KEY): Imperative description" "improvement" "Never park it in"; do
   grep -qF "$k" "$REPO_ROOT/skills/specos-dev.md" || { bad "specos-dev lacks: $k"; V28_BAD=$((V28_BAD+1)); }
@@ -438,10 +441,10 @@ OLD_MODES=$(grep -rIn -E "brief \\?\| full|brief \| full" "$REPO_ROOT/README.md"
 
 # v2.9: the message before any question, assumptions in the spec, gates on triggers.
 V29_BAD=0
-for k in "What I understood" "Assumptions (I decided these; confirm or change)" "Open questions" "A1 · " "Q1 · " "my proposal:" "Files: specs/" "Never cite an id" "## Assumptions" "## Decisions" "Opening a gate because" "more than 5 assumptions" "more than 15 ACs" "No assumptions, no open questions" "Lead's language"; do
-  grep -qF "$k" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead lacks: $k"; V29_BAD=$((V29_BAD+1)); }
+for k in "What I understood" "Assumptions (I decided these; confirm or change)" "Open questions" "A1 · " "Q1 · " "my proposal:" "never stands alone" "## Assumptions" "## Decisions" "Opening a gate because" "more than 5 assumptions" "more than 15 ACs" "No assumptions, no open questions" "Lead's last message"; do
+  grep -qF "$k" <<< "$LEADSET" || { bad "the lead skills lack: $k"; V29_BAD=$((V29_BAD+1)); }
 done
-grep -q "32-3-assets-and-loans" "$REPO_ROOT/skills/specos-lead.md" || { bad "specos-lead has no complete example of the message"; V29_BAD=$((V29_BAD+1)); }
+grep -q "32-3-assets-and-loans" "$SK/specos-understand.md" || { bad "specos-understand has no complete example of the message"; V29_BAD=$((V29_BAD+1)); }
 [[ $V29_BAD -eq 0 ]] && ok "v2.9 contracts: understood/assumptions message with example, Assumptions section, gates"
 
 # Optional destination: jira-csv must be readable by distribute and settable through config.
@@ -452,16 +455,68 @@ done
 grep -q "Summary,Description,Issue Type,Parent" "$REPO_ROOT/skills/specos-distribute.md" || { bad "distribute does not define the jira-csv columns"; JC_BAD=$((JC_BAD+1)); }
 [[ $JC_BAD -eq 0 ]] && ok "jira-csv destination is defined in distribute, config, template and README"
 
-# Token weight: this version set out to make skills lighter, so a skill growing
-# past its v2.6 size has to be a decision, not an accident.
-# (sizes in bytes at v2.6; +15% tolerated for skills that gained a mode or a command)
+# Token weight: skills should not grow silently. Each limit is the skill's size at the
+# previous version plus 10% (the four lead skills: their v2.10 size plus 10%). A bigger skill has to be a decision, not an accident.
 check_size() {
   local name="$1" base="$2" f="$REPO_ROOT/skills/specos-$1.md" size limit
-  size=$(wc -c < "$f" | tr -d ' '); limit=$(( base + base * 15 / 100 ))
-  if [[ "$size" -le "$limit" ]]; then ok "specos-$name is $size bytes (v2.6: $base)"; else bad "specos-$name grew to $size bytes (v2.6: $base, limit $limit)"; fi
+  size=$(wc -c < "$f" | tr -d ' '); limit=$(( base + base / 10 ))
+  if [[ "$size" -le "$limit" ]]; then ok "specos-$name is $size bytes (base $base, limit $limit)"; else bad "specos-$name grew to $size bytes (base $base, limit $limit)"; fi
 }
-check_size lead 6482; check_size dev 6440; check_size qa 7223; check_size distribute 9579; check_size start 12180
-check_size status 2882; check_size help 1932; check_size init 10675; check_size config 7993; check_size split 3805; check_size group 2347
+check_size lead 4812; check_size understand 3331; check_size write 2997; check_size change 2100; check_size dev 6437; check_size qa 5639; check_size distribute 9243; check_size start 12168
+check_size status 2858; check_size help 2087; check_size init 10650; check_size config 7992; check_size split 3726; check_size group 2337
+
+# v2.10: an orchestrator that owns the order, and three small skills that each do one job.
+V210_BAD=0
+l3() { sed -n '3p' "$SK/specos-$1.md"; }
+[[ "$(l3 lead)" == Orchestrator:* && "$(l3 lead)" != *'"'* ]] || { bad "specos-lead line 3 is not an Orchestrator description without double quotes"; V210_BAD=$((V210_BAD+1)); }
+for n in understand write change; do
+  line="$(l3 $n)"
+  [[ "$line" == "Internal step of /specos-lead:"* && "$line" != *'"'* ]] || { bad "specos-$n line 3 does not say it is an internal step of /specos-lead"; V210_BAD=$((V210_BAD+1)); }
+done
+# Information hiding: the orchestrator and the understand step hold no file formats; write holds them.
+for f in lead understand; do
+  for str in "Sketches suggested" "## Decisions" "retired (v" "- [new]" "## TC-01"; do
+    grep -qF -- "$str" "$SK/specos-$f.md" && { bad "specos-$f holds a file format: $str"; V210_BAD=$((V210_BAD+1)); }
+  done
+done
+for str in "Sketches suggested" "## Decisions" "retired (v" "- [new]" "## TC-01" "Before the go-ahead nothing under \`specs/\` is created or edited"; do
+  grep -qF -- "$str" "$SK/specos-write.md" || { bad "specos-write lacks: $str"; V210_BAD=$((V210_BAD+1)); }
+done
+# The orchestrator: names, order, stops, handoff, go-ahead, Close.
+for k in "specos-understand" "specos-write" "specos-change" "STOP and wait" "Stop and wait" "Go-ahead" "Skill tool" "/specos-<name>" "is never loaded before the go-ahead" "Files created:" "Close"; do
+  grep -qF -- "$k" "$SK/specos-lead.md" || { bad "specos-lead lacks: $k"; V210_BAD=$((V210_BAD+1)); }
+done
+grep -qF 'Bad: "By A2' "$SK/specos-lead.md" && grep -qF "Good: " "$SK/specos-lead.md" || { bad "specos-lead lacks the bad/good plain-words example"; V210_BAD=$((V210_BAD+1)); }
+for old in "Write ONE draft" "Before asking the Lead to review or accept anything, print" "In chat, BEFORE asking"; do
+  grep -qF -- "$old" "$SK/specos-lead.md" "$SK/specos-understand.md" && { bad "an old write-before-asking step remains: $old"; V210_BAD=$((V210_BAD+1)); }
+done
+# Only specos-write is told to create the files.
+CREATORS=$(grep -l "Create \`spec.md\`" "$SK"/*.md | xargs -n1 basename 2>/dev/null | tr '\n' ' ')
+[[ "$CREATORS" == "specos-write.md " ]] || { bad "the instruction to create spec.md is in: $CREATORS (expected only specos-write.md)"; V210_BAD=$((V210_BAD+1)); }
+# Understand: reads, writes nothing, six blocks in order, gates.
+for k in "writes nothing" "Phase 1 — read-only" "create or edit nothing" "never asked separately" "Opening a gate because"; do
+  grep -qF -- "$k" "$SK/specos-understand.md" || { bad "specos-understand lacks: $k"; V210_BAD=$((V210_BAD+1)); }
+done
+EXMSG=$(awk '/^```/ { f++; next } f == 1' "$SK/specos-understand.md")
+prev=0
+for k in "What I understood" "Assumptions (I decided these; confirm or change)" "Open questions" "Plan — what I will write" "Files I will create" "Existing files I will modify (needs your yes)"; do
+  n=$(printf '%s\n' "$EXMSG" | grep -nF -- "$k" | head -1 | cut -d: -f1)
+  if [[ -z "$n" || "$n" -le "$prev" ]]; then bad "the example message in specos-understand lacks '$k' in order"; V210_BAD=$((V210_BAD+1)); else prev=$n; fi
+done
+# Change: the request block, and dev and qa point to it.
+grep -qF "SPEC CHANGE REQUEST" "$SK/specos-change.md" || { bad "specos-change lacks the SPEC CHANGE REQUEST block"; V210_BAD=$((V210_BAD+1)); }
+for name in dev qa; do grep -qF "specos-change" "$SK/specos-$name.md" || { bad "$name does not mention specos-change"; V210_BAD=$((V210_BAD+1)); }; done
+# The plain-words and never-commit lines are in all eight skills that talk to the Lead.
+for name in lead understand write change dev qa distribute start; do
+  grep -qF "never stand alone" "$SK/specos-$name.md" || { bad "$name lacks the plain-words line"; V210_BAD=$((V210_BAD+1)); }
+done
+[[ $SKILL_COUNT -eq 14 ]] || { bad "expected 14 skills, found $SKILL_COUNT"; V210_BAD=$((V210_BAD+1)); }
+MDC_COUNT=$(ls "$REPO_ROOT"/adapters/cursor/*.mdc | wc -l | tr -d ' ')
+[[ "$MDC_COUNT" -eq 14 ]] || { bad "expected 14 cursor adapters, found $MDC_COUNT"; V210_BAD=$((V210_BAD+1)); }
+# as-is must show the Lead what it understood and wait, like a new spec.
+grep -qE '^as-is:.*specos-understand.*STOP and wait.*specos-write' "$SK/specos-lead.md" || { bad "the as-is flow of specos-lead does not go through specos-understand and wait before specos-write"; V210_BAD=$((V210_BAD+1)); }
+grep -qF 'review: sections` forces sections' "$SK/specos-understand.md" || { bad "specos-understand has a cut sentence at the end of the gates"; V210_BAD=$((V210_BAD+1)); }
+[[ $V210_BAD -eq 0 ]] && ok "v2.10 contracts: orchestrator + understand/write/change, no formats in the orchestrator, only write creates files, as-is waits too, 14 skills and 14 adapters"
 
 # --- 9. The check script ----------------------------------------------------
 

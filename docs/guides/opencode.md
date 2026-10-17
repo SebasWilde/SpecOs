@@ -20,13 +20,16 @@ Run the installer from the SpecOS repo root:
 curl -fsSL https://raw.githubusercontent.com/SebasWilde/SpecOs/main/install.sh | bash
 ```
 
-The installer detects OpenCode automatically and copies the 11 skill files to `~/.config/opencode/commands/`:
+The installer detects OpenCode automatically and copies the 14 skill files to `~/.config/opencode/commands/`:
 
 ```
 ~/.config/opencode/commands/
 ├── specos-init.md
 ├── specos-start.md
 ├── specos-lead.md
+├── specos-understand.md
+├── specos-write.md
+├── specos-change.md
 ├── specos-dev.md
 ├── specos-qa.md
 ├── specos-distribute.md
@@ -49,7 +52,7 @@ These symlinks ensure that whatever agent reads the repo, it sees the same proje
 ls ~/.config/opencode/commands/specos-*.md
 ```
 
-You should see all 11 files. If you see them, skills are ready to use from any OpenCode session.
+You should see all 14 files. If you see them, skills are ready to use from any OpenCode session.
 
 ---
 

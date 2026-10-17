@@ -15,6 +15,9 @@ SKILLS
   /specos-start       Begin or resume any session — routes automatically by role
   /specos-init        First-time project setup (run once per project)
   /specos-lead        Create, change or document a spec (Lead role)
+  /specos-understand  Internal, via /specos-lead (plan message)
+  /specos-write       Internal, via /specos-lead (writes specs)
+  /specos-change      Internal, via /specos-lead (edits a spec)
   /specos-dev         Implement a task with its spec context (Dev role)
   /specos-qa          Expand testcase sketches into test cases (QA role)
   /specos-distribute  Generate outputs per specos-project.yml

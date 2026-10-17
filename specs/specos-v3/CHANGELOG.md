@@ -1,5 +1,10 @@
 # Changelog — specos-v3
 
+## 2026-10-15 v2.10
+- What: `/specos-lead` becomes an orchestrator over `specos-understand`, `specos-write` and `specos-change` (14 skills); new mode reads and asks first and writes only after the go-ahead; chat uses words, not bare ids
+- Why: v2.9 wrote files and edited an approved spec before any assumption was confirmed, spoke in bare ids, and a 10 KB `specos-lead` lost rules
+- Impact: old specs unaffected; existing specs are edited from a new-spec run only if listed and approved; size guard is now each skill's previous size + 10%
+
 ## 2026-10-15 v2.9
 - What: `specos-lead` prints a fixed "understood / assumptions / open questions" message and keeps assumptions in `## Assumptions`; extra gates open only on triggers; three new checks
 - Why: a session asked to confirm A1–A5 that existed in no file, and wrote its own choice under `## Decisions` as if the Lead had made it

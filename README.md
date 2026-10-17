@@ -39,13 +39,16 @@ The core insight: AI agents will write whatever you ask them to. SpecOS makes su
 
 Both perspectives are required. They cannot be the same logic.
 
-### The 11 skills
+### The 14 skills
 
 | Skill | Who uses it |
 |---|---|
 | `/specos-init` | Lead — first-time project setup |
 | `/specos-start` | Everyone — begins any session, runs local onboarding if needed, routes by role |
 | `/specos-lead` | Lead — creates a spec in one draft, changes an existing one, or documents what is already built |
+| `/specos-understand` | Internal, loaded by `/specos-lead` — reads the specs, writes nothing, prints the plan message |
+| `/specos-write` | Internal, loaded by `/specos-lead` — writes the files of a new spec after your go-ahead |
+| `/specos-change` | Internal, loaded by `/specos-lead` — edits an existing spec and handles spec change requests |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — expands the Lead's testcase sketches into test cases |
 | `/specos-distribute` | Lead — generates outputs per specos-project.yml settings and rules |
@@ -151,7 +154,10 @@ SpecOs/
 ├── skills/
 │   ├── specos-init.md
 │   ├── specos-start.md
-│   ├── specos-lead.md
+│   ├── specos-lead.md          ← orchestrator
+│   ├── specos-understand.md    ← internal: reads, writes nothing
+│   ├── specos-write.md         ← internal: writes after the go-ahead
+│   ├── specos-change.md        ← internal: edits an existing spec
 │   ├── specos-dev.md
 │   ├── specos-qa.md
 │   ├── specos-distribute.md
@@ -406,7 +412,7 @@ parked:          # other features, one line each
 2. Run `/specos-init` — answers 7 questions, generates project config
 3. Run `/specos-start` — first time asks your name, role, and repo paths → saves `local-workspace.yml`
 4. Run `/specos-start` (or `/specos-lead` directly) for each new feature: explain it freely, answer the few questions, and get one draft — spec, tasks and testcase sketches
-5. Read the message it prints before asking anything — what it understood, every assumption (each with its alternative), every open question (each with its proposal) — and answer. Confirmed assumptions move to `## Decisions`; the spec becomes `approved` when `## Assumptions` and `## Open questions` are empty. It closes with a summary, a commit message, and the session saved — it never commits on its own
+5. (`/specos-lead` runs `specos-understand`, waits for you, then `specos-write`.) Read the message it prints first — what it understood, every assumption (each with its alternative), every open question (each with its proposal), the plan, the files it will create and the existing ones it wants to modify — and answer. **Nothing is written until you do.** Confirmed assumptions move to `## Decisions`; the spec becomes `approved` when `## Assumptions` and `## Open questions` are empty. It closes with a summary, a commit message, and the session saved — it never commits on its own
 6. Run `/specos-distribute`, create the tasks in your task software, and give back the keys in order
 7. When something changes, say "change X because Y" — `/specos-lead` handles versions, AC ids, CHANGELOG and impact
 

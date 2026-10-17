@@ -15,6 +15,9 @@ When the user types one of the commands below, read the corresponding skill file
 | `/specos-init` | `skills/specos-init.md` | First-time project setup |
 | `/specos-start` | `skills/specos-start.md` | Start or resume any session |
 | `/specos-lead` | `skills/specos-lead.md` | Create, change or document a spec as Lead |
+| `/specos-understand` | `skills/specos-understand.md` | Internal: loaded by `/specos-lead`, reads and prints the plan message |
+| `/specos-write` | `skills/specos-write.md` | Internal: loaded by `/specos-lead` after the go-ahead, writes the spec |
+| `/specos-change` | `skills/specos-change.md` | Internal: loaded by `/specos-lead`, edits an existing spec |
 | `/specos-dev` | `skills/specos-dev.md` | Implement a task as Dev |
 | `/specos-qa` | `skills/specos-qa.md` | Expand testcase sketches into test cases as QA |
 | `/specos-distribute` | `skills/specos-distribute.md` | Generate formatted outputs |

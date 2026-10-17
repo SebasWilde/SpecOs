@@ -1,6 +1,6 @@
 ---
 feature: specos-v3
-version: 2.9
+version: 2.10
 status: approved
 lead: Sebastian Wilde
 date: 2026-10-15
@@ -294,7 +294,7 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 **Creating — `/specos-lead`, new mode**
 - AC1 — Modes are auto-detected: new (the feature folder does not exist), change (it exists), as-is (document existing behavior; asks permission before reading implementation code and leaves `tasks.md` empty by convention)
 - AC2 — New mode asks 0–4 questions, only for real gaps — never "describe the feature"
-- AC3 — New mode writes ONE draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) and prints the message in AC45 before asking the Lead to review or accept anything
+- AC3 — New mode runs in two phases (AC52–AC54): it reads and prints the AC45 message first, and writes the draft (`spec.md`, `tasks.md`, `testcases.md` sketches, `CHANGELOG.md`) only after the Lead's go-ahead
 - AC4 — `lead.review` is `draft` (default) or `sections`; `sections` restores the per-section gates
 - AC5 — `lead.suggest_scenarios` defaults to true; at most one sketch per 2 ACs, max 8
 - AC6 — ACs carry stable ids (`AC1`, `AC21b`), are grouped by theme with plain headings, and a removed AC stays as "retired"
@@ -318,7 +318,7 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 **Dev, QA and sketches**
 - AC19 — `specos-dev` refuses a `status: draft` spec and any task that references a `[pending]` AC, and tells the Lead
 - AC20 — At task start `specos-dev` shows the task's ACs and the sketched flows; at the end it prints a closing block for the PR or ticket with a commit message (no file)
-- AC21 — On a gap, dev and qa follow the change protocol by pointer to `specos-lead` — it is defined once
+- AC21 — On a gap, dev and qa follow the change protocol by pointer to `specos-change` — it is defined once
 - AC22 — Lead writes sketches only (`## TC-01 — title` + `covers:`), with the header "Sketches suggested by Lead, not reviewed."
 - AC23 — QA fills in `steps:`/`expected:` and the `spec: vX.Y` stamp; sketches are seeds, and the independent breaking perspective is the QA invocation with spec-only context
 
@@ -337,7 +337,7 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 - AC31 — `install.sh` and `update.sh` deploy it to `~/.specos/specos-check.sh`, `uninstall.sh` removes it, and install/update delete retired skills from every agent directory
 
 **Rules and structure**
-- AC32 — `specos-lead-parallel` no longer exists: 11 skills, with no reference left in adapters, docs or installers
+- AC32 — `specos-lead-parallel` no longer exists, with no reference left in adapters, docs or installers
 - AC33 — `design.md` (the how, per feature) and `00-architecture.md` (shared context of a group) are documented as optional files and never automated
 
 **Adjustments from first real use (v2.8)**
@@ -350,16 +350,30 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 - AC41 — The `specos-dev` closing block ends with `Commit message:` in the form `type(KEY): Imperative description` (types `feat`, `change`, `improvement`, `chore`; one line of about 72 characters; no AC ids); the key comes from the task, a `[new]` task makes the agent ask for it, and the message is only shown
 - AC42 — `standard` tickets are self-contained: title, `Spec:` path and version without AC ids, optional `Context` (marked "(inferred)" when inferred), `Scope` bullets, `Test cases` titles, and a checklist of 4–8 `Acceptance criteria` condensed from the spec ACs, never with ids; no Dev Notes
 - AC43 — `/specos-status --check` warns when `session.md` `open` has more than 3 entries
-- AC44 — `specos-lead`, `specos-dev`, `specos-qa` and `specos-distribute` never commit or push on their own; when asked they list the files and the message first
+- AC44 — Eight skills (`specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-distribute`, `specos-start`) never commit or push on their own; when asked they list the files and the message first
 
 **Visible assumptions and gates (v2.9)**
-- AC45 — Before any review question, `specos-lead` prints a message with "What I understood" (3–5 lines), "Assumptions" (`A1 · full text · alternative`), "Open questions" (`Q1 · full text · my proposal`) and "Files"; headings follow the Lead's language and spec content follows `language.specs`; with nothing to list it says "No assumptions, no open questions"
+- AC45 — Before any review question, `specos-understand` prints a message with "What I understood" (3–5 lines), "Assumptions" (`A1 · full text · alternative`), "Open questions" (`Q1 · full text · my proposal`) and "Files"; headings follow the Lead's language and spec content follows `language.specs`; with nothing to list it says "No assumptions, no open questions"
 - AC46 — An id (`A1`, `Q2`) is never cited without its full text, including inside an options prompt, and the skill carries a complete example of the message
 - AC47 — While `draft`, the spec has a `## Assumptions` section (`A1 — assumed X. Alternative: Y.`) with the same ids as the chat; it is omitted when empty
 - AC48 — A confirmed assumption moves to `## Decisions` under the date in one line (the Lead's changed choice is what is recorded); a rejected one disappears; the agent's own choices are never written as Decisions
 - AC49 — One draft stays the default; an extra gate opens only on a trigger, with the line "Opening a gate because …": more than 5 assumptions or more than 3 open questions (review by blocks); an assumption about calculations, data model, permissions or money (confirm it before writing the ACs that depend on it); a contradiction with an approved spec (pause with the affected statements); more than 15 ACs or 2 journeys (propose `/specos-split`); a self-contradicting request (one question)
 - AC50 — Fixed gates never depend on a trigger: the AC45 message before approving, permission before reading implementation code in as-is mode, permission before committing; the Lead can open any gate at any time and `lead.review: sections` forces section-by-section
 - AC51 — `/specos-status --check` warns on a `draft` spec with neither `## Assumptions` nor `## Open questions` with content, on an `approved` spec that still has `## Assumptions` with content, and on a `session.md` `task:` that is not a key, `[new]` or `null`
+
+**Two phases and plain words (v2.10)**
+- AC52 — In Phase 1 (`specos-understand`) the agent only reads (existing specs included) and lists open questions; no tool call creates or edits a file, and no shell command writes. Nothing under `specs/`, and not `session.md`, is created or edited before the go-ahead
+- AC53 — The Phase 1 message ends with "Plan — what I will write" (one line per theme of ACs), "Files I will create" and "Existing files I will modify (needs your yes)", or "none"
+- AC54 — The orchestrator stops and waits when the message has at least one assumption, open question or existing file to modify; with none of the three it goes straight to `specos-write`
+- AC55 — The go-ahead is a reply that answers the assumptions and questions, or says "go ahead" or to use the agent's proposals (accepting them for anything left unanswered), and does not object to the plan or the file list; a partial reply gets a request for what is missing, a reply that changes the plan gets only the changed part re-printed, and answering one question is never a go-ahead for the rest
+- AC56 — Phase 2 (`specos-write`) creates the files; confirmed assumptions become dated lines under `## Decisions`; `status` is `approved` only if every assumption and question was answered or the Lead said to use the proposals, otherwise `draft` with the rest still listed
+- AC57 — An existing spec is edited from a new-spec run only through `specos-change`, only if it was listed and the Lead said yes, with a version bump, a 3-line CHANGELOG entry and an impact list; if an approved spec would point at a spec still `draft`, the list line says so
+- AC58 — The Close summary, printed by the orchestrator as its last step in every mode, lists the files created and the files modified
+- AC59 — `specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-distribute` and `specos-start` say things in words in chat (an id or code name may follow in parentheses, never stand alone) and never commit or push on their own; file content keeps its ids
+- AC60 — The size guard in `verify.sh` is each skill's v2.9 size plus 10% (`specos-lead`, `specos-understand`, `specos-write` and `specos-change`: their v2.10 size plus 10%), instead of v2.6 plus 15%
+- AC61 — `/specos-lead` is the only command the Lead types: an orchestrator that holds the settings, the mode detection, the order of the steps, the stops and the Close, and no file formats. `specos-understand`, `specos-write` and `specos-change` each do one job, say on line 3 that they are internal, and carry the formats and rules of their job
+- AC62 — The orchestrator hands off by invoking the skill by name; if that is not possible it reads the skill file from the agent's commands folder, and if that fails it tells the Lead to run `/specos-<name>`. `specos-write` is never loaded before the go-ahead
+- AC63 — After `specos-understand` returns, the orchestrator checks the six blocks of the message and runs it again if one is missing; in as-is mode the Lead's permission to read the implementation code is not the go-ahead: after reading, `specos-understand` prints the message and the orchestrator waits like in new mode
 
 ### Agent-agnostic compatibility
 - [ ] All skills work in Claude Code, OpenCode, Gemini CLI via slash commands
@@ -511,7 +525,10 @@ SpecOs/                             ← root (any folder name)
 ├── skills/                         ← the single source for every skill
 │   ├── specos-init.md
 │   ├── specos-start.md
-│   ├── specos-lead.md
+│   ├── specos-lead.md                ← orchestrator
+│   ├── specos-understand.md          ← internal: reads, writes nothing, prints the plan message
+│   ├── specos-write.md               ← internal: writes the files of a new spec after the go-ahead
+│   ├── specos-change.md              ← internal: edits an existing spec, spec change requests
 │   ├── specos-dev.md
 │   ├── specos-qa.md
 │   ├── specos-distribute.md
@@ -848,6 +865,9 @@ On approval both old files are deleted in the same step, so no project ever hold
 - **Self-contained tickets (v2.8):** the ticket lives in Jira, so it explains itself instead of pointing at ACs. `tasks.md` keeps `(AC1–AC11) vX.Y` as the repo's pointer. `brief` is read as `link` so old configs keep working.
 - **Never commit unasked (v2.8):** a session committed a spec nobody asked it to. Branches and targets remain project policy, not SpecOS's.
 - **Assumptions have a home (v2.9):** telling the agent to list its assumptions did not work, because the template had nowhere to put them and nothing checked it. They now go in a fixed message (AC45), a `## Assumptions` section and a check, and the agent's own choices can no longer pose as the Lead's decisions. Thresholds for the extra gates are constants in the skill, not settings; change mode keeps the change-request block and does not print the message.
+- **Write nothing before the go-ahead (v2.10):** v2.9 printed a better message but kept the order — files first, message second — so a session wrote five files and edited an approved spec before the Lead had confirmed anything. The order is now the contract: Phase 1 reads and asks, Phase 2 writes. Existing specs are edited from new mode only when listed and approved, and through change mode. Ids in chat read as noise to the Lead, so they now follow a description instead of replacing it.
+- **Size guard (v2.10):** the two-phase flow made `specos-lead` 10 KB, and rules got lost in it. The guard compares each skill with its previous-version size plus 10%, so it measures growth between versions, not weight against v2.6; the four lead skills use their v2.10 size.
+- **Orchestrator and small skills (v2.10):** a prose rule ("write nothing yet") does not hold when the writing instructions sit in the same file, and a 10 KB skill loses rules. `/specos-lead` is now a small orchestrator that owns the order and the stops; the writing instructions live in `specos-write`, which is loaded only after the go-ahead. It holds no file formats (the checks look for them elsewhere), so it cannot write by following its own text. as-is goes through `specos-understand` like any new spec: the Lead's permission to read the code is not the go-ahead. Subagents come later, on top of these contracts.
 
 ### GitHub branching strategy
 

@@ -1,0 +1,7 @@
+---
+description: Internal step of /specos-lead (load only when /specos-lead hands off to it)
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-write.md` from the SpecOS repo root and follow all instructions in it exactly.

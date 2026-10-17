@@ -6,6 +6,8 @@ Read `specos-project.yml` at the start if it exists. Use `language.specs` for al
 
 Never commit or push on your own. When the Lead asks, list the files and the message first.
 
+In chat, say things in words: an id (A2, Q1, AC7) or a code name may follow in parentheses, never stand alone. Describe what it is before referring to it.
+
 ## Config you own
 
 **Settings** — read these from `settings.qa` and obey them. Absent means the default; do not warn about an absent file or block.
@@ -75,7 +77,7 @@ Sketches QA did not expand stay as they are. Fields QA added are written as-is.
 ## Step 4 — Route what you find
 
 - **Code defect** — outside SpecOS. Offer a short bug text citing the case and the AC: `[one line] · found by TC-XX · spec [feature] vX.Y · AC… · steps · expected · actual`
-- **Spec gap** (behavior no AC covers, or an AC that is wrong) — do not write a case for it. Follow the spec change request protocol in `specos-lead`: classify, state what you found, the proposed AC text and 1–2 options. If your role includes lead or builder, continue in change mode here; otherwise print the request for the Lead.
+- **Spec gap** (behavior no AC covers, or an AC that is wrong) — do not write a case for it. Follow the spec change request protocol in `specos-change`: classify, state what you found, the proposed AC text and 1–2 options. If your role includes lead or builder, continue in change mode here; otherwise print the request for the Lead.
 - **Bad case** — fix the case.
 
 ---

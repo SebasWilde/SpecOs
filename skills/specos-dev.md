@@ -74,8 +74,9 @@ Work from the spec. For each piece of code:
 - Follow conventions from `AGENTS.md`
 - Do not use `print()` or `console.log()` unless the spec explicitly requires logging output
 - Never commit or push on your own. When the Lead asks, list the files and the message first.
+- In chat, say things in words: an id (A2, Q1, AC7) or a code name may follow in parentheses, never stand alone. Describe what it is before referring to it.
 
-On a gap (missing AC, ambiguity, a wrong AC, an edge case): stop and follow the spec change request protocol in `specos-lead`, in the chat — classify it, state what you found, the proposed AC text and 1–2 options. Never park it in `session.md` `open`. If your role includes lead or builder, continue in change mode in this session; otherwise print the request for the Lead and keep working on what it does not block. Changes to spec.md require Lead approval; an agent may write them only after that approval. Never invent requirements.
+On a gap (missing AC, ambiguity, a wrong AC, an edge case): stop and follow the spec change request protocol in `specos-change`, in the chat — classify it, state what you found, the proposed AC text and 1–2 options. Never park it in `session.md` `open`. If your role includes lead or builder, continue in change mode in this session; otherwise print the request for the Lead and keep working on what it does not block. Changes to spec.md require Lead approval; an agent may write them only after that approval. Never invent requirements.
 
 ---
 

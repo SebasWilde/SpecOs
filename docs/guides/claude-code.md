@@ -20,13 +20,16 @@ Run the installer from the SpecOS repo root:
 curl -fsSL https://raw.githubusercontent.com/SebasWilde/SpecOs/main/install.sh | bash
 ```
 
-The installer detects Claude Code automatically and copies the 11 skill files to `~/.claude/commands/`:
+The installer detects Claude Code automatically and copies the 14 skill files to `~/.claude/commands/`:
 
 ```
 ~/.claude/commands/
 ├── specos-init.md
 ├── specos-start.md
 ├── specos-lead.md
+├── specos-understand.md
+├── specos-write.md
+├── specos-change.md
 ├── specos-dev.md
 ├── specos-qa.md
 ├── specos-distribute.md
@@ -47,7 +50,7 @@ It also creates two symlinks in the SpecOS repo root:
 ls ~/.claude/commands/specos-*.md
 ```
 
-You should see all 11 files. If you see them, skills are ready to use from any Claude Code session.
+You should see all 14 files. If you see them, skills are ready to use from any Claude Code session.
 
 ---
 
