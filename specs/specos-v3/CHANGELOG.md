@@ -1,7 +1,7 @@
 # Changelog — specos-v3
 
 ## 2026-11-14 v2.12
-- What: `specos-e2e` gains run modes (`e2e_modes` in `local-workspace.yml`, documented in `specos-start`), a review step, `Files changed` and `Evidence` in the close, a feature-label check and a permission step before reading other repos
+- What: `specos-e2e` gains run modes (`e2e_modes` in `local-workspace.yml`, documented in `specos-start`), a review step, `Files changed` and `Evidence` in the close, a feature-label check that asks which form to use and a permission step before reading other repos
 - Why: first real use on a project with separate repos: no way to see the run, no review, a label that differed from the spec folder, tests run in the wrong mode
 - Impact: no setting added; `local-workspace.yml` has an optional `e2e_modes`; `specos-e2e` grows to ~10 KB and its size base is rebased; the commands to see the result come from the e2e repo, never from SpecOS
 

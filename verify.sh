@@ -462,7 +462,7 @@ check_size() {
   size=$(wc -c < "$f" | tr -d ' '); limit=$(( base + base / 10 ))
   if [[ "$size" -le "$limit" ]]; then ok "specos-$name is $size bytes (base $base, limit $limit)"; else bad "specos-$name grew to $size bytes (base $base, limit $limit)"; fi
 }
-check_size lead 4812; check_size understand 3331; check_size write 2997; check_size change 2100; check_size dev 6437; check_size qa 5639; check_size e2e    10605; check_size distribute 9243; check_size start 12168
+check_size lead 4812; check_size understand 3331; check_size write 2997; check_size change 2100; check_size dev 6437; check_size qa 5639; check_size e2e 10699; check_size distribute 9243; check_size start 12168
 check_size status 2858; check_size help 2279; check_size init 10650; check_size config 7992; check_size split 3726; check_size group 2337
 
 # v2.10: an orchestrator that owns the order, and three small skills that each do one job.
@@ -521,7 +521,7 @@ grep -qF 'review: sections` forces sections' "$SK/specos-understand.md" || { bad
 # v2.11: specos-e2e automates the expanded cases in the e2e repo, and the spec still decides what is tested.
 V211_BAD=0
 E2E="$SK/specos-e2e.md"
-for k in "implementation_repos.e2e" "memory_links.e2e" "specos-change" "Never commit or push" "TC id **and** the feature name" "Never bend a test" "Only expanded cases are automated" "Is there an e2e repo" "monorepo" "e2e_modes" "Files changed" "Evidence:" "Review:" "Never edit those repos" "warn once and use the form the repo uses" "predates that format" "\`type: group\`" "[pending]" "sketches" "decides *how*" "rules\` for role \`e2e\`" "Rewrite the whole \`session.md\`"; do
+for k in "implementation_repos.e2e" "memory_links.e2e" "specos-change" "Never commit or push" "TC id **and** the feature name" "Never bend a test" "Only expanded cases are automated" "Is there an e2e repo" "monorepo" "e2e_modes" "Files changed" "Evidence:" "Review:" "Never edit those repos" "ask which form to use" "predates that format" "\`type: group\`" "[pending]" "sketches" "decides *how*" "rules\` for role \`e2e\`" "Rewrite the whole \`session.md\`"; do
   grep -qF -- "$k" "$E2E" || { bad "specos-e2e lacks: $k"; V211_BAD=$((V211_BAD+1)); }
 done
 grep -qF "task: null" "$E2E" || grep -qF "\`task\` is \`null\`" "$E2E" || { bad "specos-e2e does not set task to null"; V211_BAD=$((V211_BAD+1)); }
