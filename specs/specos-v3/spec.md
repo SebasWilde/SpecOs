@@ -1,9 +1,9 @@
 ---
 feature: specos-v3
-version: 2.10
+version: 2.12
 status: approved
 lead: Sebastian Wilde
-date: 2026-10-15
+date: 2026-11-14
 keywords: [specs, perspectives, agent-agnostic, memory-links, multi-repo, monorepo, project-config, spec-change, stable-ac-ids]
 ---
 
@@ -61,6 +61,14 @@ Works with any AI agent (Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity
 6. QA edits freely — adds cases live ("add TC: ..."), removes, modifies cases and any additional custom fields
 7. If QA finds an uncovered edge case, agent raises a spec change request (see Journey 1b) instead of inventing a case
 8. Agent generates output per `specos-project.yml` destination
+
+### Journey 5b — QA automates test cases
+1. QA runs `/specos-start`; roles: [qa]; agent asks "Design or review them / Automate them in the e2e repo" and QA picks automate
+2. Agent runs `specos-e2e`: loads the spec and `testcases.md`, refuses a `draft` spec, lists the expanded cases to automate and the sketches it skips
+3. Agent reads the e2e repo's own conventions (and its memory index), then writes one test per case, labelled with the feature name and the TC id
+4. A test that fails because the app does not meet the spec stays red; the agent routes it as a code defect or as a spec change request
+5. Before closing, the agent runs the e2e repo's own review (or a short list), and copies the repo's own command to watch the run and open the report
+6. Agent prints a closing block for the e2e repo's PR with the files changed, the evidence command and a commit message; it never commits
 
 ### Journey 6 — Person with multiple roles in same session (e.g. Lead + Backend)
 1. Person runs `/specos-start`
@@ -241,6 +249,12 @@ Works with any AI agent (Claude Code, OpenCode, Cursor, Codex, Kiro, Antigravity
 - [ ] Generates output per `specos-project.yml`; works whether QA is human or agent
 - [ ] Saves session state to `session.md`
 
+### specos-e2e skill
+- [ ] Automates only expanded cases (`steps:` and `expected:`) of an approved spec; sketches are listed and skipped; cases covering a `[pending]` or retired AC are not automated
+- [ ] Works in `implementation_repos.e2e` (the current directory in a monorepo), resolves that repo's memory first, and writes what stays true back to it
+- [ ] The spec decides what is tested, the e2e repo decides how; no tool or structure is imposed
+- [ ] See "Automating test cases (v2.11)"
+
 ### specos-help skill
 - [ ] Lists all SpecOS v3 skills with a one-line description each
 - [ ] Lists key project files (AGENTS.md, constitution.md, specos-project.yml, session.md) and their purpose
@@ -350,7 +364,7 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 - AC41 — The `specos-dev` closing block ends with `Commit message:` in the form `type(KEY): Imperative description` (types `feat`, `change`, `improvement`, `chore`; one line of about 72 characters; no AC ids); the key comes from the task, a `[new]` task makes the agent ask for it, and the message is only shown
 - AC42 — `standard` tickets are self-contained: title, `Spec:` path and version without AC ids, optional `Context` (marked "(inferred)" when inferred), `Scope` bullets, `Test cases` titles, and a checklist of 4–8 `Acceptance criteria` condensed from the spec ACs, never with ids; no Dev Notes
 - AC43 — `/specos-status --check` warns when `session.md` `open` has more than 3 entries
-- AC44 — Eight skills (`specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-distribute`, `specos-start`) never commit or push on their own; when asked they list the files and the message first
+- AC44 — Nine skills (`specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-e2e`, `specos-distribute`, `specos-start`) never commit or push on their own; when asked they list the files and the message first
 
 **Visible assumptions and gates (v2.9)**
 - AC45 — Before any review question, `specos-understand` prints a message with "What I understood" (3–5 lines), "Assumptions" (`A1 · full text · alternative`), "Open questions" (`Q1 · full text · my proposal`) and "Files"; headings follow the Lead's language and spec content follows `language.specs`; with nothing to list it says "No assumptions, no open questions"
@@ -369,11 +383,23 @@ ACs from this version on carry stable ids. They are never renumbered or reused; 
 - AC56 — Phase 2 (`specos-write`) creates the files; confirmed assumptions become dated lines under `## Decisions`; `status` is `approved` only if every assumption and question was answered or the Lead said to use the proposals, otherwise `draft` with the rest still listed
 - AC57 — An existing spec is edited from a new-spec run only through `specos-change`, only if it was listed and the Lead said yes, with a version bump, a 3-line CHANGELOG entry and an impact list; if an approved spec would point at a spec still `draft`, the list line says so
 - AC58 — The Close summary, printed by the orchestrator as its last step in every mode, lists the files created and the files modified
-- AC59 — `specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-distribute` and `specos-start` say things in words in chat (an id or code name may follow in parentheses, never stand alone) and never commit or push on their own; file content keeps its ids
+- AC59 — `specos-lead`, `specos-understand`, `specos-write`, `specos-change`, `specos-dev`, `specos-qa`, `specos-e2e`, `specos-distribute` and `specos-start` say things in words in chat (an id or code name may follow in parentheses, never stand alone) and never commit or push on their own; file content keeps its ids
 - AC60 — The size guard in `verify.sh` is each skill's v2.9 size plus 10% (`specos-lead`, `specos-understand`, `specos-write` and `specos-change`: their v2.10 size plus 10%), instead of v2.6 plus 15%
 - AC61 — `/specos-lead` is the only command the Lead types: an orchestrator that holds the settings, the mode detection, the order of the steps, the stops and the Close, and no file formats. `specos-understand`, `specos-write` and `specos-change` each do one job, say on line 3 that they are internal, and carry the formats and rules of their job
 - AC62 — The orchestrator hands off by invoking the skill by name; if that is not possible it reads the skill file from the agent's commands folder, and if that fails it tells the Lead to run `/specos-<name>`. `specos-write` is never loaded before the go-ahead
 - AC63 — After `specos-understand` returns, the orchestrator checks the six blocks of the message and runs it again if one is missing; in as-is mode the Lead's permission to read the implementation code is not the go-ahead: after reading, `specos-understand` prints the message and the orchestrator waits like in new mode
+
+**Automating test cases (v2.11)**
+- AC64 — `/specos-e2e` automates in the e2e repo the expanded test cases of an approved spec: one test per case, faithful to `steps:` and `expected:`; it refuses a `draft` spec, skips sketches and cases covering a retired AC, refuses cases covering a `[pending]` AC, and only warns (never blocks) when the `spec:` stamp of `testcases.md` differs from the spec version
+- AC65 — Every test carries the TC id and the feature name (ids repeat across features); the exact label comes from the e2e repo or a `rules` entry, and with neither the agent proposes `<feature>/TC-XX` and asks
+- AC66 — A test that fails because the app does not meet the spec stays red and is reported, never bent: a code defect becomes a bug text citing case and AC, a spec gap follows the change request protocol in `specos-change`; a case that cannot be automated as written is named and QA is asked to adjust it
+- AC67 — `/specos-start` asks `qa` and `builder` (test) whether to design or review test cases (`specos-qa`) or automate them (`specos-e2e`); `rules` accept the role `e2e`, which `specos-e2e` reads together with `shared` and the `qa` rules that shape how a case reads. `specos-e2e` adds no setting
+
+- AC68 — `specos-e2e` reads `e2e_modes` (a list of `native` and `docker`) in `local-workspace.yml`; when the key is missing it asks once and saves it; with one mode it runs the tests in it without asking, with two it asks which one for that run; in `docker` mode it tells QA the stack must be up from the repo's docker checkout. `specos-start` documents the key and every rewrite of the file keeps it
+- AC69 — Before the closing block `specos-e2e` runs the e2e repo's own review command or skill on the files it touched and summarizes the findings; without one it checks a short list (label with TC id and feature, no fixed waits, data prepared by API, no credentials, no assertions in page objects) and offers to fix, never fixing silently
+- AC70 — The `specos-e2e` closing block has `Files changed:` (only the files it created or modified in the e2e repo, new ones marked), `Review:` and `Evidence:`; the evidence command is copied from the e2e repo's own guides and never written by the skill, and when none exists the block says so
+- AC71 — When existing tests write the feature name differently from its folder under `specs/` (for example `1-checkout` and `01-checkout`), `specos-e2e` warns once and uses the form the repo uses; it never renames existing tests. A `testcases.md` with no `spec:` stamp, or a case with no `covers:`, is reported once and does not block, and the ACs shown for it are marked inferred
+- AC72 — When a case needs a test id or a way to prepare data that the e2e repo lacks, `specos-e2e` asks the Lead before reading a frontend or backend repo, limited to what is missing, never edits those repos, and follows any `rules` entry that asks first
 
 ### Agent-agnostic compatibility
 - [ ] All skills work in Claude Code, OpenCode, Gemini CLI via slash commands
@@ -531,6 +557,7 @@ SpecOs/                             ← root (any folder name)
 │   ├── specos-change.md              ← internal: edits an existing spec, spec change requests
 │   ├── specos-dev.md
 │   ├── specos-qa.md
+│   ├── specos-e2e.md                 ← automates expanded test cases in the e2e repo
 │   ├── specos-distribute.md
 │   ├── specos-split.md
 │   ├── specos-group.md
@@ -561,6 +588,10 @@ implementation_repos:
   backend: ../repo_back
   frontend: ../repo_front
   e2e: null
+
+# Optional. How QA runs the e2e tests: a list of native and/or docker.
+# Asked and written by /specos-e2e; every rewrite of this file keeps it.
+e2e_modes: [native, docker]
 
 # Optional. Where each repo's agent memory lives on this machine.
 # auto = derive each session | a path = use verbatim | off = never

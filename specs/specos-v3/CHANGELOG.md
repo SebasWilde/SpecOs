@@ -1,5 +1,20 @@
 # Changelog — specos-v3
 
+## 2026-11-14 v2.12
+- What: `specos-e2e` gains run modes (`e2e_modes` in `local-workspace.yml`, documented in `specos-start`), a review step, `Files changed` and `Evidence` in the close, a feature-label check and a permission step before reading other repos
+- Why: first real use on a project with separate repos: no way to see the run, no review, a label that differed from the spec folder, tests run in the wrong mode
+- Impact: no setting added; `local-workspace.yml` has an optional `e2e_modes`; `specos-e2e` grows to ~10 KB and its size base is rebased; the commands to see the result come from the e2e repo, never from SpecOS
+
+## 2026-11-14 v2.11.1
+- What: `/specos-e2e` asks once for the e2e repo path when `implementation_repos.e2e` is `null` or missing, saves it to `local-workspace.yml` and continues
+- Why: with `null` the old step said "I can't reach null" and stopped without asking
+- Impact: no setting added; `specos-start` unchanged (the question lives only in `specos-e2e`); all paths `null` still means monorepo, no question
+
+## 2026-11-14 v2.11
+- What: new skill `/specos-e2e` (15 skills) automates the expanded test cases in the e2e repo; `/specos-start` offers qa and builder to design or automate; `rules` accept the role `e2e`
+- Why: QA defined cases in `testcases.md` but nothing connected them to the e2e repo the way `specos-dev` connects tasks to code
+- Impact: no setting added; old specs unaffected; AC44 and AC59 now list nine skills; size guard for `specos-help` rebased to its v2.10 size
+
 ## 2026-10-15 v2.10
 - What: `/specos-lead` becomes an orchestrator over `specos-understand`, `specos-write` and `specos-change` (14 skills); new mode reads and asks first and writes only after the go-ahead; chat uses words, not bare ids
 - Why: v2.9 wrote files and edited an approved spec before any assumption was confirmed, spoke in bare ids, and a 10 KB `specos-lead` lost rules

@@ -20,6 +20,7 @@ When the user types one of the commands below, read the corresponding skill file
 | `/specos-change` | `skills/specos-change.md` | Internal: loaded by `/specos-lead`, edits an existing spec |
 | `/specos-dev` | `skills/specos-dev.md` | Implement a task as Dev |
 | `/specos-qa` | `skills/specos-qa.md` | Expand testcase sketches into test cases as QA |
+| `/specos-e2e` | `skills/specos-e2e.md` | Automate expanded test cases in the e2e repo as QA |
 | `/specos-distribute` | `skills/specos-distribute.md` | Generate formatted outputs |
 | `/specos-split` | `skills/specos-split.md` | Split a large spec into sub-specs |
 | `/specos-group` | `skills/specos-group.md` | Group related specs under a parent folder |

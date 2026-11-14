@@ -20,7 +20,7 @@ Run the installer from the SpecOS repo root:
 curl -fsSL https://raw.githubusercontent.com/SebasWilde/SpecOs/main/install.sh | bash
 ```
 
-The installer detects Claude Code automatically and copies the 14 skill files to `~/.claude/commands/`:
+The installer detects Claude Code automatically and copies the 15 skill files to `~/.claude/commands/`:
 
 ```
 ~/.claude/commands/
@@ -32,6 +32,7 @@ The installer detects Claude Code automatically and copies the 14 skill files to
 ├── specos-change.md
 ├── specos-dev.md
 ├── specos-qa.md
+├── specos-e2e.md
 ├── specos-distribute.md
 ├── specos-split.md
 ├── specos-group.md
@@ -50,7 +51,7 @@ It also creates two symlinks in the SpecOS repo root:
 ls ~/.claude/commands/specos-*.md
 ```
 
-You should see all 14 files. If you see them, skills are ready to use from any Claude Code session.
+You should see all 15 files. If you see them, skills are ready to use from any Claude Code session.
 
 ---
 
@@ -225,5 +226,6 @@ This removes `~/.claude/commands/specos-*.md` and the repo symlinks. Project fil
 | `/specos-lead` | Lead | New feature |
 | `/specos-dev` | Dev | Pick up a task |
 | `/specos-qa` | QA | After the Lead's sketches exist |
+| `/specos-e2e` | QA | Automate the expanded test cases in the e2e repo |
 | `/specos-distribute` | Lead | Before pushing to Jira/Confluence |
 | `bash uninstall.sh` | Anyone | Remove SpecOS from machine |

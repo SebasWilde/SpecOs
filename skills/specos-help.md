@@ -20,6 +20,7 @@ SKILLS
   /specos-change      Internal, via /specos-lead (edits a spec)
   /specos-dev         Implement a task with its spec context (Dev role)
   /specos-qa          Expand testcase sketches into test cases (QA role)
+  /specos-e2e         Automate test cases in the e2e repo (QA role)
   /specos-distribute  Generate outputs per specos-project.yml
   /specos-split       Split a large spec into sub-specs under a group folder
   /specos-group       Group related specs under a shared parent folder

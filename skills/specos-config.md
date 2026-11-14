@@ -54,6 +54,7 @@ Rules
   [section-name]
     frontend: [N entries]
     backend: [N entries]
+    e2e: [N entries]
     shared: [N entries]
   [If none: "No rules defined yet."]
 ```
@@ -140,7 +141,7 @@ Ask: "What do you want to call this section? (e.g. writing_style, code_style, ap
 
 If the section already exists, offer to add to it, edit an entry, or remove one.
 
-Ask: "Which roles does this apply to? (frontend, backend, qa, shared — or a combination)"
+Ask: "Which roles does this apply to? (frontend, backend, qa, e2e, shared — or a combination)"
 
 For each role selected, ask: "What are the rules for [role]? Give me one rule per line."
 

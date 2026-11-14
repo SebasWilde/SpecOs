@@ -345,7 +345,7 @@ done
 [[ $LIST_MISSING -eq 0 ]] && ok "all $SKILL_COUNT skills are listed in README, CHEATSHEET, AGENTS, generic adapter and help"
 
 if grep -q "The $SKILL_COUNT skills" "$REPO_ROOT/README.md"; then ok "README states $SKILL_COUNT skills"; else bad "README does not say 'The $SKILL_COUNT skills'"; fi
-STALE_COUNTS=$(grep -rIn -E "The 12 skills|12 skills|all 10 settings|10 settings across" "$REPO_ROOT/README.md" "$REPO_ROOT/CHEATSHEET.md" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/skills" "$REPO_ROOT/docs" "$REPO_ROOT/adapters" 2>/dev/null | wc -l | tr -d ' ')
+STALE_COUNTS=$(grep -rIn -E "The 12 skills|12 skills|The 14 skills|14 skills|14 skill files|all 14 files|all 10 settings|10 settings across" "$REPO_ROOT/README.md" "$REPO_ROOT/CHEATSHEET.md" "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/skills" "$REPO_ROOT/docs" "$REPO_ROOT/adapters" 2>/dev/null | wc -l | tr -d ' ')
 [[ "$STALE_COUNTS" -eq 0 ]] && ok "no stale skill or settings counts" || bad "$STALE_COUNTS stale skill/settings count(s) in docs or skills"
 
 # Rule 4 is worded the same everywhere, and the old wording is gone.
@@ -392,7 +392,7 @@ PROTO_COPIES=$(grep -l "Type: clarification" "$REPO_ROOT"/skills/*.md | wc -l | 
 
 # session.md: one schema, written by start, referenced by everyone else.
 SCHEMA_BAD=0
-for name in lead dev qa split group; do
+for name in lead dev qa e2e split group; do
   grep -q "specos-start" "$REPO_ROOT/skills/specos-$name.md" && grep -qi "whole" "$REPO_ROOT/skills/specos-$name.md" \
     || { bad "$name does not rewrite session.md whole by the specos-start schema"; SCHEMA_BAD=$((SCHEMA_BAD+1)); }
 done
@@ -462,8 +462,8 @@ check_size() {
   size=$(wc -c < "$f" | tr -d ' '); limit=$(( base + base / 10 ))
   if [[ "$size" -le "$limit" ]]; then ok "specos-$name is $size bytes (base $base, limit $limit)"; else bad "specos-$name grew to $size bytes (base $base, limit $limit)"; fi
 }
-check_size lead 4812; check_size understand 3331; check_size write 2997; check_size change 2100; check_size dev 6437; check_size qa 5639; check_size distribute 9243; check_size start 12168
-check_size status 2858; check_size help 2087; check_size init 10650; check_size config 7992; check_size split 3726; check_size group 2337
+check_size lead 4812; check_size understand 3331; check_size write 2997; check_size change 2100; check_size dev 6437; check_size qa 5639; check_size e2e    10605; check_size distribute 9243; check_size start 12168
+check_size status 2858; check_size help 2279; check_size init 10650; check_size config 7992; check_size split 3726; check_size group 2337
 
 # v2.10: an orchestrator that owns the order, and three small skills that each do one job.
 V210_BAD=0
@@ -505,18 +505,34 @@ for k in "What I understood" "Assumptions (I decided these; confirm or change)" 
 done
 # Change: the request block, and dev and qa point to it.
 grep -qF "SPEC CHANGE REQUEST" "$SK/specos-change.md" || { bad "specos-change lacks the SPEC CHANGE REQUEST block"; V210_BAD=$((V210_BAD+1)); }
-for name in dev qa; do grep -qF "specos-change" "$SK/specos-$name.md" || { bad "$name does not mention specos-change"; V210_BAD=$((V210_BAD+1)); }; done
-# The plain-words and never-commit lines are in all eight skills that talk to the Lead.
-for name in lead understand write change dev qa distribute start; do
+for name in dev qa e2e; do grep -qF "specos-change" "$SK/specos-$name.md" || { bad "$name does not mention specos-change"; V210_BAD=$((V210_BAD+1)); }; done
+# The plain-words line is in all nine skills that talk to the Lead.
+for name in lead understand write change dev qa e2e distribute start; do
   grep -qF "never stand alone" "$SK/specos-$name.md" || { bad "$name lacks the plain-words line"; V210_BAD=$((V210_BAD+1)); }
 done
-[[ $SKILL_COUNT -eq 14 ]] || { bad "expected 14 skills, found $SKILL_COUNT"; V210_BAD=$((V210_BAD+1)); }
+[[ $SKILL_COUNT -eq 15 ]] || { bad "expected 15 skills, found $SKILL_COUNT"; V210_BAD=$((V210_BAD+1)); }
 MDC_COUNT=$(ls "$REPO_ROOT"/adapters/cursor/*.mdc | wc -l | tr -d ' ')
-[[ "$MDC_COUNT" -eq 14 ]] || { bad "expected 14 cursor adapters, found $MDC_COUNT"; V210_BAD=$((V210_BAD+1)); }
+[[ "$MDC_COUNT" -eq 15 ]] || { bad "expected 15 cursor adapters, found $MDC_COUNT"; V210_BAD=$((V210_BAD+1)); }
 # as-is must show the Lead what it understood and wait, like a new spec.
 grep -qE '^as-is:.*specos-understand.*STOP and wait.*specos-write' "$SK/specos-lead.md" || { bad "the as-is flow of specos-lead does not go through specos-understand and wait before specos-write"; V210_BAD=$((V210_BAD+1)); }
 grep -qF 'review: sections` forces sections' "$SK/specos-understand.md" || { bad "specos-understand has a cut sentence at the end of the gates"; V210_BAD=$((V210_BAD+1)); }
-[[ $V210_BAD -eq 0 ]] && ok "v2.10 contracts: orchestrator + understand/write/change, no formats in the orchestrator, only write creates files, as-is waits too, 14 skills and 14 adapters"
+[[ $V210_BAD -eq 0 ]] && ok "v2.10 contracts: orchestrator + understand/write/change, no formats in the orchestrator, only write creates files, as-is waits too, 15 skills and 15 adapters"
+
+# v2.11: specos-e2e automates the expanded cases in the e2e repo, and the spec still decides what is tested.
+V211_BAD=0
+E2E="$SK/specos-e2e.md"
+for k in "implementation_repos.e2e" "memory_links.e2e" "specos-change" "Never commit or push" "TC id **and** the feature name" "Never bend a test" "Only expanded cases are automated" "Is there an e2e repo" "monorepo" "e2e_modes" "Files changed" "Evidence:" "Review:" "Never edit those repos" "warn once and use the form the repo uses" "predates that format" "\`type: group\`" "[pending]" "sketches" "decides *how*" "rules\` for role \`e2e\`" "Rewrite the whole \`session.md\`"; do
+  grep -qF -- "$k" "$E2E" || { bad "specos-e2e lacks: $k"; V211_BAD=$((V211_BAD+1)); }
+done
+grep -qF "task: null" "$E2E" || grep -qF "\`task\` is \`null\`" "$E2E" || { bad "specos-e2e does not set task to null"; V211_BAD=$((V211_BAD+1)); }
+# No tool is named in the generic skill, and it holds no copy of the change request block.
+grep -qiE "playwright|cypress|selenium|pytest|allure|finokapi" "$E2E" && { bad "specos-e2e names a tool or project"; V211_BAD=$((V211_BAD+1)); }
+grep -qF "Type: clarification" "$E2E" && { bad "specos-e2e copies the change request block"; V211_BAD=$((V211_BAD+1)); }
+grep -qF "e2e_modes" "$SK/specos-start.md" || { bad "specos-start does not document e2e_modes"; V211_BAD=$((V211_BAD+1)); }
+grep -qF "specos-e2e" "$SK/specos-start.md" || { bad "specos-start does not route to specos-e2e"; V211_BAD=$((V211_BAD+1)); }
+grep -qF "automate" "$SK/specos-start.md" || { bad "specos-start does not offer to automate test cases"; V211_BAD=$((V211_BAD+1)); }
+grep -qF "e2e" "$SK/specos-config.md" || { bad "specos-config does not list e2e as a rules role"; V211_BAD=$((V211_BAD+1)); }
+[[ $V211_BAD -eq 0 ]] && ok "v2.11 contracts: specos-e2e automates expanded cases, labels feature and TC, never bends a test, routes through specos-change; start and config know it"
 
 # --- 9. The check script ----------------------------------------------------
 

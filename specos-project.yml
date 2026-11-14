@@ -80,7 +80,7 @@ outputs:
 # settings:
 
 # --- Rules -----------------------------------------------------------------
-# Free-form. Any section name, organized by role: frontend, backend, qa, shared.
+# Free-form. Any section name, organized by role: frontend, backend, qa, e2e, shared.
 # `shared` applies to every role. Skills interpret these as written.
 #
 # Sections that read as quality gates (acceptance_criteria, qa_gates,

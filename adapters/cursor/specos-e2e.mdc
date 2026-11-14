@@ -1,0 +1,7 @@
+---
+description: Automate the expanded test cases of a spec in the e2e repo
+globs:
+alwaysApply: false
+---
+
+Read the file `skills/specos-e2e.md` from the SpecOS repo root and follow all instructions in it exactly.

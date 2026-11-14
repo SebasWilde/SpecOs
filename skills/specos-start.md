@@ -46,7 +46,7 @@ Continue this session reading the old files. Do not ask again in this session �
 
 Look for `local-workspace.yml` in the specs repo root (the directory containing `specs/` and `specos-project.yml`).
 
-**If local-workspace.yml exists:** read it silently. Extract `user`, `roles`, `implementation_repos`, and `memory_links`. Go to Step 0.5.
+**If local-workspace.yml exists:** read it silently. Extract `user`, `roles`, `implementation_repos`, `memory_links` and `e2e_modes`. Go to Step 0.5.
 
 **If local-workspace.yml does not exist:** run the local onboarding flow below.
 
@@ -95,7 +95,13 @@ implementation_repos:
   e2e: [path or null]
 ```
 
-Leave `memory_links` out; Step 0.5 adds it.
+Leave `memory_links` out; Step 0.5 adds it. Likewise `e2e_modes`, an optional list of `native` and/or `docker` that `/specos-e2e` asks for and writes next to `implementation_repos`:
+
+```yaml
+e2e_modes: [native, docker]
+```
+
+Whoever rewrites `local-workspace.yml` keeps every key it does not own.
 
 Confirm: "local-workspace.yml saved. Welcome, [name]."
 
@@ -199,8 +205,7 @@ Using `roles` from `local-workspace.yml`, ask one question:
 **If role is dev/backend/frontend only:**
 "What is your task key or description? (e.g. FK-42 or 'implement login endpoint')"
 
-**If role is qa only:**
-"Which spec or task do you want to work on?"
+**If role is qa only:** ask the test case question below.
 
 **If role includes multiple options (e.g. lead + backend):**
 "What perspective do you take today?
@@ -214,13 +219,18 @@ Using `roles` from `local-workspace.yml`, ask one question:
 2. Implement a task
 3. Test what I built"
 
+**Test case question** (role qa only, or builder choosing "Test what I built"):
+"What do you want to do with test cases?
+1. Design or review them
+2. Automate them in the e2e repo"
+
 Wait for the answer before continuing.
 
 ---
 
 ## Step 3 — Validate implementation repo paths
 
-If the session writes code (dev or qa), check `implementation_repos` in `local-workspace.yml`.
+If the session writes code (dev, qa or e2e automation), check `implementation_repos` in `local-workspace.yml`.
 
 For each path that is not `null`:
 - Check the path is accessible from the current directory; if not: "I can't reach `[path]`. Please update the path in local-workspace.yml."
@@ -250,10 +260,12 @@ Based on the resolved role and perspective, hand off to the appropriate skill:
 | lead — breaking | specos-qa |
 | lead — both | specos-lead, then offer specos-qa |
 | backend / frontend / dev | specos-dev |
-| qa — breaking | specos-qa |
+| qa — design or review test cases | specos-qa |
+| qa — automate test cases | specos-e2e |
 | builder — specify | specos-lead |
 | builder — implement | specos-dev |
-| builder — test | specos-qa |
+| builder — test, design or review | specos-qa |
+| builder — test, automate | specos-e2e |
 
 Announce "Starting [skill name] for [feature or task]. Let's go.", then load and follow the target skill.
 

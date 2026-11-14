@@ -37,6 +37,7 @@ Agent reads `session.md`. If it exists: resumes. If not: asks based on your role
 | `/specos-change` | internal | Loaded by `/specos-lead`: edits an existing spec, spec change requests |
 | `/specos-dev` | Dev | Loads only the relevant spec, shows the task's ACs, writes to implementation repo |
 | `/specos-qa` | QA | Expands the Lead's sketches into test cases, every AC covered |
+| `/specos-e2e` | QA | Automates the expanded cases in the e2e repo, one labelled test per case |
 | `/specos-distribute` | Lead / QA | Brief `[new]` tasks, tests, Confluence, diagrams — per specos-project.yml |
 | `/specos-split` | Lead | Splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead | Groups related existing specs under a shared parent folder |
@@ -86,6 +87,15 @@ stop → classify: clarification | addition | contradiction | out-of-scope
 /specos-start → provide feature or task key
 → agent loads spec + sketches → expands in batches, shows the draft before writing
 → "add TC: ..." adds cases live → /specos-distribute
+```
+
+**QA — automate test cases:**
+```
+/specos-start → "Automate test cases" (or /specos-e2e) → feature or TC
+→ expanded cases only (sketches listed and skipped), spec must be approved
+→ implementation_repos.e2e: the spec decides WHAT, the e2e repo decides HOW
+→ one test per case, labelled <feature>/TC-XX (or the repo's own form)
+→ red test = defect or spec gap, never bend the test → block for the e2e repo's PR
 ```
 
 **Solo builder (agent takes breaking perspective):**
@@ -173,6 +183,7 @@ implementation_repos:
   backend: ../repo_back
   frontend: null
   e2e: null
+e2e_modes: [native, docker]   # optional, written by /specos-e2e
 memory_links:            # auto | a path | off
   self: auto
   backend: auto
@@ -298,7 +309,7 @@ settings:
   distribute: { diagrams: ask, branch_info: ask, task_title_max_words: 8, task_detail: standard }
   dev:        { require_tests: false }
 
-# --- Rules: free-form. Skills interpret. Any section, by role. ---
+# --- Rules: free-form. Skills interpret. Any section, by role (frontend | backend | qa | e2e | shared). ---
 rules:
   acceptance_criteria:   # → injected into task ACs in /specos-distribute
     backend:

@@ -39,7 +39,7 @@ The core insight: AI agents will write whatever you ask them to. SpecOS makes su
 
 Both perspectives are required. They cannot be the same logic.
 
-### The 14 skills
+### The 15 skills
 
 | Skill | Who uses it |
 |---|---|
@@ -51,6 +51,7 @@ Both perspectives are required. They cannot be the same logic.
 | `/specos-change` | Internal, loaded by `/specos-lead` — edits an existing spec and handles spec change requests |
 | `/specos-dev` | Dev — implements with full spec context |
 | `/specos-qa` | QA — expands the Lead's testcase sketches into test cases |
+| `/specos-e2e` | QA — automates the expanded test cases in the e2e repo, using that repo's own conventions |
 | `/specos-distribute` | Lead — generates outputs per specos-project.yml settings and rules |
 | `/specos-split` | Lead — splits a large spec into sub-specs under a group folder |
 | `/specos-group` | Lead — groups related existing specs under a shared parent folder |
@@ -160,6 +161,7 @@ SpecOs/
 │   ├── specos-change.md        ← internal: edits an existing spec
 │   ├── specos-dev.md
 │   ├── specos-qa.md
+│   ├── specos-e2e.md
 │   ├── specos-distribute.md
 │   ├── specos-split.md
 │   ├── specos-group.md
@@ -339,6 +341,8 @@ Anything that can only be said in a sentence is a rule. Tone belongs there, not 
 
 Every setting is optional and has one documented default, so an absent `settings` block behaves like a fresh install. An invalid value is reported once and falls back to its default — a bad config never blocks a session. `ask` is a real choice, not a fallback: it keeps a question being asked every run.
 
+Rules are organized by role: `frontend`, `backend`, `qa`, `e2e` and `shared`; `/specos-e2e` reads `e2e`, `shared` and the `qa` ones that shape how a case reads.
+
 Rules keep the behaviour they always had: sections that read as quality gates are appended to task Acceptance Criteria, everything else is injected as a Standards section, and `specos-dev` enforces them during implementation.
 
 Run `/specos-config` to edit any of it interactively. `distribute.task_detail` picks the ticket: `standard` (default) is self-contained — context, scope, test case titles and a short acceptance checklist, no AC ids — `link` only points to the spec (it was called `brief`), `full` is the long template. Set `outputs.tasks.destination: jira-csv` and `/specos-distribute` prints the tasks as a CSV (`Summary, Description, Issue Type, Parent`) ready for Jira's CSV import — no integration involved.
@@ -376,6 +380,7 @@ implementation_repos:
   backend: ../repo-backend
   frontend: ../repo-frontend
   e2e: null
+e2e_modes: [native, docker]   # optional: how QA runs the e2e tests; /specos-e2e asks once and writes it
 
 # Where each repo's agent memory lives on this machine.
 # auto = derive each session | a path = use verbatim | off = never
@@ -428,6 +433,7 @@ parked:          # other features, one line each
 2. Agent loads the spec and the Lead's sketches, and expands them in batches
 3. Review, adjust, add cases live, add custom fields freely
 4. Run `/specos-distribute` to push output
+5. To automate the expanded cases, choose "Automate test cases" in `/specos-start` (or run `/specos-e2e`): one test per case in the e2e repo, labelled with the case id and the feature name, in the way that repo already writes tests. A test that fails because the app does not meet the spec stays red and is reported — it is never bent to pass. Needs `implementation_repos.e2e` in `local-workspace.yml`; it never commits
 
 ---
 

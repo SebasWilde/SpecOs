@@ -27,6 +27,7 @@ All flows use the `feature-tags` example project (see `examples/feature-tags/`).
 | [03 — dev](flows/03-dev.md) | `/specos-dev` | Task picked up with its ACs, a spec gap raised, closing block |
 | [04 — qa](flows/04-qa.md) | `/specos-qa` | Sketches expanded batch by batch, draft shown before writing |
 | [05 — distribute](flows/05-distribute.md) | `/specos-distribute` | Brief `[new]` tasks, keys replaced in order, steps to test, Confluence |
+| [06 — e2e](flows/06-e2e.md) | `/specos-e2e` | Expanded cases automated in the e2e repo, a red test reported, closing block |
 
 ---
 
@@ -35,4 +36,5 @@ All flows use the `feature-tags` example project (see `examples/feature-tags/`).
 - **New to SpecOS?** Start with the guide for your agent, then read flow 01 and 02.
 - **Dev picking up a task?** Read flow 03.
 - **QA generating test cases?** Read flow 04.
+- **QA automating test cases?** Read flow 06.
 - **Ready to push to Jira/Confluence?** Read flow 05 to see exactly what output to expect.

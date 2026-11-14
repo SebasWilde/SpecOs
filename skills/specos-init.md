@@ -162,7 +162,7 @@ outputs:
 # `ask` is a real choice: it keeps a question being asked every run.
 
 # --- Rules -----------------------------------------------------------------
-# Free-form. Any section name, organized by role: frontend, backend, qa, shared.
+# Free-form. Any section name, organized by role: frontend, backend, qa, e2e, shared.
 # Use rules for what a value cannot express (tone, naming, review expectations).
 #
 #   rules:

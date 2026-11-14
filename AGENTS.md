@@ -134,6 +134,7 @@ Run `/specos-start` to begin any session. The agent reads `session.md` and route
 | `/specos-change` | Internal — loaded by `/specos-lead`: edits an existing spec, spec change requests |
 | `/specos-dev` | Implement a task with full spec context |
 | `/specos-qa` | Expand testcase sketches into test cases |
+| `/specos-e2e` | Automate expanded test cases in the e2e repo |
 | `/specos-distribute` | Generate outputs per specos-project.yml settings and rules |
 | `/specos-split` | Split a large spec into sub-specs under a group folder |
 | `/specos-group` | Group related existing specs under a shared parent folder |
